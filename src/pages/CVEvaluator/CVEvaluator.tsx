@@ -18,6 +18,8 @@ import type { CriteriaWithStats, CvEvaluation, Candidate } from '../../types/dat
 import CreateCriteriaModal from './CreateCriteriaModal';
 import EditCriteriaModal from './EditCriteriaModal';
 import CriteriaDetailModal from './CriteriaDetailModal';
+import SelectCriteriaMethodModal from './SelectCriteriaMethodModal';
+import type { GeneratedCriteria } from '../../services/aiCriteriaGenerator';
 
 type ViewMode = 'upload' | 'criteria';
 
@@ -42,6 +44,10 @@ export default function CVEvaluator() {
   const [editingCriteriaId, setEditingCriteriaId] = useState<string | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [detailCriteriaId, setDetailCriteriaId] = useState<string | null>(null);
+
+  // Method selection modal (shown before create)
+  const [showMethodModal, setShowMethodModal] = useState(false);
+  const [prefilledCriteria, setPrefilledCriteria] = useState<GeneratedCriteria | null>(null);
 
   // Existing candidates
   const [existingCandidates, setExistingCandidates] = useState<Candidate[]>([]);
@@ -143,18 +149,18 @@ export default function CVEvaluator() {
     setError(null);
 
     try {
-      let evaluation: CvEvaluation;
+      let result: CvEvaluation;
 
       if (uploadMode === 'new' && uploadedFile) {
-        // Evaluate new CV upload
-        evaluation = await evaluateCv(
+        // Send CV to webhook and wait for n8n's response
+        result = await evaluateCv(
           uploadedFile,
           selectedProjectId,
           autoConsiderMode === 'criteria' ? selectedCriteriaId : undefined
         );
       } else if (uploadMode === 'existing' && selectedCandidateId) {
-        // Evaluate existing candidate
-        evaluation = await evaluateExistingCandidate(
+        // Evaluate existing candidate via webhook
+        result = await evaluateExistingCandidate(
           selectedCandidateId,
           selectedProjectId,
           autoConsiderMode === 'criteria' ? selectedCriteriaId : undefined
@@ -163,7 +169,7 @@ export default function CVEvaluator() {
         throw new Error('Invalid evaluation mode');
       }
 
-      setEvaluationResult(evaluation);
+      setEvaluationResult(result);
       setUploadedFile(null);
       setSelectedCandidateId('');
     } catch (err: any) {
@@ -238,6 +244,11 @@ export default function CVEvaluator() {
   const handleEditCriteria = (id: string) => {
     setEditingCriteriaId(id);
     setShowEditModal(true);
+  };
+
+  const handleGenerateDone = (generated: GeneratedCriteria) => {
+    setPrefilledCriteria(generated);
+    setShowCreateModal(true);
   };
 
   const handleUpdateCriteria = async (
@@ -333,13 +344,8 @@ export default function CVEvaluator() {
       concerns.push('Education background needs review');
     }
 
-    // Default messages if none generated
-    if (strengths.length === 0) {
-      strengths.push('Candidate profile available for review');
-    }
-    if (concerns.length === 0) {
-      concerns.push('No major concerns identified');
-    }
+    if (strengths.length === 0) strengths.push('Candidate profile available for review');
+    if (concerns.length === 0) concerns.push('No major concerns identified');
 
     return { strengths, concerns };
   };
@@ -365,11 +371,26 @@ export default function CVEvaluator() {
         </div>
       )}
 
+      {/* Method Selection Modal — shown first when clicking "New CV Evaluation Criteria" */}
+      <SelectCriteriaMethodModal
+        isOpen={showMethodModal}
+        onClose={() => setShowMethodModal(false)}
+        onSelectManual={() => {
+          setPrefilledCriteria(null);
+          setShowCreateModal(true);
+        }}
+        onGenerateDone={handleGenerateDone}
+      />
+
       {/* Create Criteria Modal */}
       <CreateCriteriaModal
         isOpen={showCreateModal}
-        onClose={() => setShowCreateModal(false)}
+        onClose={() => {
+          setShowCreateModal(false);
+          setPrefilledCriteria(null);
+        }}
         onSave={handleCreateCriteria}
+        prefilled={prefilledCriteria}
       />
 
       {/* Edit Criteria Modal */}
@@ -594,7 +615,7 @@ export default function CVEvaluator() {
                 {evaluating ? (
                   <>
                     <Sparkles size={18} className={styles.spinner} />
-                    Evaluating...
+                    Waiting for AI analysis...
                   </>
                 ) : (
                   <>
@@ -639,7 +660,13 @@ export default function CVEvaluator() {
 
           {/* Right Section - Results */}
           <div className={styles.resultsSection}>
-            {!evaluationResult ? (
+            {evaluating ? (
+              <div className={styles.emptyResults}>
+                <Sparkles size={64} className={`${styles.emptyIcon} ${styles.spinner}`} />
+                <h3>Analysing CV...</h3>
+                <p>CV sent to AI. Waiting for n8n to process and save the evaluation — checking every few seconds.</p>
+              </div>
+            ) : !evaluationResult ? (
               <div className={styles.emptyResults}>
                 <BarChart3 size={64} className={styles.emptyIcon} />
                 <h3>No evaluation yet</h3>
@@ -649,10 +676,10 @@ export default function CVEvaluator() {
               <div className={styles.resultsCard}>
                 <div className={styles.resultsHeader}>
                   <div>
-                    <h2>{evaluationResult.parsed_name || evaluationResult.candidate?.full_name}</h2>
+                    <h2>{evaluationResult.parsed_name || evaluationResult.candidate?.full_name || 'Candidate'}</h2>
                     <p className={styles.contactInfo}>
                       {evaluationResult.parsed_email || evaluationResult.candidate?.email}
-                      {(evaluationResult.parsed_phone || evaluationResult.candidate?.phone) && 
+                      {(evaluationResult.parsed_phone || evaluationResult.candidate?.phone) &&
                         ` · ${evaluationResult.parsed_phone || evaluationResult.candidate?.phone}`}
                     </p>
                   </div>
@@ -702,6 +729,12 @@ export default function CVEvaluator() {
                   </span>
                 </div>
 
+                {evaluationResult.parsed_summary && (
+                  <div className={styles.summary}>
+                    <p>{evaluationResult.parsed_summary}</p>
+                  </div>
+                )}
+
                 <div className={styles.insights}>
                   <div className={styles.insightSection}>
                     <h4>
@@ -740,16 +773,17 @@ export default function CVEvaluator() {
                       View CV File
                     </a>
                   )}
-                  <button
-                    className={styles.btnPrimary}
-                    onClick={() => {
-                      // Navigate to project detail page
-                      window.location.href = `/project/${evaluationResult.hiring_project_id}`;
-                    }}
-                  >
-                    <Eye size={16} />
-                    View in Project
-                  </button>
+                  {evaluationResult.hiring_project_id && (
+                    <button
+                      className={styles.btnPrimary}
+                      onClick={() => {
+                        window.location.href = `/project/${evaluationResult.hiring_project_id}`;
+                      }}
+                    >
+                      <Eye size={16} />
+                      View in Project
+                    </button>
+                  )}
                 </div>
               </div>
             )}
@@ -788,7 +822,7 @@ export default function CVEvaluator() {
               </button>
             </div>
 
-            <button className={styles.newCriteriaBtn} onClick={() => setShowCreateModal(true)}>
+            <button className={styles.newCriteriaBtn} onClick={() => setShowMethodModal(true)}>
               <Plus size={18} />
               New CV Evaluation Criteria
             </button>
@@ -803,7 +837,7 @@ export default function CVEvaluator() {
                   <Target size={64} className={styles.emptyIcon} />
                   <h3>No {criteriaFilter.toLowerCase()} criteria</h3>
                   <p>Create your first evaluation criteria set to get started.</p>
-                  <button className={styles.createFirstBtn} onClick={() => setShowCreateModal(true)}>
+                  <button className={styles.createFirstBtn} onClick={() => setShowMethodModal(true)}>
                     <Plus size={18} />
                     Create First Criteria
                   </button>

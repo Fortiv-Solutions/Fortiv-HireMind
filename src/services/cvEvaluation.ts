@@ -394,9 +394,9 @@ async function sendToWebhook(
     // Add JSON data
     formData.append('data', JSON.stringify(payload));
     
-    // Send to webhook with timeout
+    // Send to webhook with timeout — n8n AI processing can take a while
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+    const timeoutId = setTimeout(() => controller.abort(), 120000); // 2 minute timeout
     
     const response = await fetch(webhookUrl, {
       method: 'POST',
@@ -438,11 +438,11 @@ async function sendToWebhook(
     };
   } catch (error: any) {
     if (error.name === 'AbortError') {
-      console.error('❌ Webhook timeout after 30 seconds');
+      console.error('❌ Webhook timeout after 2 minutes');
       return {
         success: false,
         error: 'Webhook request timeout',
-        message: 'The webhook took too long to respond',
+        message: 'The webhook took too long to respond. Please try again.',
       };
     }
     
@@ -455,130 +455,114 @@ async function sendToWebhook(
   }
 }
 
-/**
- * Upload CV file to Supabase Storage
- */
-export async function uploadCvFile(file: File, candidateEmail: string): Promise<string> {
-  const fileExt = file.name.split('.').pop();
-  const fileName = `${candidateEmail}_${Date.now()}.${fileExt}`;
-  const filePath = `cvs/${fileName}`;
-
-  const { data, error } = await supabase.storage
-    .from('cv-uploads')
-    .upload(filePath, file, {
-      cacheControl: '3600',
-      upsert: false,
-    });
-
-  if (error) throw error;
-
-  // Get public URL
-  const { data: urlData } = supabase.storage
-    .from('cv-uploads')
-    .getPublicUrl(filePath);
-
-  return urlData.publicUrl;
-}
+// ============================================
+// WEBHOOK RESPONSE TYPE
+// ============================================
 
 /**
- * Parse CV text from file (placeholder - you'll need to implement actual parsing)
- * This could integrate with an AI service or CV parsing API
+ * The shape of the immediate acknowledgement returned by the n8n webhook.
+ * n8n processes the CV asynchronously and writes results to the database.
+ * We then poll the database to retrieve the completed evaluation.
  */
-export async function parseCvFile(file: File): Promise<{
-  name: string;
-  email: string;
-  phone?: string;
-  location?: string;
-  skills: string[];
-  experienceYears: number;
-  education?: string;
-  companies: string[];
-  projects: string[];
-  summary?: string;
-  rawText: string;
-}> {
-  // TODO: Implement actual CV parsing logic
-  // This is a placeholder that returns mock data
-  // You can integrate with services like:
-  // - OpenAI API for text extraction
-  // - Affinda, Sovren, or other CV parsing APIs
-  // - Custom NLP models
-
-  return {
-    name: 'John Doe',
-    email: 'john.doe@example.com',
-    phone: '+91 98765 43210',
-    location: 'Bangalore, India',
-    skills: ['React', 'TypeScript', 'Node.js', 'Python', 'AWS'],
-    experienceYears: 5,
-    education: 'B.Tech in Computer Science',
-    companies: ['Tech Corp', 'Startup Inc'],
-    projects: ['E-commerce Platform', 'Mobile App'],
-    summary: 'Experienced software engineer with 5+ years in full-stack development',
-    rawText: 'CV content would be extracted here...',
+export interface WebhookAckResponse {
+  success: boolean;
+  message?: string;
+  error?: string;
+  data?: {
+    candidate_id?: string;
+    processing_status?: string;
+    timestamp?: string;
+    [key: string]: unknown;
   };
 }
 
-/**
- * Calculate evaluation scores based on project requirements
- */
-export function calculateEvaluationScores(
-  parsedCv: {
-    skills: string[];
-    experienceYears: number;
-    education?: string;
-  },
-  project: HiringProject
-): {
-  skillsMatchScore: number;
-  experienceScore: number;
-  educationScore: number;
-  totalScore: number;
-} {
-  // Skills match score
-  const requiredSkills = project.required_skills || [];
-  const candidateSkills = parsedCv.skills.map((s) => s.toLowerCase());
-  const matchedSkills = requiredSkills.filter((skill) =>
-    candidateSkills.some((cs) => cs.includes(skill.toLowerCase()))
-  );
-  const skillsMatchScore =
-    requiredSkills.length > 0 ? (matchedSkills.length / requiredSkills.length) * 100 : 50;
+// ============================================
+// DATABASE POLLING
+// ============================================
 
-  // Experience score
-  const requiredYears = project.required_experience_years || 0;
-  const candidateYears = parsedCv.experienceYears || 0;
-  let experienceScore = 0;
-  if (candidateYears >= requiredYears) {
-    experienceScore = Math.min(100, 70 + (candidateYears - requiredYears) * 5);
-  } else {
-    experienceScore = (candidateYears / requiredYears) * 70;
+/**
+ * Poll cv_evaluations until n8n has written the result, then return it.
+ *
+ * Strategy:
+ *  - If n8n returned a candidate_id, query by candidate_id + hiring_project_id.
+ *  - Otherwise, query by hiring_project_id for any record created after
+ *    `submittedAt` (the moment we sent the webhook request).
+ *
+ * Polls every 3 seconds for up to 2 minutes.
+ */
+async function pollForEvaluation(
+  projectId: string,
+  submittedAt: Date,
+  candidateId?: string
+): Promise<CvEvaluation> {
+  const POLL_INTERVAL_MS = 3000;
+  const MAX_WAIT_MS = 120_000; // 2 minutes
+  const deadline = Date.now() + MAX_WAIT_MS;
+
+  console.log('⏳ Polling database for evaluation result...', { projectId, candidateId });
+
+  while (Date.now() < deadline) {
+    await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL_MS));
+
+    let query = supabase
+      .from('cv_evaluations')
+      .select(`
+        *,
+        candidate:candidates (
+          id,
+          full_name,
+          email,
+          phone,
+          linkedin_url,
+          location
+        )
+      `)
+      .eq('hiring_project_id', projectId)
+      .order('created_at', { ascending: false })
+      .limit(1);
+
+    if (candidateId) {
+      query = query.eq('candidate_id', candidateId);
+    } else {
+      // Only look at records created after we submitted the webhook
+      query = query.gte('created_at', submittedAt.toISOString());
+    }
+
+    const { data, error } = await query.maybeSingle();
+
+    if (error) {
+      console.warn('⚠️ Poll query error (will retry):', error.message);
+      continue;
+    }
+
+    if (data) {
+      console.log('✅ Evaluation found in database:', data.id);
+      return data as CvEvaluation;
+    }
+
+    console.log('🔄 Not ready yet, retrying in 3s...');
   }
 
-  // Education score (simplified)
-  const educationScore = parsedCv.education ? 75 : 50;
-
-  // Total score (weighted average)
-  const totalScore = Math.round(
-    skillsMatchScore * 0.5 + experienceScore * 0.3 + educationScore * 0.2
+  throw new Error(
+    'Timed out waiting for the evaluation result. n8n may still be processing — check the project page in a moment.'
   );
-
-  return {
-    skillsMatchScore: Math.round(skillsMatchScore),
-    experienceScore: Math.round(experienceScore),
-    educationScore,
-    totalScore,
-  };
 }
 
 /**
- * Process and evaluate a CV
+ * Process and evaluate a CV.
+ * 1. Sends the file + project/criteria context to the n8n webhook.
+ * 2. Waits for n8n's acknowledgement (success/error).
+ * 3. Polls the database until n8n has written the evaluation record.
+ * 4. Returns the completed CvEvaluation from the database.
+ *
+ * No local DB writes are performed here — n8n owns all database operations.
  */
 export async function evaluateCv(
   file: File,
   projectId: string,
   criteriaSetId?: string
 ): Promise<CvEvaluation> {
-  // 1. Get project details
+  // 1. Get project details (read-only — needed to build the webhook payload)
   const { data: project, error: projectError } = await supabase
     .from('hiring_projects')
     .select('*')
@@ -587,111 +571,22 @@ export async function evaluateCv(
 
   if (projectError) throw projectError;
 
-  // 2. Send CV file to webhook for AI analysis (no mock data)
-  const webhookResponse = await sendToWebhook(
-    file,
-    project,
-    criteriaSetId
-  );
-  
-  // Log webhook response for debugging
-  if (webhookResponse.success) {
-    console.log('✅ Webhook integration successful:', webhookResponse.message);
-  } else {
-    console.warn('⚠️ Webhook integration failed:', webhookResponse.error);
+  const submittedAt = new Date();
+
+  // 2. Send CV file to webhook and wait for the acknowledgement
+  const webhookResponse = await sendToWebhook(file, project, criteriaSetId);
+
+  if (!webhookResponse.success) {
+    throw new Error(webhookResponse.error || webhookResponse.message || 'Webhook evaluation failed');
   }
 
-  // 3. Parse the CV (this is still needed for local database storage)
-  const parsedData = await parseCvFile(file);
+  const ack = webhookResponse.data as WebhookAckResponse['data'];
+  const candidateId = ack?.candidate_id;
 
-  // 4. Upload the file to Supabase storage
-  const cvFileUrl = await uploadCvFile(file, parsedData.email);
+  console.log('📨 Webhook acknowledged. Waiting for n8n to write evaluation to database...');
 
-  // 5. Calculate scores
-  const scores = calculateEvaluationScores(parsedData, project);
-
-  // 6. Create or get candidate
-  const { data: existingCandidate } = await supabase
-    .from('candidates')
-    .select('id')
-    .eq('email', parsedData.email)
-    .single();
-
-  let candidateId: string;
-
-  if (existingCandidate) {
-    candidateId = existingCandidate.id;
-    // Update candidate info
-    await supabase
-      .from('candidates')
-      .update({
-        full_name: parsedData.name,
-        phone: parsedData.phone,
-        location: parsedData.location,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', candidateId);
-  } else {
-    // Create new candidate
-    const { data: newCandidate, error: candidateError } = await supabase
-      .from('candidates')
-      .insert({
-        full_name: parsedData.name,
-        email: parsedData.email,
-        phone: parsedData.phone,
-        location: parsedData.location,
-      })
-      .select('id')
-      .single();
-
-    if (candidateError) throw candidateError;
-    candidateId = newCandidate.id;
-  }
-
-  // 7. Create CV evaluation
-  const { data: evaluation, error: evalError } = await supabase
-    .from('cv_evaluations')
-    .insert({
-      candidate_id: candidateId,
-      hiring_project_id: projectId,
-      criteria_set_id: criteriaSetId || null,
-      source_platform: 'Manual',
-      cv_file_url: cvFileUrl,
-      raw_cv_text: parsedData.rawText,
-      parsed_name: parsedData.name,
-      parsed_email: parsedData.email,
-      parsed_phone: parsedData.phone,
-      parsed_location: parsedData.location,
-      parsed_skills: parsedData.skills,
-      parsed_experience_years: parsedData.experienceYears,
-      parsed_education: parsedData.education,
-      parsed_companies: parsedData.companies,
-      parsed_projects: parsedData.projects,
-      parsed_summary: parsedData.summary,
-      skills_match_score: scores.skillsMatchScore,
-      experience_score: scores.experienceScore,
-      education_score: scores.educationScore,
-      additional_score: 0,
-      total_score: scores.totalScore,
-      status: 'New',
-      shortlisted: false,
-      applied_at: new Date().toISOString(),
-    })
-    .select(`
-      *,
-      candidate:candidates (
-        id,
-        full_name,
-        email,
-        phone,
-        linkedin_url,
-        location
-      )
-    `)
-    .single();
-
-  if (evalError) throw evalError;
-  return evaluation;
+  // 3. Poll the database until n8n writes the result
+  return pollForEvaluation(projectId, submittedAt, candidateId);
 }
 
 /**
@@ -717,14 +612,26 @@ export async function fetchExistingCandidates(): Promise<
 }
 
 /**
- * Evaluate an existing candidate for a project
+ * Evaluate an existing candidate for a project.
+ * 1. Sends candidate + project context to the n8n webhook.
+ * 2. Waits for n8n's acknowledgement.
+ * 3. Polls the database until n8n has written the evaluation record.
+ * 4. Returns the completed CvEvaluation from the database.
+ *
+ * No local DB writes are performed here — n8n owns all database operations.
  */
 export async function evaluateExistingCandidate(
   candidateId: string,
   projectId: string,
   criteriaSetId?: string
 ): Promise<CvEvaluation> {
-  // Get candidate details
+  const webhookUrl = import.meta.env.VITE_CV_INTAKE_WEBHOOK_URL;
+
+  if (!webhookUrl) {
+    throw new Error('Webhook URL not configured. Please set VITE_CV_INTAKE_WEBHOOK_URL.');
+  }
+
+  // 1. Fetch candidate details (read-only)
   const { data: candidate, error: candidateError } = await supabase
     .from('candidates')
     .select('*')
@@ -733,7 +640,7 @@ export async function evaluateExistingCandidate(
 
   if (candidateError) throw candidateError;
 
-  // Get project details
+  // 2. Fetch project details (read-only)
   const { data: project, error: projectError } = await supabase
     .from('hiring_projects')
     .select('*')
@@ -742,84 +649,116 @@ export async function evaluateExistingCandidate(
 
   if (projectError) throw projectError;
 
-  // Check if evaluation already exists
-  const { data: existingEval } = await supabase
-    .from('cv_evaluations')
-    .select('id')
-    .eq('candidate_id', candidateId)
-    .eq('hiring_project_id', projectId)
-    .single();
+  // 3. Build payload
+  const payload: Record<string, unknown> = {
+    candidate: {
+      id: candidate.id,
+      full_name: candidate.full_name,
+      email: candidate.email,
+      phone: candidate.phone,
+      location: candidate.location,
+      linkedin_url: candidate.linkedin_url,
+    },
+    project: {
+      id: project.id,
+      title: project.title,
+      department: project.department,
+      location: project.location,
+      job_type: project.job_type,
+      required_skills: project.required_skills,
+      required_experience_years: project.required_experience_years,
+      required_education: project.required_education,
+      description: project.description,
+      status: project.status,
+    },
+    metadata: {
+      source_platform: 'Manual',
+      uploaded_at: new Date().toISOString(),
+      evaluation_type: 'existing_candidate',
+    },
+  };
 
-  if (existingEval) {
-    throw new Error('This candidate has already been evaluated for this project');
+  // 4. Optionally include criteria set
+  if (criteriaSetId) {
+    try {
+      const { data: criteriaSet, error: criteriaError } = await supabase
+        .from('cv_evaluation_criteria')
+        .select('*')
+        .eq('id', criteriaSetId)
+        .single();
+
+      if (!criteriaError && criteriaSet) {
+        const { data: criteriaItems } = await supabase
+          .from('cv_criteria_items')
+          .select('*')
+          .eq('criteria_set_id', criteriaSetId)
+          .order('created_at', { ascending: true });
+
+        if (criteriaItems) {
+          payload.evaluation_criteria = {
+            id: criteriaSet.id,
+            name: criteriaSet.name,
+            description: criteriaSet.description,
+            status: criteriaSet.status,
+            items: criteriaItems.map((item) => ({
+              criterion_name: item.criterion_name,
+              criterion_description: item.criterion_description,
+              weight: item.weight,
+              criterion_type: item.criterion_type,
+              expected_value: item.expected_value,
+            })),
+          };
+        }
+      }
+    } catch (err) {
+      console.warn('⚠️ Could not fetch criteria details:', err);
+    }
+    (payload.metadata as Record<string, unknown>).criteria_set_id = criteriaSetId;
   }
 
-  // Get previous evaluation data if exists
-  const { data: previousEval } = await supabase
-    .from('cv_evaluations')
-    .select('*')
-    .eq('candidate_id', candidateId)
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .single();
+  console.log('📤 Sending existing candidate to webhook for AI analysis');
 
-  // Use previous evaluation data or create basic scores
-  const parsedData = previousEval
-    ? {
-        skills: previousEval.parsed_skills || [],
-        experienceYears: previousEval.parsed_experience_years || 0,
-        education: previousEval.parsed_education,
+  const submittedAt = new Date();
+
+  // 5. Send to webhook and wait for acknowledgement
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s for the ack only
+
+  let ackCandidateId: string | undefined;
+
+  try {
+    const response = await fetch(webhookUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Webhook failed with status ${response.status}: ${errorText}`);
+    }
+
+    const contentType = response.headers.get('content-type');
+    if (contentType && contentType.includes('application/json')) {
+      const json = await response.json();
+      if (json.success === false) {
+        throw new Error(json.error || json.message || 'Webhook returned an error');
       }
-    : {
-        skills: [],
-        experienceYears: 0,
-        education: undefined,
-      };
+      ackCandidateId = json.data?.candidate_id ?? candidateId;
+    }
+  } catch (error: any) {
+    clearTimeout(timeoutId);
+    if (error.name === 'AbortError') {
+      throw new Error('Webhook acknowledgement timed out. Please try again.');
+    }
+    throw error;
+  }
 
-  const scores = calculateEvaluationScores(parsedData, project);
+  console.log('📨 Webhook acknowledged. Waiting for n8n to write evaluation to database...');
 
-  // Create new evaluation
-  const { data: evaluation, error: evalError } = await supabase
-    .from('cv_evaluations')
-    .insert({
-      candidate_id: candidateId,
-      hiring_project_id: projectId,
-      criteria_set_id: criteriaSetId || null,
-      source_platform: 'Manual',
-      cv_file_url: previousEval?.cv_file_url || null,
-      raw_cv_text: previousEval?.raw_cv_text || null,
-      parsed_name: candidate.full_name,
-      parsed_email: candidate.email,
-      parsed_phone: candidate.phone,
-      parsed_location: candidate.location,
-      parsed_skills: previousEval?.parsed_skills || [],
-      parsed_experience_years: previousEval?.parsed_experience_years || 0,
-      parsed_education: previousEval?.parsed_education || null,
-      parsed_companies: previousEval?.parsed_companies || [],
-      parsed_projects: previousEval?.parsed_projects || [],
-      parsed_summary: previousEval?.parsed_summary || null,
-      skills_match_score: scores.skillsMatchScore,
-      experience_score: scores.experienceScore,
-      education_score: scores.educationScore,
-      additional_score: 0,
-      total_score: scores.totalScore,
-      status: 'New',
-      shortlisted: false,
-      applied_at: new Date().toISOString(),
-    })
-    .select(`
-      *,
-      candidate:candidates (
-        id,
-        full_name,
-        email,
-        phone,
-        linkedin_url,
-        location
-      )
-    `)
-    .single();
-
-  if (evalError) throw evalError;
-  return evaluation;
+  // 6. Poll the database until n8n writes the result
+  return pollForEvaluation(projectId, submittedAt, ackCandidateId ?? candidateId);
 }

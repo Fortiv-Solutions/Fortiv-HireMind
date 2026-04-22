@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styles from './CreateCriteriaModal.module.css';
 import { X, Plus, Trash2, Save } from 'lucide-react';
 import type { CriteriaStatus, CriterionType } from '../../types/database';
@@ -12,6 +12,12 @@ interface CriteriaItem {
   expected_value: string;
 }
 
+interface PrefilledData {
+  name: string;
+  description: string;
+  items: Omit<CriteriaItem, 'id'>[];
+}
+
 interface CreateCriteriaModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -21,28 +27,47 @@ interface CreateCriteriaModalProps {
     status: CriteriaStatus;
     items: Omit<CriteriaItem, 'id'>[];
   }) => Promise<void>;
+  /** Optional pre-filled data from AI generation */
+  prefilled?: PrefilledData | null;
 }
+
+const DEFAULT_ITEM: CriteriaItem = {
+  id: '1',
+  criterion_name: '',
+  criterion_description: '',
+  weight: 1.0,
+  criterion_type: 'skill',
+  expected_value: '',
+};
 
 export default function CreateCriteriaModal({
   isOpen,
   onClose,
   onSave,
+  prefilled,
 }: CreateCriteriaModalProps) {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [status, setStatus] = useState<CriteriaStatus>('Active');
-  const [items, setItems] = useState<CriteriaItem[]>([
-    {
-      id: '1',
-      criterion_name: '',
-      criterion_description: '',
-      weight: 1.0,
-      criterion_type: 'skill',
-      expected_value: '',
-    },
-  ]);
+  const [items, setItems] = useState<CriteriaItem[]>([{ ...DEFAULT_ITEM }]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Populate form when prefilled data arrives (AI generation)
+  useEffect(() => {
+    if (isOpen && prefilled) {
+      setName(prefilled.name);
+      setDescription(prefilled.description);
+      setStatus('Active');
+      setItems(
+        prefilled.items.map((item, index) => ({
+          ...item,
+          id: String(Date.now() + index),
+        }))
+      );
+      setError(null);
+    }
+  }, [isOpen, prefilled]);
 
   const handleAddItem = () => {
     const newItem: CriteriaItem = {
@@ -119,16 +144,7 @@ export default function CreateCriteriaModal({
     setName('');
     setDescription('');
     setStatus('Active');
-    setItems([
-      {
-        id: '1',
-        criterion_name: '',
-        criterion_description: '',
-        weight: 1.0,
-        criterion_type: 'skill',
-        expected_value: '',
-      },
-    ]);
+    setItems([{ ...DEFAULT_ITEM }]);
     setError(null);
     onClose();
   };
