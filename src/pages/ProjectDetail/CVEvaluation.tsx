@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import styles from './CVEvaluation.module.css';
-import { Upload, FileText, Loader2, CheckCircle, XCircle, TrendingUp } from 'lucide-react';
+import { Upload, FileText, Loader2, CheckCircle, XCircle, TrendingUp, Target, CheckCheck, AlertTriangle, Sparkles } from 'lucide-react';
 
 export default function CVEvaluation() {
   const [file, setFile] = useState<File | null>(null);
@@ -161,7 +161,13 @@ export default function CVEvaluation() {
               <div className={styles.scoreLabel}>
                 <h3>Overall Match Score</h3>
                 <p className={styles.matchLevel}>
-                  {result.totalScore >= 80 ? '🎯 Strong Match' : result.totalScore >= 60 ? '✓ Good Match' : '⚠ Weak Match'}
+                  {result.totalScore >= 80 ? (
+                    <><Target size={16} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }} /> Strong Match</>
+                  ) : result.totalScore >= 60 ? (
+                    <><CheckCheck size={16} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }} /> Good Match</>
+                  ) : (
+                    <><AlertTriangle size={16} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }} /> Weak Match</>
+                  )}
                 </p>
               </div>
             </div>
@@ -234,7 +240,7 @@ export default function CVEvaluation() {
           {/* AI Summary */}
           <div className={styles.aiSummary}>
             <div className={styles.aiHeader}>
-              <span className={styles.aiBadge}>✨ AI Summary</span>
+              <span className={styles.aiBadge}><Sparkles size={14} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }} />AI Summary</span>
             </div>
             <p>{result.summary}</p>
           </div>

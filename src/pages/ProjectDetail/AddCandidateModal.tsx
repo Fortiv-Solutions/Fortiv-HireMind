@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import styles from './AddCandidateModal.module.css';
-import { X, Upload, User, Loader2 } from 'lucide-react';
+import { X, Upload, User, Loader2, CheckCircle } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 
 interface Props {
@@ -146,7 +146,8 @@ export default function AddCandidateModal({ onClose, projectId }: Props) {
 
         {success && (
           <div className={styles.successBanner}>
-            ✓ Candidate added successfully!
+            <CheckCircle size={16} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '6px' }} />
+            Candidate added successfully!
           </div>
         )}
 
@@ -167,7 +168,8 @@ export default function AddCandidateModal({ onClose, projectId }: Props) {
                 <p>Supports PDF, DOC, DOCX (Max 10MB)</p>
                 {file && (
                   <div className={styles.selectedFile}>
-                    <span>✓ {file.name}</span>
+                    <CheckCircle size={16} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '6px' }} />
+                    <span>{file.name}</span>
                   </div>
                 )}
               </label>
@@ -296,7 +298,8 @@ export default function AddCandidateModal({ onClose, projectId }: Props) {
               />
               {formData.resume && (
                 <div className={styles.fileNameDisplay}>
-                  ✓ {formData.resume.name}
+                  <CheckCircle size={14} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '6px' }} />
+                  {formData.resume.name}
                 </div>
               )}
             </div>

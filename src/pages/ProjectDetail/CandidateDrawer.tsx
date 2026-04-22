@@ -1,6 +1,6 @@
 import React from 'react';
 import styles from './CandidateDrawer.module.css';
-import { X, Check, Loader2 } from 'lucide-react';
+import { X, Check, Loader2, CheckCircle, Sparkles } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 import type { CvEvaluation } from '../../types/database';
 
@@ -80,7 +80,7 @@ export default function CandidateDrawer({ evaluation: ev, onClose }: Props) {
         <div className={styles.scrollContent}>
           {ev.parsed_summary && (
             <div className={styles.aiSummary}>
-              <div className={styles.aiBadge}>✨ AI Summary</div>
+              <div className={styles.aiBadge}><Sparkles size={14} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }} />AI Summary</div>
               <p>{ev.parsed_summary}</p>
             </div>
           )}
@@ -144,7 +144,7 @@ export default function CandidateDrawer({ evaluation: ev, onClose }: Props) {
               disabled={loading || ev.shortlisted}
               onClick={() => handle(() => shortlistEvaluation(ev.id))}
             >
-              {ev.shortlisted ? '✓ Shortlisted' : 'Shortlist'}
+              {ev.shortlisted ? <><CheckCircle size={16} /> Shortlisted</> : 'Shortlist'}
             </button>
             <button
               className={styles.advanceBtn}

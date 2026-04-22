@@ -1,23 +1,23 @@
 .container {
   display: flex;
   flex-direction: column;
-  gap: 24px;
-  max-width: 1600px;
+  gap: 16px;
+  max-width: 1800px;
   margin: 0 auto;
 }
 
 .header {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
 }
 
 .breadcrumbs {
-  font-size: 13px;
+  font-size: 12px;
   color: var(--color-text-secondary);
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 .breadcrumbs a {
   color: var(--color-text-secondary);
@@ -38,8 +38,8 @@
   align-items: flex-start;
 }
 .titleRow h1 {
-  margin: 0 0 6px 0;
-  font-size: 22px;
+  margin: 0 0 4px 0;
+  font-size: 20px;
   color: var(--color-primary);
   letter-spacing: -0.3px;
   font-weight: 700;
@@ -47,28 +47,28 @@
 
 .meta {
   display: flex;
-  gap: 24px;
+  gap: 20px;
   color: var(--color-text-secondary);
-  font-size: 13px;
+  font-size: 12px;
 }
 .metaItem {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
 }
 
 /* Tabs */
 .tabsContainer {
   background: white;
-  border-radius: 10px;
-  padding: 6px;
+  border-radius: 8px;
+  padding: 4px;
   border: 1px solid var(--color-border);
   box-shadow: var(--shadow-sm);
 }
 
 .tabs {
   display: flex;
-  gap: 4px;
+  gap: 3px;
 }
 
 .tab {
@@ -76,12 +76,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 10px 16px;
+  gap: 6px;
+  padding: 8px 12px;
   background: transparent;
   border: none;
-  border-radius: 8px;
-  font-size: 13px;
+  border-radius: 6px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--color-text-secondary);
   cursor: pointer;
@@ -166,14 +166,14 @@
 
 .statsStrip {
   display: flex;
-  gap: 12px;
-  margin-bottom: 20px;
+  gap: 10px;
+  margin-bottom: 16px;
 }
 .statBox {
   flex: 1;
   background: white;
-  padding: 16px;
-  border-radius: 10px;
+  padding: 12px 14px;
+  border-radius: 8px;
   border: 1px solid var(--color-border);
   box-shadow: var(--shadow-sm);
   transition: all 0.2s ease;
@@ -186,23 +186,23 @@
   border: 2px solid var(--color-brand-purple);
   background: linear-gradient(135deg, rgba(124, 58, 237, 0.05) 0%, rgba(99, 102, 241, 0.05) 100%);
 }
-.statLabel { font-size: 11px; color: var(--color-text-secondary); margin-bottom: 6px;}
-.statValue { font-size: 22px; font-weight: 700; color: var(--color-primary); font-variant-numeric: tabular-nums; }
-.statLabelBlue { font-size: 11px; color: var(--color-brand-purple); font-weight: 600; margin-bottom: 6px;}
-.statValueBlue { font-size: 22px; font-weight: 700; color: var(--color-brand-purple); font-variant-numeric: tabular-nums; }
+.statLabel { font-size: 10px; color: var(--color-text-secondary); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;}
+.statValue { font-size: 20px; font-weight: 700; color: var(--color-primary); font-variant-numeric: tabular-nums; line-height: 1; }
+.statLabelBlue { font-size: 10px; color: var(--color-brand-purple); font-weight: 600; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.05em;}
+.statValueBlue { font-size: 20px; font-weight: 700; color: var(--color-brand-purple); font-variant-numeric: tabular-nums; line-height: 1; }
 
 
 .mainLayout {
   display: flex;
-  gap: 20px;
+  gap: 16px;
   align-items: flex-start;
 }
 
 .leftSidebar {
-  width: 220px;
+  width: 200px;
   background: white;
-  border-radius: 12px;
-  padding: 20px;
+  border-radius: 8px;
+  padding: 16px;
   border: 1px solid var(--color-border);
   box-shadow: var(--shadow-sm);
 }
@@ -211,13 +211,13 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
-  padding-bottom: 16px;
+  margin-bottom: 14px;
+  padding-bottom: 12px;
   border-bottom: 1px solid var(--color-border);
 }
 .filterHeader h3 { 
   margin: 0; 
-  font-size: 15px;
+  font-size: 13px;
   font-weight: 700;
   color: var(--color-primary);
 }
@@ -225,7 +225,7 @@
   color: var(--color-brand-purple); 
   background: none; 
   border: none; 
-  font-size: 12px; 
+  font-size: 11px; 
   cursor: pointer; 
   font-weight: 500;
   transition: all 0.2s ease;
@@ -236,25 +236,25 @@
 }
 
 .filterSection {
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 }
 .filterSection h4 {
-  font-size: 11px;
+  font-size: 10px;
   color: var(--color-text-secondary);
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  margin: 0 0 12px 0;
+  margin: 0 0 10px 0;
   font-weight: 700;
 }
 
 .checkboxLabel {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 10px;
-  font-size: 13px;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 12px;
   cursor: pointer;
-  padding: 4px 0;
+  padding: 3px 0;
   transition: all 0.2s ease;
 }
 .checkboxLabel:hover {
@@ -263,6 +263,8 @@
 .checkboxLabel input[type="radio"] {
   cursor: pointer;
   accent-color: var(--color-brand-purple);
+  width: 14px;
+  height: 14px;
 }
 .boxText { 
   color: var(--color-text-primary);
@@ -310,6 +312,11 @@
 
 .contentArea {
   flex: 1;
+  background: white;
+  border-radius: 10px;
+  padding: 20px;
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
 }
 
 .tableToolbar {
@@ -317,12 +324,13 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
-  padding: 0 4px;
+  padding: 0;
 }
 .showingText { 
-  font-size: 14px; 
+  font-size: 13px; 
   color: var(--color-text-secondary);
   line-height: 1.5;
+  font-weight: 500;
 }
 .showingText strong { 
   color: var(--color-primary);
@@ -332,13 +340,13 @@
 .addCandidateBtn {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 20px;
+  gap: 6px;
+  padding: 8px 16px;
   background: linear-gradient(135deg, var(--color-brand-purple) 0%, var(--color-brand-indigo) 100%);
   color: white;
   border: none;
-  border-radius: 10px;
-  font-size: 14px;
+  border-radius: 8px;
+  font-size: 12px;
   font-weight: 600;
   cursor: pointer;
   box-shadow: var(--shadow-brand);
@@ -373,57 +381,59 @@
 .candidateTable {
   width: 100%;
   border-collapse: separate;
-  border-spacing: 0 8px;
+  border-spacing: 0 6px;
 }
 .candidateTable th {
   text-align: left;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
   color: var(--color-text-secondary);
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  padding: 0 14px 12px;
-  border-bottom: 2px solid var(--color-border);
-  background: white;
-  position: sticky;
-  top: 0;
-  z-index: 10;
+  padding: 12px 12px 14px;
+  border-bottom: none;
+  background: transparent;
+  white-space: nowrap;
 }
 
 .candidateRow {
   background: white;
-  border-radius: 10px;
+  border-radius: 8px;
   transition: all 0.2s ease;
+  border: 1px solid transparent;
 }
 .candidateRow:hover {
-  transform: translateY(-2px);
+  transform: translateY(-1px);
   box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+  border-color: rgba(124, 58, 237, 0.2);
 }
 .candidateRow td {
-  padding: 12px 14px;
+  padding: 14px 12px;
   border-top: 1px solid var(--color-border);
   border-bottom: 1px solid var(--color-border);
   cursor: pointer;
+  font-size: 13px;
+  vertical-align: middle;
 }
 .candidateRow td:first-child {
   border-left: 1px solid var(--color-border);
-  border-top-left-radius: 10px;
-  border-bottom-left-radius: 10px;
+  border-top-left-radius: 8px;
+  border-bottom-left-radius: 8px;
 }
 .candidateRow td:last-child {
   border-right: 1px solid var(--color-border);
-  border-top-right-radius: 10px;
-  border-bottom-right-radius: 10px;
+  border-top-right-radius: 8px;
+  border-bottom-right-radius: 8px;
 }
 
 .candidateProfile {
   display: flex;
-  gap: 12px;
+  gap: 10px;
   align-items: center;
 }
 .avatarBlob {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   background: #0F172A;
   color: white;
   border-radius: 50%;
@@ -431,25 +441,26 @@
   align-items: center;
   justify-content: center;
   font-weight: 600;
-  font-size: 12px;
+  font-size: 11px;
+  flex-shrink: 0;
 }
 .cName {
   font-weight: 600;
-  font-size: 14px;
+  font-size: 13px;
   color: var(--color-primary);
-  margin-bottom: 3px;
+  margin-bottom: 2px;
   line-height: 1.3;
 }
 .cRole {
-  font-size: 12px;
+  font-size: 11px;
   color: var(--color-text-secondary);
   line-height: 1.4;
 }
 
 .scoreBadge {
-  padding: 4px 10px;
-  border-radius: 12px;
-  font-size: 13px;
+  padding: 3px 8px;
+  border-radius: 10px;
+  font-size: 12px;
   font-weight: 600;
 }
 .scoreHigh { background: #DCFCE7; color: #166534; }
@@ -458,37 +469,37 @@
 .statusPill {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 6px 12px;
-  border-radius: 20px;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 16px;
   border: 1px solid var(--color-border);
-  font-size: 13px;
+  font-size: 12px;
   color: var(--color-primary);
   font-weight: 500;
 }
 .statusDot {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
   border-radius: 50%;
 }
 .appliedDays {
-  font-size: 13px;
+  font-size: 12px;
   color: var(--color-text-secondary);
 }
 
 .scoreLow { background: #FEF2F2; color: #DC2626; }
 .scoreCell {
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--color-text-secondary);
 }
 
 .sourcePill {
-  padding: 4px 10px;
-  border-radius: 12px;
+  padding: 3px 8px;
+  border-radius: 10px;
   background: linear-gradient(135deg, rgba(124, 58, 237, 0.1) 0%, rgba(99, 102, 241, 0.1) 100%);
   color: var(--color-brand-purple);
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 500;
 }
 

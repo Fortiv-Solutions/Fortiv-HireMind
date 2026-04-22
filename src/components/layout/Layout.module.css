@@ -364,7 +364,7 @@
 .content {
   flex: 1;
   overflow-y: auto;
-  padding: 24px 32px;
+  padding: 20px 28px;
 }
 
 /* Remove old unused styles */

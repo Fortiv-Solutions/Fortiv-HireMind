@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import styles from './StatusDropdown.module.css';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Check } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 import type { EvaluationStatus } from '../../types/database';
 
@@ -115,7 +115,7 @@ export default function StatusDropdown({ evaluationId, currentStatus }: Props) {
               >
                 <span className={styles.statusDot} style={{ backgroundColor: statusConf.color }}></span>
                 <span style={{ color: statusConf.color }}>{status}</span>
-                {isActive && <span className={styles.checkmark}>✓</span>}
+                {isActive && <Check size={14} className={styles.checkmark} strokeWidth={3} />}
               </button>
             );
           })}

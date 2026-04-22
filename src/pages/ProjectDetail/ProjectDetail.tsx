@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import styles from './ProjectDetail.module.css';
-import { ChevronRight, MapPin, Loader2, AlertCircle, Users, FileText, TrendingUp, Settings } from 'lucide-react';
+import { ChevronRight, MapPin, Loader2, AlertCircle, Users, FileText, TrendingUp, Settings, Building2, Briefcase, Clock } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 import MyCandidates from './MyCandidates';
 import JobPost from './JobPost';
@@ -68,13 +68,13 @@ export default function ProjectDetail() {
                 <span className={styles.metaItem}><MapPin size={14} /> {activeProject.location}</span>
               )}
               {activeProject?.department && (
-                <span className={styles.metaItem}>🏛️ {activeProject.department}</span>
+                <span className={styles.metaItem}><Building2 size={14} /> {activeProject.department}</span>
               )}
               {activeProject?.job_type && (
-                <span className={styles.metaItem}>💼 {activeProject.job_type}</span>
+                <span className={styles.metaItem}><Briefcase size={14} /> {activeProject.job_type}</span>
               )}
               {activeProject?.required_experience_years != null && (
-                <span className={styles.metaItem}>⏱ {activeProject.required_experience_years}+ years exp.</span>
+                <span className={styles.metaItem}><Clock size={14} /> {activeProject.required_experience_years}+ years exp.</span>
               )}
             </div>
           </div>
