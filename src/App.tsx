@@ -8,6 +8,7 @@ import Login from './pages/Login/Login';
 import ProjectDetail from './pages/ProjectDetail/ProjectDetail';
 import CVEvaluator from './pages/CVEvaluator/CVEvaluator';
 import HomeOverview from './pages/HomeOverview/HomeOverview';
+import Profile from './pages/Profile/Profile';
 
 export default function App() {
   return (
@@ -41,6 +42,13 @@ export default function App() {
             <ProtectedRoute>
               <Layout>
                 <CVEvaluator />
+              </Layout>
+            </ProtectedRoute>
+          } />
+          <Route path="/profile" element={
+            <ProtectedRoute>
+              <Layout>
+                <Profile />
               </Layout>
             </ProtectedRoute>
           } />

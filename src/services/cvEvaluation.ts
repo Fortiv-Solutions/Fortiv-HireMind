@@ -224,15 +224,40 @@ export async function fetchCriteriaWithItems(id: string): Promise<{
 }
 
 /**
- * Delete a criteria set
+ * Delete a criteria set.
+ * Checks for linked cv_evaluations first — if any exist, throws a descriptive
+ * error so the UI can surface a helpful message instead of a raw 409.
  */
 export async function deleteCriteriaSet(id: string): Promise<void> {
+  // Check for linked evaluations (foreign key constraint)
+  const { count, error: countError } = await supabase
+    .from('cv_evaluations')
+    .select('*', { count: 'exact', head: true })
+    .eq('criteria_set_id', id);
+
+  if (countError) throw countError;
+
+  if (count && count > 0) {
+    throw new Error(
+      `This criteria set is used by ${count} CV evaluation${count > 1 ? 's' : ''} and cannot be deleted. ` +
+      `Archive it instead to keep your evaluation history intact.`
+    );
+  }
+
   const { error } = await supabase
     .from('cv_evaluation_criteria')
     .delete()
     .eq('id', id);
 
-  if (error) throw error;
+  if (error) {
+    // Fallback: surface a clean message if the FK check somehow missed it
+    if (error.code === '23503') {
+      throw new Error(
+        'This criteria set is still referenced by existing evaluations and cannot be deleted. Archive it instead.'
+      );
+    }
+    throw error;
+  }
 }
 
 /**

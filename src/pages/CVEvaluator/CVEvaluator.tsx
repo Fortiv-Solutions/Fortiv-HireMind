@@ -186,9 +186,25 @@ export default function CVEvaluator() {
     try {
       await deleteCriteriaSet(id);
       await loadCriteria();
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error deleting criteria:', err);
-      setError('Failed to delete criteria set');
+      const message = err?.message || 'Failed to delete criteria set';
+
+      // If it's a FK conflict, offer to archive instead
+      if (
+        message.includes('referenced') ||
+        message.includes('evaluations') ||
+        message.includes('Archive')
+      ) {
+        const shouldArchive = confirm(
+          `${message}\n\nWould you like to archive it instead?`
+        );
+        if (shouldArchive) {
+          await handleArchiveCriteria(id);
+        }
+      } else {
+        setError(message);
+      }
     }
   };
 

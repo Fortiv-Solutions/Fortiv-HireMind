@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import styles from './Layout.module.css';
-import { LayoutDashboard, Briefcase, FileCheck2, HelpCircle, LogOut, Search, Bell, Settings, BrainCircuit } from 'lucide-react';
+import { LayoutDashboard, Briefcase, FileCheck2, HelpCircle, Search, Bell, BrainCircuit, User } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
@@ -60,17 +60,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <HelpCircle size={18} strokeWidth={2} />
             <span>Help Center</span>
           </NavLink>
-          <button 
-            onClick={async () => {
-              await signOut();
-              navigate('/login');
-            }}
-            className={styles.footerItem}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', width: '100%', textAlign: 'left' }}
-          >
-            <LogOut size={18} strokeWidth={2} />
-            <span>Log Out</span>
-          </button>
+          <NavLink to="/profile" className={({ isActive }) => isActive ? `${styles.footerItem} ${styles.footerItemActive}` : styles.footerItem}>
+            <User size={18} strokeWidth={2} />
+            <span>Profile</span>
+          </NavLink>
         </div>
       </aside>
 
@@ -86,8 +79,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             </div>
             <div className={styles.iconGrp}>
               <Bell size={20} />
-              <Settings size={20} />
-              <div className={styles.topUserAvatar}></div>
             </div>
           </div>
         </header>
