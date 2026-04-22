@@ -23,14 +23,14 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 .titleRow h1 {
   margin: 0;
-  font-size: 28px;
+  font-size: 22px;
   font-weight: 700;
   color: var(--color-primary);
-  letter-spacing: -0.5px;
+  letter-spacing: -0.3px;
 }
 .newBtn {
   background: linear-gradient(135deg, var(--color-brand-purple) 0%, var(--color-brand-indigo) 100%);
@@ -82,9 +82,9 @@
 }
 
 .iconWrap {
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -95,10 +95,10 @@
 .iconWrap.red    { background: #FEF2F2; color: #EF4444; }
 
 .statValue {
-  font-size: 28px;
+  font-size: 24px;
   font-weight: 700;
   color: var(--color-text-primary);
-  letter-spacing: -0.5px;
+  letter-spacing: -0.3px;
 }
 .statValueRow {
   display: flex;
@@ -205,16 +205,16 @@
   gap: 12px;
 }
 .projectIcon {
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
   background: linear-gradient(135deg, rgba(124, 58, 237, 0.1) 0%, rgba(99, 102, 241, 0.1) 100%);
   color: var(--color-brand-purple);
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 700;
-  font-size: 14px;
+  font-size: 13px;
 }
 .projectName {
   font-weight: 600;

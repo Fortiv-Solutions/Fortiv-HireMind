@@ -8,9 +8,9 @@
 
 .header h2 {
   margin: 0 0 6px 0;
-  font-size: 26px;
+  font-size: 22px;
   color: var(--color-primary);
-  letter-spacing: -0.5px;
+  letter-spacing: -0.3px;
 }
 .subtitle {
   margin: 0;
@@ -53,10 +53,10 @@
   gap: 10px;
 }
 .value {
-  font-size: 32px;
+  font-size: 26px;
   font-weight: 700;
   color: var(--color-primary);
-  letter-spacing: -0.5px;
+  letter-spacing: -0.3px;
 }
 .subtext { font-size: 15px; font-weight: 500; color: var(--color-text-secondary); margin-left: 4px; }
 .trendSuccess {
@@ -164,16 +164,16 @@
 .projectRow:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
 
 .projectIconSmall {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   background: linear-gradient(135deg, rgba(124, 58, 237, 0.1) 0%, rgba(99, 102, 241, 0.1) 100%);
   color: var(--color-brand-purple);
-  border-radius: 10px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 700;
-  font-size: 13px;
+  font-size: 12px;
 }
 .projectRowInfo { flex: 1; }
 .projectRowTitle { font-size: 14px; font-weight: 600; color: var(--color-primary); display: block; margin-bottom: 2px; }

@@ -9,10 +9,10 @@
 
 .header h2 {
   margin: 0 0 6px 0;
-  font-size: 26px;
+  font-size: 22px;
   font-weight: 700;
   color: var(--color-primary);
-  letter-spacing: -0.5px;
+  letter-spacing: -0.3px;
 }
 
 .header p {
