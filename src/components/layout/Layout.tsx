@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import styles from './Layout.module.css';
-import { LayoutDashboard, Briefcase, FileCheck2, HelpCircle, Search, Bell, BrainCircuit, User } from 'lucide-react';
+import { LayoutDashboard, Briefcase, FileCheck2, Search, Bell, BrainCircuit, User } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
@@ -56,14 +56,18 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
         {/* Footer */}
         <div className={styles.sidebarFooter}>
-          <NavLink to="/help" className={({ isActive }) => isActive ? `${styles.footerItem} ${styles.footerItemActive}` : styles.footerItem}>
-            <HelpCircle size={18} strokeWidth={2} />
-            <span>Help Center</span>
-          </NavLink>
-          <NavLink to="/profile" className={({ isActive }) => isActive ? `${styles.footerItem} ${styles.footerItemActive}` : styles.footerItem}>
-            <User size={18} strokeWidth={2} />
-            <span>Profile</span>
-          </NavLink>
+          <div className={styles.profileSection}>
+            <NavLink to="/profile" className={({ isActive }) => isActive ? `${styles.profileItem} ${styles.profileItemActive}` : styles.profileItem}>
+              <div className={styles.profileAvatar}>
+                <User size={18} strokeWidth={2.5} />
+              </div>
+              <div className={styles.profileInfo}>
+                <span className={styles.profileName}>Profile</span>
+                <span className={styles.profileSubtext}>Account & Settings</span>
+              </div>
+              <User size={16} strokeWidth={2} className={styles.profileIcon} />
+            </NavLink>
+          </div>
         </div>
       </aside>
 

@@ -113,6 +113,9 @@
   cursor: pointer;
   transition: all 0.2s ease;
   box-shadow: 0 2px 8px rgba(124, 58, 237, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .editButton:hover {
@@ -120,59 +123,25 @@
   box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
 }
 
-/* Settings Grid */
-.settingsGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-  gap: 20px;
-}
-
-.settingCard {
-  background: white;
-  border: 1px solid var(--color-border);
-  border-radius: 12px;
-  padding: 20px;
+/* Account Settings */
+.settingItem {
   display: flex;
   align-items: center;
-  gap: 16px;
-  transition: all 0.2s ease;
-  cursor: pointer;
+  justify-content: space-between;
+  padding: 16px 0;
 }
 
-.settingCard:hover {
-  border-color: rgba(124, 58, 237, 0.3);
-  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.1);
-  transform: translateY(-2px);
-}
-
-.settingIcon {
-  width: 48px;
-  height: 48px;
-  background: linear-gradient(135deg, rgba(124, 58, 237, 0.1) 0%, rgba(99, 102, 241, 0.1) 100%);
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #7C3AED;
-  flex-shrink: 0;
-}
-
-.settingContent {
-  flex: 1;
-}
-
-.settingContent h3 {
+.settingInfo h3 {
   font-size: 16px;
   font-weight: 600;
   color: #1A1F36;
   margin: 0 0 4px 0;
 }
 
-.settingContent p {
+.settingInfo p {
   font-size: 14px;
   color: #6B7280;
   margin: 0;
-  line-height: 1.4;
 }
 
 .settingButton {
@@ -185,12 +154,278 @@
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
-  flex-shrink: 0;
 }
 
 .settingButton:hover {
   background: rgba(124, 58, 237, 0.1);
   border-color: #7C3AED;
+}
+
+/* Modal Styles */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.modal {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.modalHeader h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1A1F36;
+  margin: 0;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #6B7280;
+  cursor: pointer;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.closeButton:hover {
+  background: rgba(107, 114, 128, 0.1);
+  color: #374151;
+}
+
+.formGroup {
+  margin-bottom: 16px;
+}
+
+.formGroup label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 6px;
+}
+
+.input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #D1D5DB;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #7C3AED;
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+}
+
+.input:disabled {
+  background: #F9FAFB;
+  color: #6B7280;
+  cursor: not-allowed;
+}
+
+.passwordInput {
+  position: relative;
+}
+
+.passwordInput .input {
+  padding-right: 40px;
+}
+
+.eyeButton {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #6B7280;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.eyeButton:hover {
+  color: #374151;
+  background: rgba(107, 114, 128, 0.1);
+}
+
+.modalActions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.cancelButton {
+  flex: 1;
+  background: transparent;
+  color: #6B7280;
+  border: 1px solid #D1D5DB;
+  padding: 10px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cancelButton:hover {
+  background: #F9FAFB;
+  border-color: #9CA3AF;
+}
+
+.cancelButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.submitButton {
+  flex: 1;
+  background: linear-gradient(135deg, #7C3AED 0%, #4F46E5 100%);
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.submitButton:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+}
+
+.submitButton:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.error {
+  background: #FEF2F2;
+  color: #DC2626;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  margin-bottom: 16px;
+  border: 1px solid #FECACA;
+}
+
+.success {
+  background: #F0FDF4;
+  color: #16A34A;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  margin-bottom: 16px;
+  border: 1px solid #BBF7D0;
+}
+
+/* FAQ Styles */
+.faqContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.faqItem {
+  border: 1px solid #E5E7EB;
+  border-radius: 8px;
+  overflow: visible;
+  transition: all 0.2s ease;
+  background: white;
+}
+
+.faqItem:hover {
+  border-color: rgba(124, 58, 237, 0.3);
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.1);
+}
+
+.faqQuestion {
+  width: 100%;
+  background: white;
+  border: none;
+  padding: 16px;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 14px;
+  font-weight: 500;
+  color: #1A1F36;
+  transition: all 0.2s ease;
+  border-radius: 8px;
+  position: relative;
+  z-index: 1;
+}
+
+.faqQuestion:hover {
+  background: rgba(124, 58, 237, 0.05);
+}
+
+.faqQuestion span {
+  flex: 1;
+  line-height: 1.4;
+}
+
+.faqAnswer {
+  padding: 0 16px 16px 16px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #6B7280;
+  background: white;
+  border-radius: 0 0 8px 8px;
+  animation: slideDown 0.3s ease-out;
+  transform-origin: top;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+  to {
+    opacity: 1;
+    max-height: 200px;
+    padding-top: 0;
+    padding-bottom: 16px;
+  }
 }
 
 /* Action Cards */
@@ -280,20 +515,10 @@
 
 /* Responsive Design */
 @media (max-width: 768px) {
-  .settingsGrid {
-    grid-template-columns: 1fr;
-  }
-  
   .profileInfo {
     flex-direction: column;
     text-align: center;
     gap: 16px;
-  }
-  
-  .settingCard {
-    flex-direction: column;
-    text-align: center;
-    gap: 12px;
   }
   
   .actionCard {
