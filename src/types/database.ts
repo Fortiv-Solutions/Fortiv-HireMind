@@ -87,3 +87,40 @@ export interface ProjectWithStats extends HiringProject {
   screened: number;
   rejected: number;
 }
+
+// CV Evaluation Criteria types
+export type CriteriaStatus = 'Active' | 'Inactive' | 'Draft' | 'Archived';
+export type CriterionType = 'skill' | 'experience' | 'education' | 'custom';
+
+export interface CvEvaluationCriteria {
+  id: string;
+  name: string;
+  description: string | null;
+  status: CriteriaStatus;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CvCriteriaItem {
+  id: string;
+  criteria_set_id: string;
+  criterion_name: string;
+  criterion_description: string | null;
+  weight: number;
+  criterion_type: CriterionType | null;
+  expected_value: string | null;
+  created_at: string;
+}
+
+export interface ProjectCriteriaMapping {
+  id: string;
+  hiring_project_id: string;
+  criteria_set_id: string;
+  created_at: string;
+}
+
+// Enriched criteria with stats
+export interface CriteriaWithStats extends CvEvaluationCriteria {
+  criteriaCount: number;
+  projectsUsed: number;
+}

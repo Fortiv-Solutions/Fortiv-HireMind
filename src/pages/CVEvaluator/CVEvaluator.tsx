@@ -2,47 +2,91 @@ import React, { useState, useEffect } from 'react';
 import styles from './CVEvaluator.module.css';
 import { Upload, FileText, CheckCircle, AlertCircle, Sparkles, Plus, Edit2, Trash2, Copy, Eye, BarChart3, Target, Clock, Zap } from 'lucide-react';
 import { useStore } from '../../store/useStore';
+import {
+  fetchCriteriaWithStats,
+  evaluateCv,
+  fetchExistingCandidates,
+  evaluateExistingCandidate,
+  deleteCriteriaSet,
+  duplicateCriteriaSet,
+  updateCriteriaSet,
+  createCriteriaSetWithItems,
+  fetchCriteriaWithItems,
+  updateCriteriaSetWithItems,
+} from '../../services/cvEvaluation';
+import type { CriteriaWithStats, CvEvaluation, Candidate } from '../../types/database';
+import CreateCriteriaModal from './CreateCriteriaModal';
+import EditCriteriaModal from './EditCriteriaModal';
+import CriteriaDetailModal from './CriteriaDetailModal';
 
 type ViewMode = 'upload' | 'criteria';
-
-interface EvaluationCriteria {
-  id: string;
-  name: string;
-  description: string;
-  criteriaCount: number;
-  projectsUsed: number;
-  status: 'Active' | 'Inactive' | 'Draft' | 'Archived';
-  createdAt: string;
-}
 
 export default function CVEvaluator() {
   const [viewMode, setViewMode] = useState<ViewMode>('upload');
   const { projects, loadProjects } = useStore();
   const [selectedProjectId, setSelectedProjectId] = useState<string>('');
+  const [selectedCriteriaId, setSelectedCriteriaId] = useState<string>('');
   const [uploadMode, setUploadMode] = useState<'new' | 'existing'>('new');
   const [dragActive, setDragActive] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [evaluating, setEvaluating] = useState(false);
-  const [evaluationResult, setEvaluationResult] = useState<any>(null);
+  const [evaluationResult, setEvaluationResult] = useState<CvEvaluation | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  // Mock criteria data
-  const [criteriaList, setCriteriaList] = useState<EvaluationCriteria[]>([
-    {
-      id: '1',
-      name: 'Software Engineer',
-      description: 'Screen every applicant against custom criteria.',
-      criteriaCount: 5,
-      projectsUsed: 1,
-      status: 'Active',
-      createdAt: '2024-04-27',
-    },
-  ]);
-
+  // Criteria management
+  const [criteriaList, setCriteriaList] = useState<CriteriaWithStats[]>([]);
   const [criteriaFilter, setCriteriaFilter] = useState<'Active' | 'Inactive' | 'Archived' | 'Draft'>('Active');
+  const [loadingCriteria, setLoadingCriteria] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingCriteriaId, setEditingCriteriaId] = useState<string | null>(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [detailCriteriaId, setDetailCriteriaId] = useState<string | null>(null);
+
+  // Existing candidates
+  const [existingCandidates, setExistingCandidates] = useState<Candidate[]>([]);
+  const [selectedCandidateId, setSelectedCandidateId] = useState<string>('');
+  const [loadingCandidates, setLoadingCandidates] = useState(false);
+
+  // Auto-consider mode
+  const [autoConsiderMode, setAutoConsiderMode] = useState<'criteria' | 'project'>('project');
 
   useEffect(() => {
     loadProjects();
+    loadCriteria();
   }, [loadProjects]);
+
+  useEffect(() => {
+    if (uploadMode === 'existing') {
+      loadExistingCandidates();
+    }
+  }, [uploadMode]);
+
+  const loadCriteria = async () => {
+    setLoadingCriteria(true);
+    try {
+      const data = await fetchCriteriaWithStats();
+      setCriteriaList(data);
+    } catch (err) {
+      console.error('Error loading criteria:', err);
+      setError('Failed to load evaluation criteria');
+    } finally {
+      setLoadingCriteria(false);
+    }
+  };
+
+  const loadExistingCandidates = async () => {
+    setLoadingCandidates(true);
+    try {
+      const data = await fetchExistingCandidates();
+      setExistingCandidates(data);
+    } catch (err) {
+      console.error('Error loading candidates:', err);
+      setError('Failed to load existing candidates');
+    } finally {
+      setLoadingCandidates(false);
+    }
+  };
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
@@ -82,36 +126,223 @@ export default function CVEvaluator() {
   };
 
   const handleEvaluate = async () => {
-    if (!uploadedFile || !selectedProjectId) return;
+    if (uploadMode === 'new' && !uploadedFile) {
+      setError('Please upload a CV file');
+      return;
+    }
+    if (uploadMode === 'existing' && !selectedCandidateId) {
+      setError('Please select a candidate');
+      return;
+    }
+    if (!selectedProjectId) {
+      setError('Please select a hiring project');
+      return;
+    }
 
     setEvaluating(true);
-    
-    // Simulate evaluation (replace with actual API call)
-    setTimeout(() => {
-      setEvaluationResult({
-        candidateName: 'John Doe',
-        email: 'john.doe@example.com',
-        phone: '+91 98765 43210',
-        totalScore: 78,
-        skillsMatch: 85,
-        experienceScore: 75,
-        educationScore: 70,
-        strengths: [
-          'Strong proficiency in React and TypeScript',
-          '5+ years of relevant experience',
-          'Led multiple successful projects',
-        ],
-        concerns: [
-          'Limited experience with cloud platforms',
-          'No mention of testing frameworks',
-        ],
-        recommendation: 'Strong Match',
-      });
+    setError(null);
+
+    try {
+      let evaluation: CvEvaluation;
+
+      if (uploadMode === 'new' && uploadedFile) {
+        // Evaluate new CV upload
+        evaluation = await evaluateCv(
+          uploadedFile,
+          selectedProjectId,
+          autoConsiderMode === 'criteria' ? selectedCriteriaId : undefined
+        );
+      } else if (uploadMode === 'existing' && selectedCandidateId) {
+        // Evaluate existing candidate
+        evaluation = await evaluateExistingCandidate(
+          selectedCandidateId,
+          selectedProjectId,
+          autoConsiderMode === 'criteria' ? selectedCriteriaId : undefined
+        );
+      } else {
+        throw new Error('Invalid evaluation mode');
+      }
+
+      setEvaluationResult(evaluation);
+      setUploadedFile(null);
+      setSelectedCandidateId('');
+    } catch (err: any) {
+      console.error('Error evaluating CV:', err);
+      setError(err.message || 'Failed to evaluate CV. Please try again.');
+    } finally {
       setEvaluating(false);
-    }, 2500);
+    }
+  };
+
+  const handleDeleteCriteria = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this criteria set?')) return;
+
+    try {
+      await deleteCriteriaSet(id);
+      await loadCriteria();
+    } catch (err) {
+      console.error('Error deleting criteria:', err);
+      setError('Failed to delete criteria set');
+    }
+  };
+
+  const handleDuplicateCriteria = async (id: string) => {
+    try {
+      await duplicateCriteriaSet(id);
+      await loadCriteria();
+    } catch (err) {
+      console.error('Error duplicating criteria:', err);
+      setError('Failed to duplicate criteria set');
+    }
+  };
+
+  const handleArchiveCriteria = async (id: string) => {
+    try {
+      await updateCriteriaSet(id, { status: 'Archived' });
+      await loadCriteria();
+    } catch (err) {
+      console.error('Error archiving criteria:', err);
+      setError('Failed to archive criteria set');
+    }
+  };
+
+  const handleCreateCriteria = async (data: {
+    name: string;
+    description: string;
+    status: 'Active' | 'Inactive' | 'Draft' | 'Archived';
+    items: Array<{
+      criterion_name: string;
+      criterion_description: string;
+      weight: number;
+      criterion_type: 'skill' | 'experience' | 'education' | 'custom';
+      expected_value: string;
+    }>;
+  }) => {
+    try {
+      await createCriteriaSetWithItems(
+        {
+          name: data.name,
+          description: data.description,
+          status: data.status,
+        },
+        data.items
+      );
+      await loadCriteria();
+      setShowCreateModal(false);
+    } catch (err: any) {
+      console.error('Error creating criteria:', err);
+      throw new Error(err.message || 'Failed to create criteria set');
+    }
+  };
+
+  const handleEditCriteria = (id: string) => {
+    setEditingCriteriaId(id);
+    setShowEditModal(true);
+  };
+
+  const handleUpdateCriteria = async (
+    criteriaId: string,
+    data: {
+      name: string;
+      description: string;
+      status: 'Active' | 'Inactive' | 'Draft' | 'Archived';
+      itemsToAdd: Array<{
+        criterion_name: string;
+        criterion_description: string;
+        weight: number;
+        criterion_type: 'skill' | 'experience' | 'education' | 'custom';
+        expected_value: string;
+      }>;
+      itemsToUpdate: Array<{
+        id: string;
+        criterion_name?: string;
+        criterion_description?: string;
+        weight?: number;
+        criterion_type?: 'skill' | 'experience' | 'education' | 'custom';
+        expected_value?: string;
+      }>;
+      itemsToDelete: string[];
+    }
+  ) => {
+    try {
+      await updateCriteriaSetWithItems(
+        criteriaId,
+        {
+          name: data.name,
+          description: data.description,
+          status: data.status,
+        },
+        data.itemsToAdd,
+        data.itemsToUpdate,
+        data.itemsToDelete
+      );
+      await loadCriteria();
+      setShowEditModal(false);
+      setEditingCriteriaId(null);
+    } catch (err: any) {
+      console.error('Error updating criteria:', err);
+      throw new Error(err.message || 'Failed to update criteria set');
+    }
+  };
+
+  const handleLoadCriteriaForEdit = async (id: string) => {
+    return await fetchCriteriaWithItems(id);
+  };
+
+  const handleViewCriteriaDetail = (id: string) => {
+    setDetailCriteriaId(id);
+    setShowDetailModal(true);
   };
 
   const filteredCriteria = criteriaList.filter(c => c.status === criteriaFilter);
+
+  // Generate recommendation text based on score
+  const getRecommendation = (score: number): string => {
+    if (score >= 80) return 'Strong Match';
+    if (score >= 60) return 'Good Match';
+    if (score >= 40) return 'Moderate Match';
+    return 'Weak Match';
+  };
+
+  // Generate strengths and concerns from evaluation data
+  const getInsights = (evaluation: CvEvaluation) => {
+    const strengths: string[] = [];
+    const concerns: string[] = [];
+
+    if (evaluation.skills_match_score >= 70) {
+      strengths.push(`Strong skills match (${evaluation.skills_match_score}%)`);
+    } else if (evaluation.skills_match_score < 50) {
+      concerns.push(`Limited skills match (${evaluation.skills_match_score}%)`);
+    }
+
+    if (evaluation.experience_score >= 70) {
+      strengths.push(`${evaluation.parsed_experience_years || 0}+ years of relevant experience`);
+    } else if (evaluation.experience_score < 50) {
+      concerns.push(`Limited experience (${evaluation.parsed_experience_years || 0} years)`);
+    }
+
+    if (evaluation.parsed_skills && evaluation.parsed_skills.length > 5) {
+      strengths.push(`Diverse skill set (${evaluation.parsed_skills.length} skills)`);
+    }
+
+    if (evaluation.parsed_companies && evaluation.parsed_companies.length > 2) {
+      strengths.push(`Experience across ${evaluation.parsed_companies.length} companies`);
+    }
+
+    if (evaluation.education_score < 60) {
+      concerns.push('Education background needs review');
+    }
+
+    // Default messages if none generated
+    if (strengths.length === 0) {
+      strengths.push('Candidate profile available for review');
+    }
+    if (concerns.length === 0) {
+      concerns.push('No major concerns identified');
+    }
+
+    return { strengths, concerns };
+  };
 
   return (
     <div className={styles.container}>
@@ -124,6 +355,45 @@ export default function CVEvaluator() {
           </p>
         </div>
       </div>
+
+      {/* Error Display */}
+      {error && (
+        <div className={styles.errorBanner}>
+          <AlertCircle size={18} />
+          <span>{error}</span>
+          <button onClick={() => setError(null)} className={styles.closeError}>×</button>
+        </div>
+      )}
+
+      {/* Create Criteria Modal */}
+      <CreateCriteriaModal
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        onSave={handleCreateCriteria}
+      />
+
+      {/* Edit Criteria Modal */}
+      <EditCriteriaModal
+        isOpen={showEditModal}
+        criteriaId={editingCriteriaId}
+        onClose={() => {
+          setShowEditModal(false);
+          setEditingCriteriaId(null);
+        }}
+        onSave={handleUpdateCriteria}
+        onLoadCriteria={handleLoadCriteriaForEdit}
+      />
+
+      {/* Criteria Detail Modal */}
+      <CriteriaDetailModal
+        isOpen={showDetailModal}
+        criteriaId={detailCriteriaId}
+        onClose={() => {
+          setShowDetailModal(false);
+          setDetailCriteriaId(null);
+        }}
+        onLoadCriteria={handleLoadCriteriaForEdit}
+      />
 
       {/* View Mode Tabs */}
       <div className={styles.tabs}>
@@ -201,9 +471,27 @@ export default function CVEvaluator() {
 
               {uploadMode === 'existing' && (
                 <div className={styles.existingCandidates}>
-                  <p className={styles.comingSoon}>
-                    Select from existing candidates (Coming soon)
-                  </p>
+                  {loadingCandidates ? (
+                    <p className={styles.loading}>Loading candidates...</p>
+                  ) : existingCandidates.length === 0 ? (
+                    <p className={styles.comingSoon}>No existing candidates found</p>
+                  ) : (
+                    <div className={styles.candidatesList}>
+                      <label>Select a candidate</label>
+                      <select
+                        className={styles.select}
+                        value={selectedCandidateId}
+                        onChange={(e) => setSelectedCandidateId(e.target.value)}
+                      >
+                        <option value="">Choose candidate...</option>
+                        {existingCandidates.map((candidate) => (
+                          <option key={candidate.id} value={candidate.id}>
+                            {candidate.full_name} ({candidate.email})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -237,22 +525,45 @@ export default function CVEvaluator() {
                 <label>Auto-Consider CVs</label>
                 <div className={styles.radioGroup}>
                   <label className={styles.radioLabel}>
-                    <input type="radio" name="autoConsider" defaultChecked />
+                    <input
+                      type="radio"
+                      name="autoConsider"
+                      checked={autoConsiderMode === 'criteria'}
+                      onChange={() => setAutoConsiderMode('criteria')}
+                    />
                     <span>Select CV Criteria</span>
                   </label>
                   <label className={styles.radioLabel}>
-                    <input type="radio" name="autoConsider" />
+                    <input
+                      type="radio"
+                      name="autoConsider"
+                      checked={autoConsiderMode === 'project'}
+                      onChange={() => setAutoConsiderMode('project')}
+                    />
                     <span>Select a Hiring Project</span>
                   </label>
                 </div>
               </div>
 
-              <div className={styles.formGroup}>
-                <label>Select CV Criteria</label>
-                <select className={styles.select} disabled>
-                  <option>Choose criteria set...</option>
-                </select>
-              </div>
+              {autoConsiderMode === 'criteria' && (
+                <div className={styles.formGroup}>
+                  <label>Select CV Criteria</label>
+                  <select
+                    className={styles.select}
+                    value={selectedCriteriaId}
+                    onChange={(e) => setSelectedCriteriaId(e.target.value)}
+                  >
+                    <option value="">Choose criteria set...</option>
+                    {criteriaList
+                      .filter((c) => c.status === 'Active')
+                      .map((c) => (
+                        <option key={c.id} value={c.id}>
+                          {c.name}
+                        </option>
+                      ))}
+                  </select>
+                </div>
+              )}
 
               <div className={styles.formGroup}>
                 <label>Select a Hiring Project</label>
@@ -273,7 +584,12 @@ export default function CVEvaluator() {
               <button
                 className={styles.evaluateBtn}
                 onClick={handleEvaluate}
-                disabled={!uploadedFile || !selectedProjectId || evaluating}
+                disabled={
+                  evaluating ||
+                  !selectedProjectId ||
+                  (uploadMode === 'new' && !uploadedFile) ||
+                  (uploadMode === 'existing' && !selectedCandidateId)
+                }
               >
                 {evaluating ? (
                   <>
@@ -333,13 +649,15 @@ export default function CVEvaluator() {
               <div className={styles.resultsCard}>
                 <div className={styles.resultsHeader}>
                   <div>
-                    <h2>{evaluationResult.candidateName}</h2>
+                    <h2>{evaluationResult.parsed_name || evaluationResult.candidate?.full_name}</h2>
                     <p className={styles.contactInfo}>
-                      {evaluationResult.email} · {evaluationResult.phone}
+                      {evaluationResult.parsed_email || evaluationResult.candidate?.email}
+                      {(evaluationResult.parsed_phone || evaluationResult.candidate?.phone) && 
+                        ` · ${evaluationResult.parsed_phone || evaluationResult.candidate?.phone}`}
                     </p>
                   </div>
                   <div className={styles.scoreCircle}>
-                    <div className={styles.scoreValue}>{evaluationResult.totalScore}</div>
+                    <div className={styles.scoreValue}>{evaluationResult.total_score}</div>
                     <div className={styles.scoreLabel}>Overall</div>
                   </div>
                 </div>
@@ -350,36 +668,38 @@ export default function CVEvaluator() {
                     <div className={styles.scoreBar}>
                       <div
                         className={styles.scoreBarFill}
-                        style={{ width: `${evaluationResult.skillsMatch}%` }}
+                        style={{ width: `${evaluationResult.skills_match_score}%` }}
                       ></div>
                     </div>
-                    <span className={styles.scoreItemValue}>{evaluationResult.skillsMatch}%</span>
+                    <span className={styles.scoreItemValue}>{evaluationResult.skills_match_score}%</span>
                   </div>
                   <div className={styles.scoreItem}>
                     <span className={styles.scoreItemLabel}>Experience</span>
                     <div className={styles.scoreBar}>
                       <div
                         className={styles.scoreBarFill}
-                        style={{ width: `${evaluationResult.experienceScore}%` }}
+                        style={{ width: `${evaluationResult.experience_score}%` }}
                       ></div>
                     </div>
-                    <span className={styles.scoreItemValue}>{evaluationResult.experienceScore}%</span>
+                    <span className={styles.scoreItemValue}>{evaluationResult.experience_score}%</span>
                   </div>
                   <div className={styles.scoreItem}>
                     <span className={styles.scoreItemLabel}>Education</span>
                     <div className={styles.scoreBar}>
                       <div
                         className={styles.scoreBarFill}
-                        style={{ width: `${evaluationResult.educationScore}%` }}
+                        style={{ width: `${evaluationResult.education_score}%` }}
                       ></div>
                     </div>
-                    <span className={styles.scoreItemValue}>{evaluationResult.educationScore}%</span>
+                    <span className={styles.scoreItemValue}>{evaluationResult.education_score}%</span>
                   </div>
                 </div>
 
                 <div className={styles.recommendation}>
                   <CheckCircle size={20} className={styles.recommendIcon} />
-                  <span className={styles.recommendText}>{evaluationResult.recommendation}</span>
+                  <span className={styles.recommendText}>
+                    {getRecommendation(evaluationResult.total_score)}
+                  </span>
                 </div>
 
                 <div className={styles.insights}>
@@ -389,7 +709,7 @@ export default function CVEvaluator() {
                       Key Strengths
                     </h4>
                     <ul>
-                      {evaluationResult.strengths.map((s: string, i: number) => (
+                      {getInsights(evaluationResult).strengths.map((s: string, i: number) => (
                         <li key={i}>{s}</li>
                       ))}
                     </ul>
@@ -401,7 +721,7 @@ export default function CVEvaluator() {
                       Potential Concerns
                     </h4>
                     <ul>
-                      {evaluationResult.concerns.map((c: string, i: number) => (
+                      {getInsights(evaluationResult).concerns.map((c: string, i: number) => (
                         <li key={i}>{c}</li>
                       ))}
                     </ul>
@@ -409,13 +729,26 @@ export default function CVEvaluator() {
                 </div>
 
                 <div className={styles.resultsActions}>
-                  <button className={styles.btnSecondary}>
+                  {evaluationResult.cv_file_url && (
+                    <a
+                      href={evaluationResult.cv_file_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={styles.btnSecondary}
+                    >
+                      <Eye size={16} />
+                      View CV File
+                    </a>
+                  )}
+                  <button
+                    className={styles.btnPrimary}
+                    onClick={() => {
+                      // Navigate to project detail page
+                      window.location.href = `/project/${evaluationResult.hiring_project_id}`;
+                    }}
+                  >
                     <Eye size={16} />
-                    View Full Report
-                  </button>
-                  <button className={styles.btnPrimary}>
-                    <Plus size={16} />
-                    Add to Project
+                    View in Project
                   </button>
                 </div>
               </div>
@@ -439,92 +772,132 @@ export default function CVEvaluator() {
                 className={criteriaFilter === 'Inactive' ? styles.filterBtnActive : styles.filterBtn}
                 onClick={() => setCriteriaFilter('Inactive')}
               >
-                Inactive
+                Inactive ({criteriaList.filter(c => c.status === 'Inactive').length})
               </button>
               <button
                 className={criteriaFilter === 'Archived' ? styles.filterBtnActive : styles.filterBtn}
                 onClick={() => setCriteriaFilter('Archived')}
               >
-                Archived
+                Archived ({criteriaList.filter(c => c.status === 'Archived').length})
               </button>
               <button
                 className={criteriaFilter === 'Draft' ? styles.filterBtnActive : styles.filterBtn}
                 onClick={() => setCriteriaFilter('Draft')}
               >
-                Draft
+                Draft ({criteriaList.filter(c => c.status === 'Draft').length})
               </button>
             </div>
 
-            <button className={styles.newCriteriaBtn}>
+            <button className={styles.newCriteriaBtn} onClick={() => setShowCreateModal(true)}>
               <Plus size={18} />
               New CV Evaluation Criteria
             </button>
           </div>
 
-          <div className={styles.criteriaGrid}>
-            {filteredCriteria.length === 0 ? (
-              <div className={styles.emptyCriteria}>
-                <Target size={64} className={styles.emptyIcon} />
-                <h3>No {criteriaFilter.toLowerCase()} criteria</h3>
-                <p>Create your first evaluation criteria set to get started.</p>
-                <button className={styles.createFirstBtn}>
-                  <Plus size={18} />
-                  Create First Criteria
-                </button>
-              </div>
-            ) : (
-              filteredCriteria.map((criteria) => (
-                <div key={criteria.id} className={styles.criteriaCard}>
-                  <div className={styles.criteriaCardHeader}>
-                    <h3>{criteria.name}</h3>
-                    <div className={styles.criteriaActions}>
-                      <button className={styles.iconBtn} title="Duplicate">
-                        <Copy size={16} />
-                      </button>
-                      <button className={styles.iconBtn} title="Edit">
-                        <Edit2 size={16} />
-                      </button>
-                      <button className={styles.iconBtn} title="Delete">
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  </div>
-
-                  <p className={styles.criteriaDescription}>{criteria.description}</p>
-
-                  <div className={styles.criteriaStats}>
-                    <div className={styles.criteriaStat}>
-                      <span className={styles.statValue}>{criteria.criteriaCount}</span>
-                      <span className={styles.statLabel}>Criteria</span>
-                    </div>
-                    <div className={styles.criteriaStat}>
-                      <span className={styles.statValue}>{criteria.projectsUsed}</span>
-                      <span className={styles.statLabel}>Projects</span>
-                    </div>
-                  </div>
-
-                  <div className={styles.criteriaFooter}>
-                    <span className={`${styles.statusBadge} ${styles[`status${criteria.status}`]}`}>
-                      {criteria.status}
-                    </span>
-                    <span className={styles.criteriaDate}>
-                      <Clock size={14} />
-                      Created {new Date(criteria.createdAt).toLocaleDateString('en-IN', {
-                        day: 'numeric',
-                        month: 'short',
-                        year: 'numeric',
-                      })}
-                    </span>
-                  </div>
-
-                  <button className={styles.evaluateCriteriaBtn}>
-                    <Sparkles size={16} />
-                    Evaluate CV
+          {loadingCriteria ? (
+            <div className={styles.loading}>Loading criteria...</div>
+          ) : (
+            <div className={styles.criteriaGrid}>
+              {filteredCriteria.length === 0 ? (
+                <div className={styles.emptyCriteria}>
+                  <Target size={64} className={styles.emptyIcon} />
+                  <h3>No {criteriaFilter.toLowerCase()} criteria</h3>
+                  <p>Create your first evaluation criteria set to get started.</p>
+                  <button className={styles.createFirstBtn} onClick={() => setShowCreateModal(true)}>
+                    <Plus size={18} />
+                    Create First Criteria
                   </button>
                 </div>
-              ))
-            )}
-          </div>
+              ) : (
+                filteredCriteria.map((criteria) => (
+                  <div 
+                    key={criteria.id} 
+                    className={styles.criteriaCard}
+                    onClick={() => handleViewCriteriaDetail(criteria.id)}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    <div className={styles.criteriaCardHeader}>
+                      <h3>{criteria.name}</h3>
+                      <div className={styles.criteriaActions}>
+                        <button
+                          className={styles.iconBtn}
+                          title="Duplicate"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDuplicateCriteria(criteria.id);
+                          }}
+                        >
+                          <Copy size={16} />
+                        </button>
+                        <button
+                          className={styles.iconBtn}
+                          title="Edit"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleEditCriteria(criteria.id);
+                          }}
+                        >
+                          <Edit2 size={16} />
+                        </button>
+                        <button
+                          className={styles.iconBtn}
+                          title="Delete"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteCriteria(criteria.id);
+                          }}
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </div>
+
+                    <p className={styles.criteriaDescription}>
+                      {criteria.description || 'No description'}
+                    </p>
+
+                    <div className={styles.criteriaStats}>
+                      <div className={styles.criteriaStat}>
+                        <span className={styles.statValue}>{criteria.criteriaCount}</span>
+                        <span className={styles.statLabel}>Criteria</span>
+                      </div>
+                      <div className={styles.criteriaStat}>
+                        <span className={styles.statValue}>{criteria.projectsUsed}</span>
+                        <span className={styles.statLabel}>Projects</span>
+                      </div>
+                    </div>
+
+                    <div className={styles.criteriaFooter}>
+                      <span className={`${styles.statusBadge} ${styles[`status${criteria.status}`]}`}>
+                        {criteria.status}
+                      </span>
+                      <span className={styles.criteriaDate}>
+                        <Clock size={14} />
+                        Created {new Date(criteria.created_at).toLocaleDateString('en-IN', {
+                          day: 'numeric',
+                          month: 'short',
+                          year: 'numeric',
+                        })}
+                      </span>
+                    </div>
+
+                    <button
+                      className={styles.evaluateCriteriaBtn}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedCriteriaId(criteria.id);
+                        setAutoConsiderMode('criteria');
+                        setViewMode('upload');
+                      }}
+                    >
+                      <Sparkles size={16} />
+                      Evaluate CV
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+          )}
         </div>
       )}
     </div>
