@@ -510,51 +510,137 @@
   gap: 20px;
 }
 
-.resultsHeader {
+/* ─── Candidate Header ───────────────────────────────────────────────────── */
+.candidateHeader {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
+  gap: 14px;
 }
 
-.resultsHeader h2 {
+.candidateAvatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-brand-purple) 0%, var(--color-brand-indigo) 100%);
+  color: white;
   font-size: 20px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.candidateMeta {
+  flex: 1;
+  min-width: 0;
+}
+
+.candidateName {
+  font-size: 18px;
   font-weight: 700;
   color: var(--color-primary);
   margin: 0 0 4px 0;
 }
 
-.contactInfo {
+.candidateContact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.candidateContact span {
   font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.statusBadge {
+  padding: 5px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.statusShortlisted {
+  background: #DCFCE7;
+  color: #166534;
+  border: 1px solid #BBF7D0;
+}
+
+.statusRejected {
+  background: #FEF2F2;
+  color: #DC2626;
+  border: 1px solid #FECACA;
+}
+
+/* ─── Total Score ────────────────────────────────────────────────────────── */
+.totalScoreRow {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: var(--color-bg-base);
+  border-radius: 10px;
+  border: 1px solid var(--color-border);
+}
+
+.totalScoreCircle {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  flex-shrink: 0;
+}
+
+.totalScoreCircle svg {
+  width: 100%;
+  height: 100%;
+}
+
+.totalScoreInner {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+}
+
+.totalScoreNum {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--color-brand-purple);
+  line-height: 1;
+}
+
+.totalScorePct {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-brand-purple);
+  align-self: flex-end;
+  margin-bottom: 3px;
+}
+
+.totalScoreInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.totalScoreLabel {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
   color: var(--color-text-secondary);
   margin: 0;
 }
 
-.scoreCircle {
-  width: 72px;
-  height: 72px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--color-brand-purple) 0%, var(--color-brand-indigo) 100%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  box-shadow: var(--shadow-brand);
-  flex-shrink: 0;
-}
-
-.scoreValue {
-  font-size: 22px;
-  font-weight: 800;
-  color: white;
-  line-height: 1;
-}
-
-.scoreLabel {
-  font-size: 10px;
-  color: rgba(255, 255, 255, 0.8);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+.totalScoreMatch {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-primary);
+  margin: 0;
 }
 
 /* ─── Score Breakdown ────────────────────────────────────────────────────── */
@@ -606,26 +692,100 @@
   flex-shrink: 0;
 }
 
-/* ─── Recommendation ─────────────────────────────────────────────────────── */
-.recommendation {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 16px;
-  background: rgba(34, 197, 94, 0.08);
-  border: 1px solid rgba(34, 197, 94, 0.25);
+/* ─── Summary Box ────────────────────────────────────────────────────────── */
+.summaryBox {
+  padding: 14px 16px;
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.05) 0%, rgba(99, 102, 241, 0.05) 100%);
+  border: 1px solid rgba(124, 58, 237, 0.2);
   border-radius: 8px;
 }
 
-.recommendIcon {
-  color: #22C55E;
-  flex-shrink: 0;
+.summaryLabel {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-brand-purple);
+  margin-bottom: 8px;
 }
 
-.recommendText {
-  font-size: 14px;
+.summaryBox p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--color-text-primary);
+}
+
+/* ─── Section ────────────────────────────────────────────────────────────── */
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sectionTitle {
+  font-size: 13px;
   font-weight: 700;
+  color: var(--color-primary);
+  margin: 0;
+}
+
+/* ─── Details Grid ───────────────────────────────────────────────────────── */
+.detailsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 10px;
+}
+
+.detailCard {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 12px;
+  background: var(--color-bg-base);
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+}
+
+.detailLabel {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-secondary);
+}
+
+.detailValue {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-primary);
+  line-height: 1.4;
+}
+
+/* ─── Reason Box ─────────────────────────────────────────────────────────── */
+.reasonBox {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.reasonBox[data-type="shortlist"] {
+  background: #F0FDF4;
+  border: 1px solid #BBF7D0;
   color: #166534;
+}
+
+.reasonBox[data-type="reject"] {
+  background: #FEF2F2;
+  border: 1px solid #FECACA;
+  color: #DC2626;
 }
 
 /* ─── Insights ───────────────────────────────────────────────────────────── */
@@ -1030,4 +1190,132 @@
 
 .spinner {
   animation: spin 0.8s linear infinite;
+}
+
+/* ─── Status Pill ────────────────────────────────────────────────────────── */
+.statusPill {
+  display: inline-block;
+  margin-left: 10px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.statusShortlisted {
+  background: #DCFCE7;
+  color: #166534;
+  border: 1px solid #BBF7D0;
+}
+
+.statusPending {
+  background: #FEF9C3;
+  color: #854D0E;
+  border: 1px solid #FDE68A;
+}
+
+/* ─── Skills Section ─────────────────────────────────────────────────────── */
+.skillsSection {
+  margin-top: 4px;
+}
+
+.skillsSection h4 {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-primary);
+  margin: 0 0 8px 0;
+}
+
+.skillTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.skillTag {
+  padding: 4px 10px;
+  background: rgba(124, 58, 237, 0.08);
+  color: var(--color-brand-purple);
+  border: 1px solid rgba(124, 58, 237, 0.2);
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* ─── Details Row ────────────────────────────────────────────────────────── */
+.detailsRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 12px 0;
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.detailItem {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+  min-width: 140px;
+}
+
+.detailLabel {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-secondary);
+}
+
+.detailValue {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+/* ─── IDs Section ────────────────────────────────────────────────────────── */
+.idsSection {
+  padding: 12px 14px;
+  background: var(--color-bg-base);
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+}
+
+.idsSectionHeader {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-text-secondary);
+  margin-bottom: 10px;
+}
+
+.idsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 10px;
+}
+
+.idItem {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.idLabel {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-secondary);
+}
+
+.idValue {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-primary);
+  font-family: monospace;
+  word-break: break-all;
 }

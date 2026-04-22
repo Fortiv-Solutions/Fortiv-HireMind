@@ -1,61 +1,56 @@
 import React, { useState } from 'react';
 import styles from './CVEvaluation.module.css';
-import { Upload, FileText, Loader2, CheckCircle, XCircle, TrendingUp, Target, CheckCheck, AlertTriangle, Sparkles } from 'lucide-react';
+import {
+  Upload, FileText, Loader2, CheckCircle, TrendingUp,
+  Target, CheckCheck, AlertTriangle, ExternalLink, Hash
+} from 'lucide-react';
+import { evaluateCv } from '../../services/cvEvaluation';
+import type { CvEvaluation as CvEvaluationResult, WebhookResponseData } from '../../services/cvEvaluation';
 
-export default function CVEvaluation() {
+interface Props {
+  projectId: string;
+}
+
+interface EvalResult {
+  evaluation: CvEvaluationResult;
+  webhookData: WebhookResponseData;
+}
+
+export default function CVEvaluation({ projectId }: Props) {
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<any>(null);
+  const [result, setResult] = useState<EvalResult | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setFile(e.target.files[0]);
       setResult(null);
+      setError(null);
     }
   };
 
   const handleEvaluate = async () => {
     if (!file) return;
-
     setLoading(true);
-    
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 3000));
-    
-    // Mock result
-    setResult({
-      candidateName: 'John Doe',
-      email: 'john.doe@example.com',
-      phone: '+91 98765 43210',
-      location: 'Mumbai, India',
-      experienceYears: 5,
-      totalScore: 87,
-      skillsScore: 92,
-      experienceScore: 85,
-      educationScore: 84,
-      matchedSkills: ['React', 'TypeScript', 'Node.js', 'AWS'],
-      missingSkills: ['Docker', 'Kubernetes'],
-      education: 'B.Tech in Computer Science, IIT Mumbai',
-      companies: ['Google', 'Microsoft', 'Startup Inc.'],
-      summary: 'Experienced full-stack developer with strong expertise in React and Node.js. Has worked at top tech companies and demonstrates excellent problem-solving skills. Strong match for the role requirements.',
-      strengths: [
-        'Extensive experience with required tech stack',
-        'Proven track record at leading companies',
-        'Strong educational background',
-      ],
-      concerns: [
-        'Missing some DevOps skills',
-        'Limited experience with cloud infrastructure',
-      ],
-    });
-    
-    setLoading(false);
+    setError(null);
+    try {
+      const res = await evaluateCv(file, projectId);
+      setResult(res);
+    } catch (err: any) {
+      setError(err.message || 'Evaluation failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleReset = () => {
     setFile(null);
     setResult(null);
+    setError(null);
   };
+
+  const score = result?.webhookData.total_score ?? 0;
 
   return (
     <div className={styles.container}>
@@ -88,22 +83,18 @@ export default function CVEvaluation() {
               )}
             </label>
 
+            {error && <p className={styles.errorMsg}>{error}</p>}
+
             {file && (
-              <button 
-                className={styles.evaluateBtn} 
+              <button
+                className={styles.evaluateBtn}
                 onClick={handleEvaluate}
                 disabled={loading}
               >
                 {loading ? (
-                  <>
-                    <Loader2 size={20} className={styles.spinner} />
-                    Analyzing Resume...
-                  </>
+                  <><Loader2 size={20} className={styles.spinner} /> Analyzing Resume...</>
                 ) : (
-                  <>
-                    <TrendingUp size={20} />
-                    Evaluate Resume
-                  </>
+                  <><TrendingUp size={20} /> Evaluate Resume</>
                 )}
               </button>
             )}
@@ -112,26 +103,11 @@ export default function CVEvaluation() {
           <div className={styles.infoCard}>
             <h3>What we analyze</h3>
             <ul>
-              <li>
-                <CheckCircle size={18} />
-                <span>Skills match against job requirements</span>
-              </li>
-              <li>
-                <CheckCircle size={18} />
-                <span>Years of experience and relevance</span>
-              </li>
-              <li>
-                <CheckCircle size={18} />
-                <span>Educational background</span>
-              </li>
-              <li>
-                <CheckCircle size={18} />
-                <span>Previous companies and projects</span>
-              </li>
-              <li>
-                <CheckCircle size={18} />
-                <span>Overall fit score and recommendations</span>
-              </li>
+              <li><CheckCircle size={18} /><span>Skills match against job requirements</span></li>
+              <li><CheckCircle size={18} /><span>Years of experience and relevance</span></li>
+              <li><CheckCircle size={18} /><span>Educational background</span></li>
+              <li><CheckCircle size={18} /><span>Previous companies and projects</span></li>
+              <li><CheckCircle size={18} /><span>Overall fit score and recommendations</span></li>
             </ul>
           </div>
         </div>
@@ -143,167 +119,110 @@ export default function CVEvaluation() {
               <div className={styles.scoreCircle}>
                 <svg viewBox="0 0 100 100" className={styles.scoreRing}>
                   <circle cx="50" cy="50" r="45" className={styles.scoreRingBg} />
-                  <circle 
-                    cx="50" 
-                    cy="50" 
-                    r="45" 
+                  <circle
+                    cx="50" cy="50" r="45"
                     className={styles.scoreRingFill}
-                    style={{ 
-                      strokeDasharray: `${result.totalScore * 2.827}, 282.7`,
-                    }}
+                    style={{ strokeDasharray: `${score * 2.827}, 282.7` }}
                   />
                 </svg>
                 <div className={styles.scoreValue}>
-                  <span className={styles.scoreNumber}>{result.totalScore}</span>
+                  <span className={styles.scoreNumber}>{score}</span>
                   <span className={styles.scorePercent}>%</span>
                 </div>
               </div>
               <div className={styles.scoreLabel}>
-                <h3>Overall Match Score</h3>
+                <h3>{result.webhookData.job_title}</h3>
                 <p className={styles.matchLevel}>
-                  {result.totalScore >= 80 ? (
+                  {score >= 80 ? (
                     <><Target size={16} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }} /> Strong Match</>
-                  ) : result.totalScore >= 60 ? (
+                  ) : score >= 60 ? (
                     <><CheckCheck size={16} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }} /> Good Match</>
                   ) : (
                     <><AlertTriangle size={16} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }} /> Weak Match</>
                   )}
                 </p>
+                <span className={styles.statusBadge} data-shortlisted={result.webhookData.shortlisted}>
+                  {result.webhookData.status}
+                </span>
               </div>
             </div>
+          </div>
 
-            <div className={styles.scoreBreakdown}>
-              <div className={styles.scoreItem}>
-                <span className={styles.scoreItemLabel}>Skills Match</span>
-                <div className={styles.scoreBar}>
-                  <div 
-                    className={styles.scoreBarFill} 
-                    style={{ width: `${result.skillsScore}%` }}
-                  ></div>
+          {/* IDs from webhook response */}
+          <div className={styles.idsCard}>
+            <div className={styles.idsHeader}>
+              <Hash size={16} />
+              <span>Evaluation IDs</span>
+            </div>
+            <div className={styles.idsGrid}>
+              <div className={styles.idItem}>
+                <span className={styles.idLabel}>Candidate ID</span>
+                <span className={styles.idValue}>{result.webhookData.candidate_id}</span>
+              </div>
+              <div className={styles.idItem}>
+                <span className={styles.idLabel}>CV Evaluation ID</span>
+                <span className={styles.idValue}>{result.webhookData.cv_evaluation_id}</span>
+              </div>
+              <div className={styles.idItem}>
+                <span className={styles.idLabel}>Job Post ID</span>
+                <span className={styles.idValue}>{result.webhookData.job_post_id}</span>
+              </div>
+              <div className={styles.idItem}>
+                <span className={styles.idLabel}>Hiring Project ID</span>
+                <span className={styles.idValue}>{result.evaluation.hiring_project_id}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* File info */}
+          <div className={styles.fileInfoCard}>
+            <FileText size={16} />
+            <span className={styles.fileName}>{result.webhookData.original_filename}</span>
+            {result.webhookData.cv_file_url && (
+              <a
+                href={result.webhookData.cv_file_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.viewFileLink}
+              >
+                View File <ExternalLink size={13} />
+              </a>
+            )}
+          </div>
+
+          {/* Candidate info from DB */}
+          {result.evaluation.candidate && (
+            <div className={styles.candidateInfo}>
+              <h3>Candidate Information</h3>
+              <div className={styles.infoGrid}>
+                <div className={styles.infoItem}>
+                  <span className={styles.infoLabel}>Name</span>
+                  <span className={styles.infoValue}>{result.evaluation.candidate.full_name}</span>
                 </div>
-                <span className={styles.scoreItemValue}>{result.skillsScore}%</span>
-              </div>
-              <div className={styles.scoreItem}>
-                <span className={styles.scoreItemLabel}>Experience</span>
-                <div className={styles.scoreBar}>
-                  <div 
-                    className={styles.scoreBarFill} 
-                    style={{ width: `${result.experienceScore}%` }}
-                  ></div>
+                <div className={styles.infoItem}>
+                  <span className={styles.infoLabel}>Email</span>
+                  <span className={styles.infoValue}>{result.evaluation.candidate.email}</span>
                 </div>
-                <span className={styles.scoreItemValue}>{result.experienceScore}%</span>
-              </div>
-              <div className={styles.scoreItem}>
-                <span className={styles.scoreItemLabel}>Education</span>
-                <div className={styles.scoreBar}>
-                  <div 
-                    className={styles.scoreBarFill} 
-                    style={{ width: `${result.educationScore}%` }}
-                  ></div>
-                </div>
-                <span className={styles.scoreItemValue}>{result.educationScore}%</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Candidate Info */}
-          <div className={styles.candidateInfo}>
-            <h3>Candidate Information</h3>
-            <div className={styles.infoGrid}>
-              <div className={styles.infoItem}>
-                <span className={styles.infoLabel}>Name</span>
-                <span className={styles.infoValue}>{result.candidateName}</span>
-              </div>
-              <div className={styles.infoItem}>
-                <span className={styles.infoLabel}>Email</span>
-                <span className={styles.infoValue}>{result.email}</span>
-              </div>
-              <div className={styles.infoItem}>
-                <span className={styles.infoLabel}>Phone</span>
-                <span className={styles.infoValue}>{result.phone}</span>
-              </div>
-              <div className={styles.infoItem}>
-                <span className={styles.infoLabel}>Location</span>
-                <span className={styles.infoValue}>{result.location}</span>
-              </div>
-              <div className={styles.infoItem}>
-                <span className={styles.infoLabel}>Experience</span>
-                <span className={styles.infoValue}>{result.experienceYears} years</span>
-              </div>
-              <div className={styles.infoItem}>
-                <span className={styles.infoLabel}>Education</span>
-                <span className={styles.infoValue}>{result.education}</span>
+                {result.evaluation.candidate.phone && (
+                  <div className={styles.infoItem}>
+                    <span className={styles.infoLabel}>Phone</span>
+                    <span className={styles.infoValue}>{result.evaluation.candidate.phone}</span>
+                  </div>
+                )}
+                {result.evaluation.candidate.location && (
+                  <div className={styles.infoItem}>
+                    <span className={styles.infoLabel}>Location</span>
+                    <span className={styles.infoValue}>{result.evaluation.candidate.location}</span>
+                  </div>
+                )}
               </div>
             </div>
-          </div>
-
-          {/* AI Summary */}
-          <div className={styles.aiSummary}>
-            <div className={styles.aiHeader}>
-              <span className={styles.aiBadge}><Sparkles size={14} style={{ display: 'inline', verticalAlign: 'middle', marginRight: '4px' }} />AI Summary</span>
-            </div>
-            <p>{result.summary}</p>
-          </div>
-
-          {/* Skills Analysis */}
-          <div className={styles.skillsAnalysis}>
-            <div className={styles.skillsColumn}>
-              <h3>
-                <CheckCircle size={20} className={styles.iconGreen} />
-                Matched Skills
-              </h3>
-              <div className={styles.skillTags}>
-                {result.matchedSkills.map((skill: string) => (
-                  <span key={skill} className={styles.skillTagMatched}>{skill}</span>
-                ))}
-              </div>
-            </div>
-            <div className={styles.skillsColumn}>
-              <h3>
-                <XCircle size={20} className={styles.iconRed} />
-                Missing Skills
-              </h3>
-              <div className={styles.skillTags}>
-                {result.missingSkills.map((skill: string) => (
-                  <span key={skill} className={styles.skillTagMissing}>{skill}</span>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Strengths & Concerns */}
-          <div className={styles.analysisGrid}>
-            <div className={styles.analysisCard}>
-              <h3>
-                <CheckCircle size={20} className={styles.iconGreen} />
-                Key Strengths
-              </h3>
-              <ul>
-                {result.strengths.map((strength: string, idx: number) => (
-                  <li key={idx}>{strength}</li>
-                ))}
-              </ul>
-            </div>
-            <div className={styles.analysisCard}>
-              <h3>
-                <XCircle size={20} className={styles.iconOrange} />
-                Potential Concerns
-              </h3>
-              <ul>
-                {result.concerns.map((concern: string, idx: number) => (
-                  <li key={idx}>{concern}</li>
-                ))}
-              </ul>
-            </div>
-          </div>
+          )}
 
           {/* Actions */}
           <div className={styles.resultActions}>
             <button className={styles.resetBtn} onClick={handleReset}>
               Evaluate Another CV
-            </button>
-            <button className={styles.addToPipelineBtn}>
-              Add to Candidate Pipeline
             </button>
           </div>
         </div>

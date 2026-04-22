@@ -104,7 +104,7 @@ export default function ProjectDetail() {
       <div className={styles.tabContent}>
         {activeTab === 'candidates' && <MyCandidates />}
         {activeTab === 'jobPost' && <JobPost />}
-        {activeTab === 'cvEvaluation' && <CVEvaluation />}
+        {activeTab === 'cvEvaluation' && <CVEvaluation projectId={id!} />}
         {activeTab === 'settings' && <ProjectSettings />}
       </div>
     </div>

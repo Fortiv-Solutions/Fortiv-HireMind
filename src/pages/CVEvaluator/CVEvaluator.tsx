@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import styles from './CVEvaluator.module.css';
-import { Upload, FileText, CheckCircle, AlertCircle, Sparkles, Plus, Edit2, Trash2, Copy, Eye, BarChart3, Target, Clock, Zap } from 'lucide-react';
+import { Upload, FileText, CheckCircle, AlertCircle, Sparkles, Plus, Edit2, Trash2, Copy, Eye, BarChart3, Target, Clock, Zap, ExternalLink } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 import {
   fetchCriteriaWithStats,
@@ -15,6 +15,7 @@ import {
   updateCriteriaSetWithItems,
 } from '../../services/cvEvaluation';
 import type { CriteriaWithStats, CvEvaluation } from '../../types/database';
+import type { WebhookResponseData } from '../../services/cvEvaluation';
 import CreateCriteriaModal from './CreateCriteriaModal';
 import EditCriteriaModal from './EditCriteriaModal';
 import CriteriaDetailModal from './CriteriaDetailModal';
@@ -22,6 +23,11 @@ import SelectCriteriaMethodModal from './SelectCriteriaMethodModal';
 import type { GeneratedCriteria } from '../../services/aiCriteriaGenerator';
 
 type ViewMode = 'upload' | 'criteria';
+
+interface EvalResult {
+  evaluation: CvEvaluation;
+  webhookData: WebhookResponseData;
+}
 
 export default function CVEvaluator() {
   const [viewMode, setViewMode] = useState<ViewMode>('upload');
@@ -32,7 +38,7 @@ export default function CVEvaluator() {
   const [dragActive, setDragActive] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [evaluating, setEvaluating] = useState(false);
-  const [evaluationResult, setEvaluationResult] = useState<CvEvaluation | null>(null);
+  const [evaluationResult, setEvaluationResult] = useState<EvalResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   // Criteria management
@@ -149,22 +155,37 @@ export default function CVEvaluator() {
     setError(null);
 
     try {
-      let result: CvEvaluation;
+      let result: EvalResult;
 
       if (uploadMode === 'new' && uploadedFile) {
-        // Send CV to webhook and wait for n8n's response
         result = await evaluateCv(
           uploadedFile,
           selectedProjectId,
           autoConsiderMode === 'criteria' ? selectedCriteriaId : undefined
         );
       } else if (uploadMode === 'existing' && selectedCandidateId) {
-        // Evaluate existing candidate via webhook
-        result = await evaluateExistingCandidate(
+        const evaluation = await evaluateExistingCandidate(
           selectedCandidateId,
           selectedProjectId,
           autoConsiderMode === 'criteria' ? selectedCriteriaId : undefined
         );
+        // evaluateExistingCandidate returns CvEvaluation directly — wrap it
+        result = {
+          evaluation,
+          webhookData: {
+            candidate_id: evaluation.candidate_id ?? '',
+            cv_evaluation_id: evaluation.id,
+            job_post_id: evaluation.job_post_id ?? '',
+            job_title: '',
+            original_filename: '',
+            cv_file_url: evaluation.cv_file_url ?? '',
+            total_score: evaluation.total_score,
+            status: evaluation.status,
+            shortlisted: evaluation.shortlisted,
+            processing_status: 'completed',
+            timestamp: evaluation.created_at,
+          },
+        };
       } else {
         throw new Error('Invalid evaluation mode');
       }
@@ -690,117 +711,172 @@ export default function CVEvaluator() {
               </div>
             ) : (
               <div className={styles.resultsCard}>
-                <div className={styles.resultsHeader}>
-                  <div>
-                    <h2>{evaluationResult.parsed_name || evaluationResult.candidate?.full_name || 'Candidate'}</h2>
-                    <p className={styles.contactInfo}>
-                      {evaluationResult.parsed_email || evaluationResult.candidate?.email}
-                      {(evaluationResult.parsed_phone || evaluationResult.candidate?.phone) &&
-                        ` · ${evaluationResult.parsed_phone || evaluationResult.candidate?.phone}`}
-                    </p>
-                  </div>
-                  <div className={styles.scoreCircle}>
-                    <div className={styles.scoreValue}>{evaluationResult.total_score}</div>
-                    <div className={styles.scoreLabel}>Overall</div>
-                  </div>
-                </div>
 
-                <div className={styles.scoreBreakdown}>
-                  <div className={styles.scoreItem}>
-                    <span className={styles.scoreItemLabel}>Skills Match</span>
-                    <div className={styles.scoreBar}>
-                      <div
-                        className={styles.scoreBarFill}
-                        style={{ width: `${evaluationResult.skills_match_score}%` }}
-                      ></div>
-                    </div>
-                    <span className={styles.scoreItemValue}>{evaluationResult.skills_match_score}%</span>
+                {/* ── Candidate Header ── */}
+                <div className={styles.candidateHeader}>
+                  <div className={styles.candidateAvatar}>
+                    {(evaluationResult.evaluation.parsed_name || evaluationResult.evaluation.candidate?.full_name || 'C')[0].toUpperCase()}
                   </div>
-                  <div className={styles.scoreItem}>
-                    <span className={styles.scoreItemLabel}>Experience</span>
-                    <div className={styles.scoreBar}>
-                      <div
-                        className={styles.scoreBarFill}
-                        style={{ width: `${evaluationResult.experience_score}%` }}
-                      ></div>
+                  <div className={styles.candidateMeta}>
+                    <h2 className={styles.candidateName}>
+                      {evaluationResult.evaluation.parsed_name || evaluationResult.evaluation.candidate?.full_name || 'Candidate'}
+                    </h2>
+                    <div className={styles.candidateContact}>
+                      {(evaluationResult.evaluation.parsed_email || evaluationResult.evaluation.candidate?.email) && (
+                        <span>{evaluationResult.evaluation.parsed_email || evaluationResult.evaluation.candidate?.email}</span>
+                      )}
+                      {(evaluationResult.evaluation.parsed_phone || evaluationResult.evaluation.candidate?.phone) && (
+                        <span>{evaluationResult.evaluation.parsed_phone || evaluationResult.evaluation.candidate?.phone}</span>
+                      )}
+                      {(evaluationResult.evaluation.parsed_location || evaluationResult.evaluation.candidate?.location) && (
+                        <span>📍 {evaluationResult.evaluation.parsed_location || evaluationResult.evaluation.candidate?.location}</span>
+                      )}
                     </div>
-                    <span className={styles.scoreItemValue}>{evaluationResult.experience_score}%</span>
                   </div>
-                  <div className={styles.scoreItem}>
-                    <span className={styles.scoreItemLabel}>Education</span>
-                    <div className={styles.scoreBar}>
-                      <div
-                        className={styles.scoreBarFill}
-                        style={{ width: `${evaluationResult.education_score}%` }}
-                      ></div>
-                    </div>
-                    <span className={styles.scoreItemValue}>{evaluationResult.education_score}%</span>
-                  </div>
-                </div>
-
-                <div className={styles.recommendation}>
-                  <CheckCircle size={20} className={styles.recommendIcon} />
-                  <span className={styles.recommendText}>
-                    {getRecommendation(evaluationResult.total_score)}
+                  <span className={`${styles.statusBadge} ${evaluationResult.evaluation.shortlisted ? styles.statusShortlisted : styles.statusRejected}`}>
+                    {evaluationResult.evaluation.status}
                   </span>
                 </div>
 
-                {evaluationResult.parsed_summary && (
-                  <div className={styles.summary}>
-                    <p>{evaluationResult.parsed_summary}</p>
+                {/* ── Total Score ── */}
+                <div className={styles.totalScoreRow}>
+                  <div className={styles.totalScoreCircle}>
+                    <svg viewBox="0 0 80 80">
+                      <circle cx="40" cy="40" r="34" fill="none" stroke="var(--color-bg-base)" strokeWidth="7" />
+                      <circle cx="40" cy="40" r="34" fill="none"
+                        stroke="url(#scoreGrad)" strokeWidth="7" strokeLinecap="round"
+                        strokeDasharray={`${evaluationResult.evaluation.total_score * 2.136} 213.6`}
+                        transform="rotate(-90 40 40)"
+                      />
+                      <defs>
+                        <linearGradient id="scoreGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                          <stop offset="0%" stopColor="var(--color-brand-purple)" />
+                          <stop offset="100%" stopColor="var(--color-brand-indigo)" />
+                        </linearGradient>
+                      </defs>
+                    </svg>
+                    <div className={styles.totalScoreInner}>
+                      <span className={styles.totalScoreNum}>{evaluationResult.evaluation.total_score}</span>
+                      <span className={styles.totalScorePct}>%</span>
+                    </div>
+                  </div>
+                  <div className={styles.totalScoreInfo}>
+                    <p className={styles.totalScoreLabel}>Total Score</p>
+                    <p className={styles.totalScoreMatch}>{getRecommendation(evaluationResult.evaluation.total_score)}</p>
+                  </div>
+                </div>
+
+                {/* ── Score Breakdown ── */}
+                <div className={styles.scoreBreakdown}>
+                  {[
+                    { label: 'Skills Match', value: evaluationResult.evaluation.skills_match_score },
+                    { label: 'Experience',   value: evaluationResult.evaluation.experience_score },
+                    { label: 'Education',    value: evaluationResult.evaluation.education_score },
+                  ].map(({ label, value }) => (
+                    <div key={label} className={styles.scoreItem}>
+                      <span className={styles.scoreItemLabel}>{label}</span>
+                      <div className={styles.scoreBar}>
+                        <div className={styles.scoreBarFill} style={{ width: `${value}%` }} />
+                      </div>
+                      <span className={styles.scoreItemValue}>{value}%</span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* ── AI Summary ── */}
+                {evaluationResult.evaluation.parsed_summary && (
+                  <div className={styles.summaryBox}>
+                    <div className={styles.summaryLabel}><Sparkles size={13} /> AI Summary</div>
+                    <p>{evaluationResult.evaluation.parsed_summary}</p>
                   </div>
                 )}
 
+                {/* ── Skills ── */}
+                {evaluationResult.evaluation.parsed_skills && evaluationResult.evaluation.parsed_skills.length > 0 && (
+                  <div className={styles.section}>
+                    <h4 className={styles.sectionTitle}>Skills</h4>
+                    <div className={styles.skillTags}>
+                      {evaluationResult.evaluation.parsed_skills.map((skill, i) => (
+                        <span key={i} className={styles.skillTag}>{skill}</span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* ── Key Details ── */}
+                <div className={styles.detailsGrid}>
+                  {evaluationResult.evaluation.parsed_education && (
+                    <div className={styles.detailCard}>
+                      <span className={styles.detailLabel}>Education</span>
+                      <span className={styles.detailValue}>{evaluationResult.evaluation.parsed_education}</span>
+                    </div>
+                  )}
+                  {evaluationResult.evaluation.parsed_experience_years != null && (
+                    <div className={styles.detailCard}>
+                      <span className={styles.detailLabel}>Experience</span>
+                      <span className={styles.detailValue}>{evaluationResult.evaluation.parsed_experience_years} years</span>
+                    </div>
+                  )}
+                  {evaluationResult.evaluation.parsed_companies && evaluationResult.evaluation.parsed_companies.length > 0 && (
+                    <div className={styles.detailCard}>
+                      <span className={styles.detailLabel}>Companies</span>
+                      <span className={styles.detailValue}>{evaluationResult.evaluation.parsed_companies.join(', ')}</span>
+                    </div>
+                  )}
+                  {evaluationResult.evaluation.parsed_projects && evaluationResult.evaluation.parsed_projects.length > 0 && (
+                    <div className={styles.detailCard}>
+                      <span className={styles.detailLabel}>Projects</span>
+                      <span className={styles.detailValue}>{evaluationResult.evaluation.parsed_projects.join(', ')}</span>
+                    </div>
+                  )}
+                  {evaluationResult.evaluation.additional_score > 0 && (
+                    <div className={styles.detailCard}>
+                      <span className={styles.detailLabel}>Additional Score</span>
+                      <span className={styles.detailValue}>{evaluationResult.evaluation.additional_score}%</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* ── Shortlist / Reject Reason ── */}
+                {evaluationResult.evaluation.shortlist_reason && (
+                  <div className={styles.reasonBox} data-type="shortlist">
+                    <CheckCircle size={14} />
+                    <span>{evaluationResult.evaluation.shortlist_reason}</span>
+                  </div>
+                )}
+                {evaluationResult.evaluation.reject_reason && (
+                  <div className={styles.reasonBox} data-type="reject">
+                    <AlertCircle size={14} />
+                    <span>{evaluationResult.evaluation.reject_reason}</span>
+                  </div>
+                )}
+
+                {/* ── Strengths & Concerns ── */}
                 <div className={styles.insights}>
                   <div className={styles.insightSection}>
-                    <h4>
-                      <CheckCircle size={18} className={styles.strengthIcon} />
-                      Key Strengths
-                    </h4>
-                    <ul>
-                      {getInsights(evaluationResult).strengths.map((s: string, i: number) => (
-                        <li key={i}>{s}</li>
-                      ))}
-                    </ul>
+                    <h4><CheckCircle size={16} className={styles.strengthIcon} /> Key Strengths</h4>
+                    <ul>{getInsights(evaluationResult.evaluation).strengths.map((s, i) => <li key={i}>{s}</li>)}</ul>
                   </div>
-
                   <div className={styles.insightSection}>
-                    <h4>
-                      <AlertCircle size={18} className={styles.concernIcon} />
-                      Potential Concerns
-                    </h4>
-                    <ul>
-                      {getInsights(evaluationResult).concerns.map((c: string, i: number) => (
-                        <li key={i}>{c}</li>
-                      ))}
-                    </ul>
+                    <h4><AlertCircle size={16} className={styles.concernIcon} /> Potential Concerns</h4>
+                    <ul>{getInsights(evaluationResult.evaluation).concerns.map((c, i) => <li key={i}>{c}</li>)}</ul>
                   </div>
                 </div>
 
+                {/* ── Actions ── */}
                 <div className={styles.resultsActions}>
-                  {evaluationResult.cv_file_url && (
-                    <a
-                      href={evaluationResult.cv_file_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={styles.btnSecondary}
-                    >
-                      <Eye size={16} />
-                      View CV File
+                  {evaluationResult.webhookData.cv_file_url && (
+                    <a href={evaluationResult.webhookData.cv_file_url} target="_blank" rel="noopener noreferrer" className={styles.btnSecondary}>
+                      <ExternalLink size={16} /> View CV File
                     </a>
                   )}
-                  {evaluationResult.hiring_project_id && (
-                    <button
-                      className={styles.btnPrimary}
-                      onClick={() => {
-                        window.location.href = `/project/${evaluationResult.hiring_project_id}`;
-                      }}
-                    >
-                      <Eye size={16} />
-                      View in Project
+                  {evaluationResult.evaluation.hiring_project_id && (
+                    <button className={styles.btnPrimary} onClick={() => { window.location.href = `/project/${evaluationResult.evaluation.hiring_project_id}`; }}>
+                      <Eye size={16} /> View in Project
                     </button>
                   )}
                 </div>
+
               </div>
             )}
           </div>

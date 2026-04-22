@@ -459,7 +459,7 @@ async function sendToWebhook(
     return {
       success: true,
       message: responseData?.message || 'CV file sent successfully',
-      data: responseData?.data || responseData,
+      data: responseData, // return the raw response — caller handles unwrapping
     };
   } catch (error: any) {
     if (error.name === 'AbortError') {
@@ -475,7 +475,9 @@ async function sendToWebhook(
     return {
       success: false,
       error: error.message || 'Unknown error',
-      message: 'Failed to send CV file to webhook',
+      message: error.message?.includes('fetch')
+        ? 'CORS error: The n8n webhook must allow requests from this origin. Check your n8n webhook CORS settings.'
+        : 'Failed to send CV file to webhook',
     };
   }
 }
@@ -484,110 +486,64 @@ async function sendToWebhook(
 // WEBHOOK RESPONSE TYPE
 // ============================================
 
-/**
- * The shape of the immediate acknowledgement returned by the n8n webhook.
- * n8n processes the CV asynchronously and writes results to the database.
- * We then poll the database to retrieve the completed evaluation.
- */
-export interface WebhookAckResponse {
+export interface WebhookResponseData {
+  candidate_id: string;
+  cv_evaluation_id: string;
+  job_post_id: string;
+  job_title: string;
+  original_filename: string;
+  cv_file_url: string;
+  total_score: number;
+  status: string;
+  shortlisted: boolean;
+  processing_status: string;
+  timestamp: string;
+}
+
+export interface WebhookResponse {
   success: boolean;
-  message?: string;
-  error?: string;
-  data?: {
-    candidate_id?: string;
-    processing_status?: string;
-    timestamp?: string;
-    [key: string]: unknown;
-  };
+  message: string;
+  data: WebhookResponseData;
 }
 
 // ============================================
-// DATABASE POLLING
+// SINGLE FETCH BY EVALUATION ID
 // ============================================
 
-/**
- * Poll cv_evaluations until n8n has written the result, then return it.
- *
- * Strategy:
- *  - If n8n returned a candidate_id, query by candidate_id + hiring_project_id.
- *  - Otherwise, query by hiring_project_id for any record created after
- *    `submittedAt` (the moment we sent the webhook request).
- *
- * Polls every 3 seconds for up to 2 minutes.
- */
-async function pollForEvaluation(
-  projectId: string,
-  submittedAt: Date,
-  candidateId?: string
-): Promise<CvEvaluation> {
-  const POLL_INTERVAL_MS = 3000;
-  const MAX_WAIT_MS = 120_000; // 2 minutes
-  const deadline = Date.now() + MAX_WAIT_MS;
+async function fetchEvaluationById(cvEvaluationId: string): Promise<CvEvaluation> {
+  const { data, error } = await supabase
+    .from('cv_evaluations')
+    .select(`
+      *,
+      candidate:candidates (
+        id,
+        full_name,
+        email,
+        phone,
+        linkedin_url,
+        location
+      )
+    `)
+    .eq('id', cvEvaluationId)
+    .single();
 
-  console.log('⏳ Polling database for evaluation result...', { projectId, candidateId });
-
-  while (Date.now() < deadline) {
-    await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL_MS));
-
-    let query = supabase
-      .from('cv_evaluations')
-      .select(`
-        *,
-        candidate:candidates (
-          id,
-          full_name,
-          email,
-          phone,
-          linkedin_url,
-          location
-        )
-      `)
-      .eq('hiring_project_id', projectId)
-      .order('created_at', { ascending: false })
-      .limit(1);
-
-    if (candidateId) {
-      query = query.eq('candidate_id', candidateId);
-    } else {
-      // Only look at records created after we submitted the webhook
-      query = query.gte('created_at', submittedAt.toISOString());
-    }
-
-    const { data, error } = await query.maybeSingle();
-
-    if (error) {
-      console.warn('⚠️ Poll query error (will retry):', error.message);
-      continue;
-    }
-
-    if (data) {
-      console.log('✅ Evaluation found in database:', data.id);
-      return data as CvEvaluation;
-    }
-
-    console.log('🔄 Not ready yet, retrying in 3s...');
-  }
-
-  throw new Error(
-    'Timed out waiting for the evaluation result. n8n may still be processing — check the project page in a moment.'
-  );
+  if (error) throw error;
+  return data as CvEvaluation;
 }
 
 /**
  * Process and evaluate a CV.
  * 1. Sends the file + project/criteria context to the n8n webhook.
- * 2. Waits for n8n's acknowledgement (success/error).
- * 3. Polls the database until n8n has written the evaluation record.
- * 4. Returns the completed CvEvaluation from the database.
- *
- * No local DB writes are performed here — n8n owns all database operations.
+ * 2. Webhook responds with all IDs (candidate_id, cv_evaluation_id, etc.).
+ * 3. Uses cv_evaluation_id from the response to fetch the full record once.
+ * 4. Returns the completed CvEvaluation.
  */
 export async function evaluateCv(
   file: File,
   projectId: string,
   criteriaSetId?: string
-): Promise<CvEvaluation> {
-  // 1. Get project details (read-only — needed to build the webhook payload)
+): Promise<{ evaluation: CvEvaluation; webhookData: WebhookResponseData }> {
+  // 1. Get project details (needed to build the webhook payload)
   const { data: project, error: projectError } = await supabase
     .from('hiring_projects')
     .select('*')
@@ -596,22 +552,31 @@ export async function evaluateCv(
 
   if (projectError) throw projectError;
 
-  const submittedAt = new Date();
-
-  // 2. Send CV file to webhook and wait for the acknowledgement
+  // 2. Send CV to webhook and wait for the response
   const webhookResponse = await sendToWebhook(file, project, criteriaSetId);
 
   if (!webhookResponse.success) {
     throw new Error(webhookResponse.error || webhookResponse.message || 'Webhook evaluation failed');
   }
 
-  const ack = webhookResponse.data as WebhookAckResponse['data'];
-  const candidateId = ack?.candidate_id;
+  // 3. Unwrap the webhook response — handles all shapes:
+  //    - Array: [{ success, message, data: { cv_evaluation_id, ... } }]
+  //    - Object with data: { success, message, data: { cv_evaluation_id, ... } }
+  //    - Direct data: { cv_evaluation_id, ... }
+  const raw = webhookResponse.data;
+  const responseItem = Array.isArray(raw) ? raw[0] : raw;
+  const webhookData: WebhookResponseData = responseItem?.data ?? responseItem;
 
-  console.log('📨 Webhook acknowledged. Waiting for n8n to write evaluation to database...');
+  if (!webhookData?.cv_evaluation_id) {
+    console.error('Unexpected webhook response shape:', raw);
+    throw new Error('Webhook response did not include a cv_evaluation_id.');
+  }
+  console.log('📨 Webhook responded with IDs:', webhookData);
 
-  // 3. Poll the database until n8n writes the result
-  return pollForEvaluation(projectId, submittedAt, candidateId);
+  // 4. Single fetch using cv_evaluation_id from the webhook response
+  const evaluation = await fetchEvaluationById(webhookData.cv_evaluation_id);
+
+  return { evaluation, webhookData };
 }
 
 /**
@@ -743,13 +708,9 @@ export async function evaluateExistingCandidate(
 
   console.log('📤 Sending existing candidate to webhook for AI analysis');
 
-  const submittedAt = new Date();
-
-  // 5. Send to webhook and wait for acknowledgement
+  // 5. Send to webhook and wait for the response
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s for the ack only
-
-  let ackCandidateId: string | undefined;
+  const timeoutId = setTimeout(() => controller.abort(), 120000);
 
   try {
     const response = await fetch(webhookUrl, {
@@ -772,18 +733,26 @@ export async function evaluateExistingCandidate(
       if (json.success === false) {
         throw new Error(json.error || json.message || 'Webhook returned an error');
       }
-      ackCandidateId = json.data?.candidate_id ?? candidateId;
+
+      // Webhook returns an array — grab the first item
+      const responsePayload: WebhookResponse = Array.isArray(json) ? json[0] : json;
+
+      if (!responsePayload?.data?.cv_evaluation_id) {
+        throw new Error('Webhook response did not include a cv_evaluation_id.');
+      }
+
+      console.log('📨 Webhook responded with IDs:', responsePayload.data);
+
+      // 6. Single fetch using cv_evaluation_id
+      return fetchEvaluationById(responsePayload.data.cv_evaluation_id);
     }
+
+    throw new Error('Webhook returned a non-JSON response.');
   } catch (error: any) {
     clearTimeout(timeoutId);
     if (error.name === 'AbortError') {
-      throw new Error('Webhook acknowledgement timed out. Please try again.');
+      throw new Error('Webhook timed out. Please try again.');
     }
     throw error;
   }
-
-  console.log('📨 Webhook acknowledged. Waiting for n8n to write evaluation to database...');
-
-  // 6. Poll the database until n8n writes the result
-  return pollForEvaluation(projectId, submittedAt, ackCandidateId ?? candidateId);
 }
