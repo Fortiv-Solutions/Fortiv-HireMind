@@ -4,6 +4,7 @@ import {
   fetchProjectById,
   fetchEvaluationsForProject,
   updateEvaluationStatus,
+  addCandidateManually,
 } from '../services/hiringProjects';
 import type { ProjectWithStats, HiringProject, CvEvaluation } from '../types/database';
 
@@ -22,9 +23,19 @@ interface AppState {
   // Actions
   loadProjects: () => Promise<void>;
   loadProjectDetail: (id: string) => Promise<void>;
+  updateEvaluationStatus: (evaluationId: string, updates: Partial<Pick<CvEvaluation, 'status' | 'shortlisted' | 'shortlist_reason' | 'reject_reason'>>) => Promise<void>;
   advanceEvaluation: (evaluationId: string) => Promise<void>;
   rejectEvaluation: (evaluationId: string, reason?: string) => Promise<void>;
   shortlistEvaluation: (evaluationId: string, reason?: string) => Promise<void>;
+  addCandidate: (projectId: string, candidateData: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone?: string;
+    location?: string;
+    linkedinUrl?: string;
+    experienceYears?: number;
+  }) => Promise<void>;
 }
 
 export const useStore = create<AppState>((set, get) => ({
@@ -60,6 +71,10 @@ export const useStore = create<AppState>((set, get) => ({
     }
   },
 
+  updateEvaluationStatus: async (evaluationId: string, updates: Partial<Pick<CvEvaluation, 'status' | 'shortlisted' | 'shortlist_reason' | 'reject_reason'>>) => {
+    await updateEvaluationStatus(evaluationId, updates);
+  },
+
   advanceEvaluation: async (evaluationId: string) => {
     await updateEvaluationStatus(evaluationId, { status: 'Screened' });
     // Re-sync evaluations for the active project
@@ -81,5 +96,19 @@ export const useStore = create<AppState>((set, get) => ({
     });
     const activeProject = get().activeProject;
     if (activeProject) await get().loadProjectDetail(activeProject.id);
+  },
+
+  addCandidate: async (projectId: string, candidateData: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone?: string;
+    location?: string;
+    linkedinUrl?: string;
+    experienceYears?: number;
+  }) => {
+    await addCandidateManually(projectId, candidateData);
+    // Reload the project detail to show the new candidate
+    await get().loadProjectDetail(projectId);
   },
 }));

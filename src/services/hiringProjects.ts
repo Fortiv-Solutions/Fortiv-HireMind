@@ -93,3 +93,128 @@ export async function createHiringProject(
   if (error) throw error;
   return data;
 }
+
+// Create or get candidate by email
+export async function createOrGetCandidate(candidateData: {
+  full_name: string;
+  email: string;
+  phone?: string;
+  location?: string;
+  linkedin_url?: string;
+}): Promise<string> {
+  // First check if candidate exists by email
+  const { data: existing } = await supabase
+    .from('candidates')
+    .select('id')
+    .eq('email', candidateData.email)
+    .single();
+
+  if (existing) {
+    return existing.id;
+  }
+
+  // Create new candidate
+  const { data, error } = await supabase
+    .from('candidates')
+    .insert({
+      full_name: candidateData.full_name,
+      email: candidateData.email,
+      phone: candidateData.phone || null,
+      location: candidateData.location || null,
+      linkedin_url: candidateData.linkedin_url || null,
+    })
+    .select('id')
+    .single();
+
+  if (error) throw error;
+  return data.id;
+}
+
+// Create CV evaluation for a candidate
+export async function createCvEvaluation(evaluationData: {
+  candidate_id: string;
+  hiring_project_id: string;
+  source_platform?: string;
+  parsed_name?: string;
+  parsed_email?: string;
+  parsed_phone?: string;
+  parsed_location?: string;
+  parsed_experience_years?: number;
+  parsed_skills?: string[];
+  skills_match_score?: number;
+  experience_score?: number;
+  education_score?: number;
+  total_score?: number;
+}): Promise<CvEvaluation> {
+  const { data, error } = await supabase
+    .from('cv_evaluations')
+    .insert({
+      candidate_id: evaluationData.candidate_id,
+      hiring_project_id: evaluationData.hiring_project_id,
+      source_platform: evaluationData.source_platform || 'Manual',
+      parsed_name: evaluationData.parsed_name,
+      parsed_email: evaluationData.parsed_email,
+      parsed_phone: evaluationData.parsed_phone,
+      parsed_location: evaluationData.parsed_location,
+      parsed_experience_years: evaluationData.parsed_experience_years || 0,
+      parsed_skills: evaluationData.parsed_skills || [],
+      skills_match_score: evaluationData.skills_match_score || 0,
+      experience_score: evaluationData.experience_score || 0,
+      education_score: evaluationData.education_score || 0,
+      additional_score: 0,
+      total_score: evaluationData.total_score || 0,
+      status: 'New',
+      shortlisted: false,
+      applied_at: new Date().toISOString(),
+    })
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+// Add candidate manually to a project
+export async function addCandidateManually(
+  projectId: string,
+  candidateData: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone?: string;
+    location?: string;
+    linkedinUrl?: string;
+    experienceYears?: number;
+  }
+): Promise<CvEvaluation> {
+  // Create or get candidate
+  const candidateId = await createOrGetCandidate({
+    full_name: `${candidateData.firstName} ${candidateData.lastName}`,
+    email: candidateData.email,
+    phone: candidateData.phone,
+    location: candidateData.location,
+    linkedin_url: candidateData.linkedinUrl,
+  });
+
+  // Create evaluation with basic scores
+  const experienceYears = candidateData.experienceYears || 0;
+  const experienceScore = Math.min(experienceYears * 10, 100);
+  const totalScore = experienceScore * 0.4 + 30; // Basic score calculation
+
+  const evaluation = await createCvEvaluation({
+    candidate_id: candidateId,
+    hiring_project_id: projectId,
+    source_platform: 'Manual',
+    parsed_name: `${candidateData.firstName} ${candidateData.lastName}`,
+    parsed_email: candidateData.email,
+    parsed_phone: candidateData.phone,
+    parsed_location: candidateData.location,
+    parsed_experience_years: experienceYears,
+    skills_match_score: 50,
+    experience_score: experienceScore,
+    education_score: 50,
+    total_score: totalScore,
+  });
+
+  return evaluation;
+}

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import styles from './Layout.module.css';
-import { LayoutDashboard, Briefcase, FileCheck2, BarChart2, HelpCircle, LogOut, Plus, Search, Bell, Settings, BrainCircuit } from 'lucide-react';
+import { LayoutDashboard, Briefcase, FileCheck2, BarChart2, HelpCircle, LogOut, Search, Bell, Settings, BrainCircuit } from 'lucide-react';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [scrolled, setScrolled] = useState(false);
@@ -30,14 +30,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <span className={styles.fortiv}>Fortiv</span>
             <span className={styles.hiremind}>HireMind</span>
           </div>
-        </div>
-
-        {/* New Opening Button */}
-        <div className={styles.actionSection}>
-          <button className={styles.newOpeningBtn}>
-            <Plus size={16} strokeWidth={2.5} />
-            <span>New Opening</span>
-          </button>
         </div>
 
         {/* Navigation */}

@@ -1,0 +1,310 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.section {
+  background: white;
+  border-radius: 12px;
+  padding: 24px 28px;
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.sectionTitle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--color-brand-purple);
+}
+
+.sectionTitle h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.editBtn,
+.addBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.1) 0%, rgba(99, 102, 241, 0.1) 100%);
+  color: var(--color-brand-purple);
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.editBtn:hover,
+.addBtn:hover {
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.15) 0%, rgba(99, 102, 241, 0.15) 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.2);
+}
+
+/* Job Description */
+.descriptionCard {
+  background: var(--color-bg-base);
+  border-radius: 10px;
+  padding: 20px;
+  border: 1px solid var(--color-border);
+}
+
+.descriptionContent {
+  margin-bottom: 20px;
+}
+
+.descriptionContent p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--color-text-primary);
+  white-space: pre-wrap;
+}
+
+.emptyDescription {
+  padding: 40px;
+  text-align: center;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+}
+
+.jobMeta {
+  padding-top: 20px;
+  border-top: 1px solid var(--color-border);
+}
+
+.metaGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.metaItem {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.metaLabel {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-secondary);
+}
+
+.metaValue {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.skillsSection {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.skillTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.skillTag {
+  padding: 6px 14px;
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.1) 0%, rgba(99, 102, 241, 0.1) 100%);
+  color: var(--color-brand-purple);
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  border: 1px solid rgba(124, 58, 237, 0.2);
+}
+
+/* Job Postings */
+.postingsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.postCard {
+  background: var(--color-bg-base);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 20px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.postCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  border-color: var(--color-brand-purple);
+}
+
+.postHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.platformBadge {
+  padding: 6px 14px;
+  background: linear-gradient(135deg, var(--color-brand-purple) 0%, var(--color-brand-indigo) 100%);
+  color: white;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  box-shadow: var(--shadow-brand);
+}
+
+.toggleBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  transition: all 0.2s ease;
+}
+
+.toggleBtn:hover {
+  transform: scale(1.1);
+}
+
+.toggleActive {
+  color: #22C55E;
+}
+
+.toggleInactive {
+  color: var(--color-text-secondary);
+}
+
+.postBody {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.postStatus {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.statusDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.statusDotActive {
+  background: #22C55E;
+  box-shadow: 0 0 8px rgba(34, 197, 94, 0.5);
+}
+
+.statusDotInactive {
+  background: var(--color-text-secondary);
+}
+
+.statusText {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.postMeta {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.postDate {
+  display: block;
+}
+
+.postLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-brand-purple);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  margin-top: 8px;
+}
+
+.postLink:hover {
+  color: var(--color-brand-indigo);
+  gap: 8px;
+}
+
+/* Empty State */
+.emptyState {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.emptyIcon {
+  color: var(--color-text-tertiary);
+  margin-bottom: 16px;
+}
+
+.emptyState h3 {
+  margin: 0 0 8px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.emptyState p {
+  margin: 0 0 24px 0;
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  max-width: 400px;
+}
+
+.emptyActionBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, var(--color-brand-purple) 0%, var(--color-brand-indigo) 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: var(--shadow-brand);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.emptyActionBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.35);
+}
