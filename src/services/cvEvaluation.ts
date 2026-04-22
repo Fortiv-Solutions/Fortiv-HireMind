@@ -276,6 +276,142 @@ export async function duplicateCriteriaSet(id: string): Promise<CvEvaluationCrit
 // ============================================
 
 /**
+ * Send CV data to webhook
+ */
+async function sendToWebhook(
+  file: File,
+  parsedData: {
+    name: string;
+    email: string;
+    phone?: string;
+    location?: string;
+    skills: string[];
+    experienceYears: number;
+    education?: string;
+    companies: string[];
+    projects: string[];
+    summary?: string;
+    rawText: string;
+  },
+  project: HiringProject,
+  scores: {
+    skillsMatchScore: number;
+    experienceScore: number;
+    educationScore: number;
+    totalScore: number;
+  },
+  cvFileUrl: string,
+  criteriaSetId?: string
+): Promise<void> {
+  const webhookUrl = import.meta.env.VITE_CV_INTAKE_WEBHOOK_URL;
+  
+  if (!webhookUrl) {
+    console.warn('Webhook URL not configured. Skipping webhook call.');
+    return;
+  }
+
+  console.log('Sending CV data to webhook:', webhookUrl);
+
+  try {
+    // Create FormData to send binary file along with other data
+    const formData = new FormData();
+    
+    // Add the binary file
+    formData.append('cv_file', file, file.name);
+    
+    // Add all other data as JSON string
+    const payload = {
+      // Candidate Information
+      candidate: {
+        name: parsedData.name,
+        email: parsedData.email,
+        phone: parsedData.phone || null,
+        location: parsedData.location || null,
+      },
+      
+      // Parsed CV Data
+      parsed_data: {
+        skills: parsedData.skills,
+        experience_years: parsedData.experienceYears,
+        education: parsedData.education || null,
+        companies: parsedData.companies,
+        projects: parsedData.projects,
+        summary: parsedData.summary || null,
+        raw_text: parsedData.rawText,
+      },
+      
+      // Project Information
+      project: {
+        id: project.id,
+        title: project.title,
+        department: project.department,
+        location: project.location,
+        job_type: project.job_type,
+        required_skills: project.required_skills,
+        required_experience_years: project.required_experience_years,
+        required_education: project.required_education,
+        description: project.description,
+        status: project.status,
+      },
+      
+      // Evaluation Scores
+      scores: {
+        skills_match_score: scores.skillsMatchScore,
+        experience_score: scores.experienceScore,
+        education_score: scores.educationScore,
+        total_score: scores.totalScore,
+      },
+      
+      // File Information
+      file_info: {
+        cv_file_url: cvFileUrl,
+        file_name: file.name,
+        file_size: file.size,
+        file_type: file.type,
+      },
+      
+      // Additional Metadata
+      metadata: {
+        criteria_set_id: criteriaSetId || null,
+        source_platform: 'Manual',
+        uploaded_at: new Date().toISOString(),
+      },
+    };
+    
+    console.log('Webhook payload:', {
+      file_name: file.name,
+      file_size: file.size,
+      candidate_email: parsedData.email,
+      project_title: project.title,
+      total_score: scores.totalScore,
+    });
+    
+    // Add JSON data
+    formData.append('data', JSON.stringify(payload));
+    
+    // Send to webhook
+    const response = await fetch(webhookUrl, {
+      method: 'POST',
+      body: formData,
+    });
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Webhook error:', response.status, errorText);
+      throw new Error(`Webhook failed with status ${response.status}: ${errorText}`);
+    }
+    
+    const responseData = await response.text();
+    console.log('Webhook response:', responseData);
+    console.log('✅ Successfully sent data to webhook');
+  } catch (error) {
+    console.error('❌ Error sending to webhook:', error);
+    // Don't throw error - we don't want to fail the entire evaluation if webhook fails
+    // Just log it for debugging
+  }
+}
+
+/**
  * Upload CV file to Supabase Storage
  */
 export async function uploadCvFile(file: File, candidateEmail: string): Promise<string> {
@@ -416,7 +552,12 @@ export async function evaluateCv(
   // 4. Calculate scores
   const scores = calculateEvaluationScores(parsedData, project);
 
-  // 5. Create or get candidate
+  // 5. Send to webhook (non-blocking)
+  sendToWebhook(file, parsedData, project, scores, cvFileUrl, criteriaSetId).catch((err) => {
+    console.error('Webhook error (non-blocking):', err);
+  });
+
+  // 6. Create or get candidate
   const { data: existingCandidate } = await supabase
     .from('candidates')
     .select('id')
@@ -454,7 +595,7 @@ export async function evaluateCv(
     candidateId = newCandidate.id;
   }
 
-  // 6. Create CV evaluation
+  // 7. Create CV evaluation
   const { data: evaluation, error: evalError } = await supabase
     .from('cv_evaluations')
     .insert({
