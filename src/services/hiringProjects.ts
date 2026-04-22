@@ -218,3 +218,72 @@ export async function addCandidateManually(
 
   return evaluation;
 }
+
+// Update hiring project description
+export async function updateProjectDescription(
+  projectId: string,
+  description: string
+): Promise<void> {
+  const { error } = await supabase
+    .from('hiring_projects')
+    .update({ description, updated_at: new Date().toISOString() })
+    .eq('id', projectId);
+
+  if (error) throw error;
+}
+
+// Fetch job posts for a project
+export async function fetchJobPostsForProject(projectId: string) {
+  const { data, error } = await supabase
+    .from('job_posts')
+    .select('*')
+    .eq('hiring_project_id', projectId)
+    .order('posted_at', { ascending: false });
+
+  if (error) throw error;
+  return data || [];
+}
+
+// Create a new job post
+export async function createJobPost(postData: {
+  hiring_project_id: string;
+  platform: string;
+  post_url: string;
+  external_job_id?: string;
+}): Promise<void> {
+  const { error } = await supabase
+    .from('job_posts')
+    .insert({
+      hiring_project_id: postData.hiring_project_id,
+      platform: postData.platform,
+      post_url: postData.post_url,
+      external_job_id: postData.external_job_id || null,
+      posted_at: new Date().toISOString(),
+      status: 'Active',
+    });
+
+  if (error) throw error;
+}
+
+// Update job post status
+export async function updateJobPostStatus(
+  postId: string,
+  status: 'Active' | 'Closed'
+): Promise<void> {
+  const { error } = await supabase
+    .from('job_posts')
+    .update({ status, updated_at: new Date().toISOString() })
+    .eq('id', postId);
+
+  if (error) throw error;
+}
+
+// Delete job post
+export async function deleteJobPost(postId: string): Promise<void> {
+  const { error } = await supabase
+    .from('job_posts')
+    .delete()
+    .eq('id', postId);
+
+  if (error) throw error;
+}

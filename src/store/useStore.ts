@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { User } from '@supabase/supabase-js';
+import type { User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 import {
   fetchProjectsWithStats,
@@ -7,8 +7,13 @@ import {
   fetchEvaluationsForProject,
   updateEvaluationStatus,
   addCandidateManually,
+  updateProjectDescription,
+  fetchJobPostsForProject,
+  createJobPost,
+  updateJobPostStatus,
+  deleteJobPost,
 } from '../services/hiringProjects';
-import type { ProjectWithStats, HiringProject, CvEvaluation } from '../types/database';
+import type { ProjectWithStats, HiringProject, CvEvaluation, JobPost } from '../types/database';
 
 interface AppState {
   // Auth
@@ -25,6 +30,10 @@ interface AppState {
   evaluations: CvEvaluation[];
   evaluationsLoading: boolean;
   evaluationsError: string | null;
+  
+  // Job posts
+  jobPosts: JobPost[];
+  jobPostsLoading: boolean;
 
   // Auth Actions
   setUser: (user: User | null) => void;
@@ -47,6 +56,16 @@ interface AppState {
     linkedinUrl?: string;
     experienceYears?: number;
   }) => Promise<void>;
+  updateProjectDescription: (projectId: string, description: string) => Promise<void>;
+  loadJobPosts: (projectId: string) => Promise<void>;
+  addJobPost: (postData: {
+    hiring_project_id: string;
+    platform: string;
+    post_url: string;
+    external_job_id?: string;
+  }) => Promise<void>;
+  toggleJobPostStatus: (postId: string, currentStatus: 'Active' | 'Closed') => Promise<void>;
+  removeJobPost: (postId: string) => Promise<void>;
 }
 
 export const useStore = create<AppState>((set, get) => ({
@@ -61,6 +80,9 @@ export const useStore = create<AppState>((set, get) => ({
   evaluations: [],
   evaluationsLoading: false,
   evaluationsError: null,
+  
+  jobPosts: [],
+  jobPostsLoading: false,
 
   setUser: (user) => set({ user, authLoading: false }),
   setAuthLoading: (loading) => set({ authLoading: loading }),
@@ -132,5 +154,52 @@ export const useStore = create<AppState>((set, get) => ({
     await addCandidateManually(projectId, candidateData);
     // Reload the project detail to show the new candidate
     await get().loadProjectDetail(projectId);
+  },
+
+  updateProjectDescription: async (projectId: string, description: string) => {
+    await updateProjectDescription(projectId, description);
+    // Reload the project to show updated description
+    await get().loadProjectDetail(projectId);
+  },
+
+  loadJobPosts: async (projectId: string) => {
+    set({ jobPostsLoading: true });
+    try {
+      const posts = await fetchJobPostsForProject(projectId);
+      set({ jobPosts: posts, jobPostsLoading: false });
+    } catch (err: any) {
+      console.error('Failed to load job posts:', err);
+      set({ jobPostsLoading: false });
+    }
+  },
+
+  addJobPost: async (postData: {
+    hiring_project_id: string;
+    platform: string;
+    post_url: string;
+    external_job_id?: string;
+  }) => {
+    await createJobPost(postData);
+    // Reload job posts
+    await get().loadJobPosts(postData.hiring_project_id);
+  },
+
+  toggleJobPostStatus: async (postId: string, currentStatus: 'Active' | 'Closed') => {
+    const newStatus = currentStatus === 'Active' ? 'Closed' : 'Active';
+    await updateJobPostStatus(postId, newStatus);
+    // Update local state
+    set(state => ({
+      jobPosts: state.jobPosts.map(post =>
+        post.id === postId ? { ...post, status: newStatus } : post
+      ),
+    }));
+  },
+
+  removeJobPost: async (postId: string) => {
+    await deleteJobPost(postId);
+    // Update local state
+    set(state => ({
+      jobPosts: state.jobPosts.filter(post => post.id !== postId),
+    }));
   },
 }));
