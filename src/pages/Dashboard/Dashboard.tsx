@@ -113,7 +113,12 @@ export default function Dashboard() {
             </thead>
             <tbody>
               {projects.map((proj) => (
-                <tr key={proj.id} className={styles.tableRow}>
+                <tr 
+                  key={proj.id} 
+                  className={styles.tableRow}
+                  onClick={() => navigate(`/project/${proj.id}`)}
+                  style={{ cursor: 'pointer' }}
+                >
                   <td>
                     <div className={styles.projectCell}>
                       <div className={styles.projectIcon}>
@@ -140,10 +145,21 @@ export default function Dashboard() {
                   </td>
                   <td>
                     <div className={styles.actionCell}>
-                      <button className={styles.viewBtn} onClick={() => navigate(`/project/${proj.id}`)}>
+                      <button 
+                        className={styles.viewBtn} 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/project/${proj.id}`);
+                        }}
+                      >
                         View
                       </button>
-                      <button className={styles.iconBtn}><MoreHorizontal size={18} /></button>
+                      <button 
+                        className={styles.iconBtn}
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <MoreHorizontal size={18} />
+                      </button>
                     </div>
                   </td>
                 </tr>

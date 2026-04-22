@@ -125,7 +125,12 @@ export default function HomeOverview() {
             <div className={styles.scheduleArea}>
               <h3>Pipeline Snapshot</h3>
               {projects.slice(0, 4).map((p) => (
-                <div key={p.id} className={styles.agendaItem}>
+                <div 
+                  key={p.id} 
+                  className={styles.agendaItem}
+                  onClick={() => navigate(`/project/${p.id}`)}
+                  style={{ cursor: 'pointer' }}
+                >
                   <div className={styles.agendaContent}>
                     <h4>{p.title}</h4>
                     <p>{p.total_candidates} total · {p.shortlisted} shortlisted · {p.rejected} rejected</p>
