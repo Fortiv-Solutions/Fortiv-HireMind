@@ -277,30 +277,12 @@ export async function duplicateCriteriaSet(id: string): Promise<CvEvaluationCrit
 
 /**
  * Send CV data to webhook
+ * Only sends the binary file and real project/criteria data
+ * No mock or parsed data - let the AI analyze everything
  */
 async function sendToWebhook(
   file: File,
-  parsedData: {
-    name: string;
-    email: string;
-    phone?: string;
-    location?: string;
-    skills: string[];
-    experienceYears: number;
-    education?: string;
-    companies: string[];
-    projects: string[];
-    summary?: string;
-    rawText: string;
-  },
   project: HiringProject,
-  scores: {
-    skillsMatchScore: number;
-    experienceScore: number;
-    educationScore: number;
-    totalScore: number;
-  },
-  cvFileUrl: string,
   criteriaSetId?: string
 ): Promise<{
   success: boolean;
@@ -318,37 +300,18 @@ async function sendToWebhook(
     };
   }
 
-  console.log('📤 Sending CV data to webhook:', webhookUrl);
+  console.log('📤 Sending CV file to webhook for AI analysis:', webhookUrl);
 
   try {
     // Create FormData to send binary file along with other data
     const formData = new FormData();
     
-    // Add the binary file
+    // Add the binary CV file - this is the main data for AI to analyze
     formData.append('cv_file', file, file.name);
     
-    // Add all other data as JSON string
-    const payload = {
-      // Candidate Information
-      candidate: {
-        name: parsedData.name,
-        email: parsedData.email,
-        phone: parsedData.phone || null,
-        location: parsedData.location || null,
-      },
-      
-      // Parsed CV Data
-      parsed_data: {
-        skills: parsedData.skills,
-        experience_years: parsedData.experienceYears,
-        education: parsedData.education || null,
-        companies: parsedData.companies,
-        projects: parsedData.projects,
-        summary: parsedData.summary || null,
-        raw_text: parsedData.rawText,
-      },
-      
-      // Project Information
+    // Add only real data (no mock/parsed data)
+    const payload: any = {
+      // Project Information (real data from database)
       project: {
         id: project.id,
         title: project.title,
@@ -362,36 +325,70 @@ async function sendToWebhook(
         status: project.status,
       },
       
-      // Evaluation Scores
-      scores: {
-        skills_match_score: scores.skillsMatchScore,
-        experience_score: scores.experienceScore,
-        education_score: scores.educationScore,
-        total_score: scores.totalScore,
-      },
-      
       // File Information
       file_info: {
-        cv_file_url: cvFileUrl,
         file_name: file.name,
         file_size: file.size,
         file_type: file.type,
+        uploaded_at: new Date().toISOString(),
       },
       
-      // Additional Metadata
+      // Metadata
       metadata: {
-        criteria_set_id: criteriaSetId || null,
         source_platform: 'Manual',
         uploaded_at: new Date().toISOString(),
       },
     };
     
+    // If criteria set is selected, fetch and include it
+    if (criteriaSetId) {
+      try {
+        const { data: criteriaSet, error: criteriaError } = await supabase
+          .from('cv_evaluation_criteria')
+          .select('*')
+          .eq('id', criteriaSetId)
+          .single();
+        
+        if (!criteriaError && criteriaSet) {
+          // Fetch criteria items
+          const { data: criteriaItems, error: itemsError } = await supabase
+            .from('cv_criteria_items')
+            .select('*')
+            .eq('criteria_set_id', criteriaSetId)
+            .order('created_at', { ascending: true });
+          
+          if (!itemsError && criteriaItems) {
+            payload.evaluation_criteria = {
+              id: criteriaSet.id,
+              name: criteriaSet.name,
+              description: criteriaSet.description,
+              status: criteriaSet.status,
+              items: criteriaItems.map(item => ({
+                criterion_name: item.criterion_name,
+                criterion_description: item.criterion_description,
+                weight: item.weight,
+                criterion_type: item.criterion_type,
+                expected_value: item.expected_value,
+              })),
+            };
+            console.log('📋 Including evaluation criteria:', criteriaSet.name);
+          }
+        }
+      } catch (err) {
+        console.warn('⚠️ Could not fetch criteria details:', err);
+        // Continue without criteria - don't fail the webhook call
+      }
+      
+      payload.metadata.criteria_set_id = criteriaSetId;
+    }
+    
     console.log('📦 Webhook payload summary:', {
       file_name: file.name,
       file_size: file.size,
-      candidate_email: parsedData.email,
+      file_type: file.type,
       project_title: project.title,
-      total_score: scores.totalScore,
+      has_criteria: !!criteriaSetId,
+      criteria_items_count: payload.evaluation_criteria?.items?.length || 0,
     });
     
     // Add JSON data
@@ -432,11 +429,11 @@ async function sendToWebhook(
       responseData = { message: textResponse };
     }
     
-    console.log('✅ Successfully sent data to webhook');
+    console.log('✅ Successfully sent CV file to webhook for AI analysis');
     
     return {
       success: true,
-      message: responseData?.message || 'Data sent successfully',
+      message: responseData?.message || 'CV file sent successfully',
       data: responseData?.data || responseData,
     };
   } catch (error: any) {
@@ -453,7 +450,7 @@ async function sendToWebhook(
     return {
       success: false,
       error: error.message || 'Unknown error',
-      message: 'Failed to send data to webhook',
+      message: 'Failed to send CV file to webhook',
     };
   }
 }
@@ -581,13 +578,7 @@ export async function evaluateCv(
   projectId: string,
   criteriaSetId?: string
 ): Promise<CvEvaluation> {
-  // 1. Parse the CV
-  const parsedData = await parseCvFile(file);
-
-  // 2. Upload the file
-  const cvFileUrl = await uploadCvFile(file, parsedData.email);
-
-  // 3. Get project details
+  // 1. Get project details
   const { data: project, error: projectError } = await supabase
     .from('hiring_projects')
     .select('*')
@@ -596,16 +587,10 @@ export async function evaluateCv(
 
   if (projectError) throw projectError;
 
-  // 4. Calculate scores
-  const scores = calculateEvaluationScores(parsedData, project);
-
-  // 5. Send to webhook and get response
+  // 2. Send CV file to webhook for AI analysis (no mock data)
   const webhookResponse = await sendToWebhook(
     file,
-    parsedData,
     project,
-    scores,
-    cvFileUrl,
     criteriaSetId
   );
   
@@ -615,6 +600,15 @@ export async function evaluateCv(
   } else {
     console.warn('⚠️ Webhook integration failed:', webhookResponse.error);
   }
+
+  // 3. Parse the CV (this is still needed for local database storage)
+  const parsedData = await parseCvFile(file);
+
+  // 4. Upload the file to Supabase storage
+  const cvFileUrl = await uploadCvFile(file, parsedData.email);
+
+  // 5. Calculate scores
+  const scores = calculateEvaluationScores(parsedData, project);
 
   // 6. Create or get candidate
   const { data: existingCandidate } = await supabase
