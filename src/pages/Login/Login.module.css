@@ -29,11 +29,12 @@
 .logoBox {
   width: 32px;
   height: 32px;
-  background: #5D3FD3;
+  background: linear-gradient(135deg, var(--color-brand-purple) 0%, var(--color-brand-indigo) 100%);
   border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
 }
 
 .fortiv {
@@ -185,9 +186,13 @@
 
 .forgot {
   font-size: 13px;
-  color: #5D3FD3;
+  color: var(--color-brand-purple);
   text-decoration: none;
   font-weight: 500;
+  transition: color 0.2s ease;
+}
+.forgot:hover {
+  color: var(--color-brand-indigo);
 }
 
 .inputWrapper {
@@ -221,14 +226,14 @@
 }
 
 .inputWrapper input:focus {
-  border-color: #5D3FD3;
+  border-color: var(--color-brand-purple);
   background: white;
-  box-shadow: 0 0 0 4px rgba(93, 63, 211, 0.1);
+  box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.1);
 }
 
 .submitBtn {
   width: 100%;
-  background: #5D3FD3;
+  background: linear-gradient(135deg, var(--color-brand-purple) 0%, var(--color-brand-indigo) 100%);
   color: white;
   border: none;
   border-radius: 8px;
@@ -237,12 +242,13 @@
   font-weight: 600;
   cursor: pointer;
   margin-top: 8px;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: var(--shadow-brand);
 }
 
 .submitBtn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(93, 63, 211, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.35);
 }
 
 .divider {
@@ -294,7 +300,11 @@
 }
 
 .troubleText a {
-  color: #5D3FD3;
+  color: var(--color-brand-purple);
   text-decoration: none;
   font-weight: 500;
+  transition: color 0.2s ease;
+}
+.troubleText a:hover {
+  color: var(--color-brand-indigo);
 }

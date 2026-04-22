@@ -52,10 +52,14 @@
   color: var(--color-primary);
 }
 .primaryBtn {
-  background: #5D3FD3;
+  background: linear-gradient(135deg, var(--color-brand-purple) 0%, var(--color-brand-indigo) 100%);
   color: white;
   border: none;
-  box-shadow: 0 4px 12px rgba(93, 63, 211, 0.2);
+  box-shadow: var(--shadow-brand);
+}
+.primaryBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.35);
 }
 
 .mainLayout {
@@ -83,7 +87,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #5D3FD3;
+  color: var(--color-brand-purple);
   font-size: 18px;
   margin: 0 0 24px 0;
 }
@@ -124,13 +128,18 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #5D3FD3;
-  background: #EEF2FF;
+  color: var(--color-brand-purple);
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.1) 0%, rgba(99, 102, 241, 0.1) 100%);
   border: none;
   padding: 8px 16px;
   border-radius: 8px;
   font-weight: 600;
   cursor: pointer;
+  transition: all 0.2s ease;
+}
+.addBtn:hover {
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.15) 0%, rgba(99, 102, 241, 0.15) 100%);
+  transform: translateY(-1px);
 }
 
 .criteriaList {
@@ -200,7 +209,7 @@
   font-weight: 600;
   margin-bottom: 12px;
 }
-.progressVal { color: #5D3FD3; }
+.progressVal { color: var(--color-brand-purple); }
 
 .progressBar {
   height: 12px;
@@ -293,7 +302,7 @@
   color: var(--color-text-primary);
   background: white;
 }
-.projectSelect:focus { border-color: #7C3AED; box-shadow: 0 0 0 3px rgba(124,58,237,0.1); }
+.projectSelect:focus { border-color: var(--color-brand-purple); box-shadow: 0 0 0 3px rgba(124,58,237,0.1); }
 
 .loadingRow {
   display: flex;
@@ -315,7 +324,7 @@
   background: transparent;
   width: 200px;
 }
-.titleInput:focus { border-bottom-color: #7C3AED; }
+.titleInput:focus { border-bottom-color: var(--color-brand-purple); }
 
 .descInput {
   width: 100%;
@@ -329,7 +338,7 @@
   background: #F8F9FC;
   font-family: inherit;
 }
-.descInput:focus { border-color: #7C3AED; background: white; }
+.descInput:focus { border-color: var(--color-brand-purple); background: white; }
 
 .readOnly {
   background: #F8F9FC !important;

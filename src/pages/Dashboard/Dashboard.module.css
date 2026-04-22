@@ -32,7 +32,7 @@
   letter-spacing: -0.5px;
 }
 .newBtn {
-  background-color: #5D3FD3; /* Match visual from screenshot */
+  background: linear-gradient(135deg, var(--color-brand-purple) 0%, var(--color-brand-indigo) 100%);
   color: white;
   border: none;
   border-radius: 20px;
@@ -40,11 +40,12 @@
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: var(--shadow-brand);
 }
 .newBtn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(93, 63, 211, 0.3);
+  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.35);
 }
 
 .statsGrid {
@@ -206,8 +207,8 @@
   width: 44px;
   height: 44px;
   border-radius: 12px;
-  background: #EEF2FF;
-  color: #5D3FD3;
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.1) 0%, rgba(99, 102, 241, 0.1) 100%);
+  color: var(--color-brand-purple);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -235,17 +236,19 @@
 }
 
 .viewBtn {
-  background: #EEF2FF;
-  color: #5D3FD3;
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.1) 0%, rgba(99, 102, 241, 0.1) 100%);
+  color: var(--color-brand-purple);
   border: none;
   padding: 6px 16px;
   border-radius: 16px;
   font-weight: 600;
   font-size: 13px;
   cursor: pointer;
+  transition: all 0.2s ease;
 }
 .viewBtn:hover {
-  background: #E0E7FF;
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.15) 0%, rgba(99, 102, 241, 0.15) 100%);
+  transform: translateY(-1px);
 }
 
 .metaCell {
@@ -275,13 +278,19 @@
 .errorState { color: #DC2626; }
 .errorState button, .emptyState button, .loadingState button {
   margin-top: 8px;
-  background: #5D3FD3;
+  background: linear-gradient(135deg, var(--color-brand-purple) 0%, var(--color-brand-indigo) 100%);
   color: white;
   border: none;
   padding: 10px 24px;
   border-radius: 8px;
   font-weight: 600;
   cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-brand);
+}
+.errorState button:hover, .emptyState button:hover, .loadingState button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.35);
 }
 
 @keyframes spin {

@@ -65,14 +65,18 @@
   gap: 8px;
   padding: 6px 12px;
   border-radius: 20px;
-  border: 1px solid #C7D2FE;
-  background: #EEF2FF;
-  color: #5D3FD3;
+  border: 1px solid var(--color-brand-purple);
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.1) 0%, rgba(99, 102, 241, 0.1) 100%);
+  color: var(--color-brand-purple);
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
+  transition: all 0.2s ease;
 }
-.dot { width: 6px; height: 6px; border-radius: 50%; background: #5D3FD3; }
+.statusSelect:hover {
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.15) 0%, rgba(99, 102, 241, 0.15) 100%);
+}
+.dot { width: 6px; height: 6px; border-radius: 50%; background: var(--color-brand-purple); }
 .timeTag { font-size: 13px; color: var(--color-text-secondary); }
 
 .fitScoreCard {
@@ -87,10 +91,10 @@
 }
 .scoreTitle { font-size: 11px; font-weight: 600; color: var(--color-text-secondary); letter-spacing: 0.05em; margin-bottom: 8px;}
 .scoreRow { display: flex; align-items: baseline; gap: 12px; }
-.giantScore { font-size: 40px; font-weight: 700; color: #5D3FD3; line-height: 1; letter-spacing: -1px;}
-.strongMatch { color: #4338CA; font-weight: 600; font-size: 14px; }
+.giantScore { font-size: 40px; font-weight: 700; color: var(--color-brand-purple); line-height: 1; letter-spacing: -1px;}
+.strongMatch { color: var(--color-brand-indigo); font-weight: 600; font-size: 14px; }
 .circles { display: flex; gap: 16px; }
-.ring { width: 48px; height: 48px; border-radius: 50%; border: 4px solid #C7D2FE; border-top-color: #5D3FD3; }
+.ring { width: 48px; height: 48px; border-radius: 50%; border: 4px solid rgba(124, 58, 237, 0.2); border-top-color: var(--color-brand-purple); animation: spin 1s linear infinite; }
 
 .tabs {
   display: flex;
@@ -109,8 +113,8 @@
   cursor: pointer;
 }
 .tabActive {
-  color: #5D3FD3;
-  border-bottom: 2px solid #5D3FD3;
+  color: var(--color-brand-purple);
+  border-bottom: 2px solid var(--color-brand-purple);
 }
 
 .scrollContent {
@@ -129,7 +133,7 @@
 .aiBadge {
   font-size: 12px;
   font-weight: 700;
-  color: #5D3FD3;
+  color: var(--color-brand-purple);
   letter-spacing: 0.05em;
   margin-bottom: 12px;
 }
@@ -188,13 +192,19 @@
   cursor: pointer;
 }
 .advanceBtn {
-  background: #5D3FD3;
+  background: linear-gradient(135deg, var(--color-brand-purple) 0%, var(--color-brand-indigo) 100%);
   color: white;
   border: none;
   padding: 10px 20px;
   border-radius: 20px;
   font-weight: 600;
   cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: var(--shadow-brand);
+}
+.advanceBtn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.35);
 }
 .advanceBtn:disabled, .rejectBtn:disabled, .secondaryBtn:disabled {
   opacity: 0.4;
@@ -230,7 +240,7 @@
 
 /* Dynamic status classes */
 .status_New { background: #F0F9FF; color: #0284C7; border-color: #BAE6FD; }
-.status_Screened { background: #EEF2FF; color: #4338CA; border-color: #C7D2FE; }
+.status_Screened { background: linear-gradient(135deg, rgba(124, 58, 237, 0.1) 0%, rgba(99, 102, 241, 0.1) 100%); color: var(--color-brand-indigo); border-color: var(--color-brand-purple); }
 .status_Shortlisted { background: #F0FDF4; color: #15803D; border-color: #BBF7D0; }
 .status_Under_Review { background: #FFF7ED; color: #C2410C; border-color: #FED7AA; }
 .status_Rejected { background: #FEF2F2; color: #DC2626; border-color: #FECACA; }
@@ -256,20 +266,24 @@
 
 .sourceBadge {
   padding: 6px 14px;
-  background: #F5F3FF;
-  color: #5D3FD3;
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.1) 0%, rgba(99, 102, 241, 0.1) 100%);
+  color: var(--color-brand-purple);
   border-radius: 20px;
   font-size: 13px;
   font-weight: 600;
 }
 
 .cvLink {
-  color: #5D3FD3;
+  color: var(--color-brand-purple);
   font-weight: 600;
   font-size: 14px;
   text-decoration: none;
+  transition: color 0.2s ease;
 }
-.cvLink:hover { text-decoration: underline; }
+.cvLink:hover { 
+  text-decoration: underline;
+  color: var(--color-brand-indigo);
+}
 
 @keyframes spin {
   from { transform: rotate(0deg); }

@@ -88,8 +88,20 @@
 }
 .chartHeader h3 { margin: 0; font-size: 16px; }
 .linkBtn {
-  background: none; border: none; color: #5D3FD3; font-weight: 600; font-size: 13px; cursor: pointer;
-  display: flex; align-items: center; gap: 4px;
+  background: none; 
+  border: none; 
+  color: var(--color-brand-purple); 
+  font-weight: 600; 
+  font-size: 13px; 
+  cursor: pointer;
+  display: flex; 
+  align-items: center; 
+  gap: 4px;
+  transition: all 0.2s ease;
+}
+.linkBtn:hover {
+  color: var(--color-brand-indigo);
+  transform: translateX(2px);
 }
 
 .chartPlaceholder {
@@ -154,8 +166,8 @@
 .projectIconSmall {
   width: 40px;
   height: 40px;
-  background: #EEF2FF;
-  color: #5D3FD3;
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.1) 0%, rgba(99, 102, 241, 0.1) 100%);
+  color: var(--color-brand-purple);
   border-radius: 10px;
   display: flex;
   align-items: center;
