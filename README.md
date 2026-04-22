@@ -2,37 +2,39 @@
 
 A modern, intelligent hiring management platform built with React, TypeScript, and Supabase. Fortiv HireMind streamlines the recruitment process with AI-powered CV evaluation, project management, and candidate tracking.
 
-## 🚀 Features
+## Features
 
 - **Dashboard Overview** - Centralized view of all hiring projects and statistics
-- **Project Management** - Create and manage multiple hiring projects with ease
-- **CV Evaluator** - AI-powered resume analysis and candidate evaluation
+- **Project Management** - Create and manage multiple hiring projects
+- **CV Evaluator** - AI-powered resume analysis using Google Gemini with weighted criteria scoring
+- **Criteria Management** - Build, duplicate, and manage reusable evaluation criteria sets
 - **Candidate Tracking** - Detailed candidate profiles with status management
+- **n8n Webhook Integration** - Async CV processing pipeline via n8n with database polling
 - **Real-time Updates** - Live data synchronization with Supabase
-- **Responsive Design** - Optimized for desktop and mobile devices
-- **Modern UI** - Clean, intuitive interface with smooth animations
+- **Responsive Design** - Optimized for desktop and mobile
 
-## 🛠️ Tech Stack
+## Tech Stack
 
-- **Frontend Framework**: React 19.2.5
-- **Language**: TypeScript 6.0.2
-- **Build Tool**: Vite 8.0.9
-- **Routing**: React Router DOM 7.14.1
-- **State Management**: Zustand 5.0.12
-- **Backend**: Supabase 2.104.0
-- **Animations**: Framer Motion 12.38.0
-- **Icons**: Lucide React 1.8.0
+- **Frontend**: React 19 + TypeScript 6
+- **Build Tool**: Vite 8
+- **Routing**: React Router DOM 7
+- **State Management**: Zustand 5
+- **Backend**: Supabase 2
+- **AI**: Google Gemini (criteria generation via `VITE_GEMINI_API_KEY`)
+- **CV Processing**: n8n webhook pipeline (`VITE_CV_INTAKE_WEBHOOK_URL`)
+- **Animations**: Framer Motion 12
+- **Icons**: Lucide React
 - **Styling**: CSS Modules
-- **Linting**: ESLint 9.39.4
 
-## 📋 Prerequisites
+## Prerequisites
 
-Before you begin, ensure you have the following installed:
-- Node.js (v18 or higher)
+- Node.js v18+
 - npm or yarn
-- Git
+- A [Supabase](https://supabase.com) project
+- A [Google Gemini](https://aistudio.google.com) API key
+- An n8n instance with a CV intake webhook configured
 
-## 🔧 Installation
+## Installation
 
 1. **Clone the repository**
    ```bash
@@ -46,11 +48,13 @@ Before you begin, ensure you have the following installed:
    ```
 
 3. **Set up environment variables**
-   
+
    Create a `.env` file in the root directory:
    ```env
    VITE_SUPABASE_URL=your_supabase_url
    VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+   VITE_GEMINI_API_KEY=your_gemini_api_key
+   VITE_CV_INTAKE_WEBHOOK_URL=your_n8n_webhook_url
    ```
 
 4. **Start the development server**
@@ -58,131 +62,71 @@ Before you begin, ensure you have the following installed:
    npm run dev
    ```
 
-   The application will be available at `http://localhost:5173`
+   The app will be available at `http://localhost:5173`
 
-## 📜 Available Scripts
+## Available Scripts
 
 - `npm run dev` - Start the development server with hot reload
-- `npm run build` - Build the application for production
+- `npm run build` - Build for production
 - `npm run preview` - Preview the production build locally
-- `npm run lint` - Run ESLint to check code quality
+- `npm run lint` - Run ESLint
 
-## 📁 Project Structure
+## Project Structure
 
 ```
-Fortiv-HireMind/
-├── public/              # Static assets
-│   ├── favicon.svg
-│   └── icons.svg
-├── src/
-│   ├── assets/          # Images and media files
-│   ├── components/      # Reusable UI components
-│   │   ├── brand/
-│   │   └── layout/
-│   ├── data/            # Mock data and constants
-│   ├── lib/             # Third-party library configurations
-│   │   └── supabase.ts
-│   ├── pages/           # Page components
-│   │   ├── CVEvaluator/
-│   │   ├── Dashboard/
-│   │   ├── HomeOverview/
-│   │   ├── Login/
-│   │   └── ProjectDetail/
-│   ├── services/        # API and business logic
-│   ├── store/           # State management (Zustand)
-│   ├── types/           # TypeScript type definitions
-│   ├── App.tsx          # Main application component
-│   ├── main.tsx         # Application entry point
-│   └── index.css        # Global styles
-├── .env                 # Environment variables
-├── .gitignore
-├── eslint.config.js     # ESLint configuration
-├── index.html           # HTML template
-├── package.json
-├── tsconfig.json        # TypeScript configuration
-├── vite.config.ts       # Vite configuration
-└── README.md
+src/
+├── components/          # Reusable UI components
+│   ├── auth/            # Auth provider and protected routes
+│   ├── brand/
+│   └── layout/
+├── data/                # Mock data and constants
+├── lib/                 # Third-party configurations (Supabase client)
+├── pages/
+│   ├── CVEvaluator/     # Criteria management UI
+│   ├── Dashboard/       # Project overview
+│   ├── HomeOverview/
+│   ├── Login/
+│   └── ProjectDetail/   # Candidates, evaluations, job posts, settings
+├── services/
+│   ├── aiCriteriaGenerator.ts  # Gemini-powered criteria generation
+│   ├── aiJobDescription.ts
+│   ├── cvEvaluation.ts         # Webhook dispatch + DB polling
+│   └── hiringProjects.ts       # Supabase CRUD for projects & candidates
+├── store/               # Zustand store
+└── types/               # TypeScript types (database.ts)
 ```
 
-## 🔐 Supabase Setup
+## Supabase Setup
 
-1. Create a Supabase project at [supabase.com](https://supabase.com)
-2. Set up the required database tables (refer to `src/types/database.ts`)
-3. Copy your project URL and anon key to the `.env` file
+1. Create a project at [supabase.com](https://supabase.com)
+2. Set up the required tables — refer to `src/types/database.ts` for the full schema
+3. Copy your project URL and anon key to `.env`
 4. Configure authentication providers as needed
 
-## 🎨 Key Components
+## CV Evaluation Flow
 
-### Dashboard
-Central hub displaying all hiring projects with statistics and quick actions.
+1. A CV file (or existing candidate) is submitted from the UI
+2. The file and project/criteria context are sent to the n8n webhook (`VITE_CV_INTAKE_WEBHOOK_URL`)
+3. n8n processes the CV asynchronously using AI and writes the result to `cv_evaluations`
+4. The frontend polls the database every 3 seconds (up to 2 minutes) until the record appears
+5. The completed evaluation is returned and displayed in the UI
 
-### CV Evaluator
-Upload and analyze candidate resumes with AI-powered insights and scoring.
-
-### Project Detail
-Manage individual hiring projects, view candidates, and track progress.
-
-### Candidate Drawer
-Detailed candidate information with status updates and evaluation history.
-
-## 🚢 Deployment
-
-### Build for Production
+## Deployment
 
 ```bash
 npm run build
 ```
 
-The optimized production build will be in the `dist/` directory.
+The production build outputs to `dist/`. Deploy to any static host (Vercel, Netlify, etc.).
 
-### Deploy to Vercel
+## License
 
-```bash
-npm install -g vercel
-vercel
-```
+Proprietary software owned by Fortiv Solutions.
 
-### Deploy to Netlify
+## Support
 
-```bash
-npm install -g netlify-cli
-netlify deploy --prod
-```
-
-## 🤝 Contributing
-
-Contributions are welcome! Please follow these steps:
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## 📝 Code Style
-
-This project uses ESLint for code quality. Run `npm run lint` before committing.
-
-## 📄 License
-
-This project is proprietary software owned by Fortiv Solutions.
-
-## 👥 Team
-
-Developed by [Fortiv Solutions](https://github.com/Fortiv-Solutions)
-
-## 📧 Support
-
-For support, email support@fortiv-solutions.com or open an issue in the GitHub repository.
-
-## 🔄 Version History
-
-- **v0.0.0** - Initial release
-  - Dashboard with project overview
-  - CV evaluation system
-  - Candidate management
-  - Supabase integration
+Open an issue on GitHub or email support@fortiv-solutions.com.
 
 ---
 
-Built with ❤️ by Fortiv Solutions
+Built by [Fortiv Solutions](https://github.com/Fortiv-Solutions)
