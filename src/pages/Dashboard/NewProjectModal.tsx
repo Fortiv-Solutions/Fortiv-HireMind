@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import styles from './NewProjectModal.module.css';
-import { X, Loader2, Plus, Trash2 } from 'lucide-react';
+import { X, Loader2, Plus, Trash2, Sparkles } from 'lucide-react';
 import { createHiringProject } from '../../services/hiringProjects';
 import { useStore } from '../../store/useStore';
 import type { JobType, ProjectStatus } from '../../types/database';
+import { generateJobDescription } from '../../services/aiJobDescription';
 
 interface Props {
   onClose: () => void;
@@ -13,6 +14,7 @@ export default function NewProjectModal({ onClose }: Props) {
   const { loadProjects } = useStore();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [generatingAI, setGeneratingAI] = useState(false);
 
   const [form, setForm] = useState({
     title: '',
@@ -36,6 +38,35 @@ export default function NewProjectModal({ onClose }: Props) {
   }
   function addSkill() { setSkills((prev) => [...prev, '']); }
   function removeSkill(index: number) { setSkills((prev) => prev.filter((_, i) => i !== index)); }
+
+  async function handleGenerateDescription() {
+    // Validate that we have at least a job title
+    if (!form.title.trim()) {
+      setError('Please enter a job title before generating a description.');
+      return;
+    }
+
+    setGeneratingAI(true);
+    setError(null);
+
+    try {
+      const generatedDescription = await generateJobDescription({
+        title: form.title,
+        department: form.department,
+        location: form.location,
+        jobType: form.job_type,
+        experienceYears: Number(form.required_experience_years),
+        education: form.required_education,
+        skills: skills.filter(s => s.trim() !== ''),
+      });
+
+      setField('description', generatedDescription);
+    } catch (err: any) {
+      setError(err.message || 'Failed to generate job description. Please try again.');
+    } finally {
+      setGeneratingAI(false);
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -128,12 +159,34 @@ export default function NewProjectModal({ onClose }: Props) {
             </div>
 
             <div className={styles.inputGroupFull}>
-              <label>Job Description</label>
+              <div className={styles.labelWithAction}>
+                <label>Job Description</label>
+                <button
+                  type="button"
+                  className={styles.aiGenerateBtn}
+                  onClick={handleGenerateDescription}
+                  disabled={generatingAI || !form.title.trim()}
+                  title="Generate job description with AI"
+                >
+                  {generatingAI ? (
+                    <>
+                      <Loader2 size={14} className={styles.spinner} />
+                      Generating...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles size={14} />
+                      Generate with AI
+                    </>
+                  )}
+                </button>
+              </div>
               <textarea
-                rows={4}
+                rows={generatingAI ? 6 : 8}
                 placeholder="Describe the responsibilities, team, and expectations for this role…"
                 value={form.description}
                 onChange={(e) => setField('description', e.target.value)}
+                className={generatingAI ? styles.textareaLoading : ''}
               />
             </div>
           </div>
