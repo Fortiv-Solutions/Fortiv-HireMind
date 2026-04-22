@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import styles from './HomeOverview.module.css';
-import { TrendingUp, Users, Clock, Target, Briefcase, Loader2 } from 'lucide-react';
+import { TrendingUp, Users, Target, Briefcase, Loader2 } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 import { useNavigate } from 'react-router-dom';
 

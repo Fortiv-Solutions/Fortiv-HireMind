@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import styles from './ProjectDetail.module.css';
 import { Plus, Upload, Loader2 } from 'lucide-react';
 import { useStore } from '../../store/useStore';

@@ -1,6 +1,6 @@
 import React from 'react';
 import styles from './CandidateDrawer.module.css';
-import { X, Check, Loader2, CheckCircle, Sparkles } from 'lucide-react';
+import { X, Loader2, CheckCircle, Sparkles } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 import type { CvEvaluation } from '../../types/database';
 

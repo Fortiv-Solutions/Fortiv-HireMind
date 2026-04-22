@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './Profile.module.css';
 import { User, LogOut, Key, Edit3, Eye, EyeOff, ChevronDown, ChevronUp } from 'lucide-react';

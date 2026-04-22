@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import styles from './Dashboard.module.css';
 import { Briefcase, Users, ThumbsUp, AlertCircle, MoreHorizontal, Filter, ChevronRight, Loader2 } from 'lucide-react';
 import { useStore } from '../../store/useStore';

@@ -1,12 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import styles from './Layout.module.css';
 import { LayoutDashboard, Briefcase, FileCheck2, Search, Bell, BrainCircuit, User } from 'lucide-react';
-import { useStore } from '../../store/useStore';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-  const navigate = useNavigate();
-  const { signOut } = useStore();
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {

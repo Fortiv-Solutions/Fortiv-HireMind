@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import styles from './CVEvaluator.module.css';
 import { Upload, FileText, CheckCircle, AlertCircle, Sparkles, Plus, Edit2, Trash2, Copy, Eye, BarChart3, Target, Clock, Zap } from 'lucide-react';
 import { useStore } from '../../store/useStore';
@@ -14,7 +14,7 @@ import {
   fetchCriteriaWithItems,
   updateCriteriaSetWithItems,
 } from '../../services/cvEvaluation';
-import type { CriteriaWithStats, CvEvaluation, Candidate } from '../../types/database';
+import type { CriteriaWithStats, CvEvaluation } from '../../types/database';
 import CreateCriteriaModal from './CreateCriteriaModal';
 import EditCriteriaModal from './EditCriteriaModal';
 import CriteriaDetailModal from './CriteriaDetailModal';
@@ -50,7 +50,7 @@ export default function CVEvaluator() {
   const [prefilledCriteria, setPrefilledCriteria] = useState<GeneratedCriteria | null>(null);
 
   // Existing candidates
-  const [existingCandidates, setExistingCandidates] = useState<Candidate[]>([]);
+  const [existingCandidates, setExistingCandidates] = useState<Array<{ id: string; full_name: string; email: string; phone: string | null; location: string | null }>>([]);
   const [selectedCandidateId, setSelectedCandidateId] = useState<string>('');
   const [loadingCandidates, setLoadingCandidates] = useState(false);
 

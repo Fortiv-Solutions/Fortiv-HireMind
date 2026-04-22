@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import styles from './ProjectDetail.module.css';
 import { ChevronRight, MapPin, Loader2, AlertCircle, Users, FileText, TrendingUp, Settings, Building2, Briefcase, Clock } from 'lucide-react';
