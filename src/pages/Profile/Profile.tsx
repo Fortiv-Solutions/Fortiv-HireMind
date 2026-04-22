@@ -19,10 +19,8 @@ export default function Profile() {
   
   // Form states
   const [newName, setNewName] = useState('');
-  const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -77,7 +75,6 @@ export default function Profile() {
 
   const handleChangePassword = () => {
     setShowChangePasswordModal(true);
-    setCurrentPassword('');
     setNewPassword('');
     setConfirmPassword('');
     setMessage('');
