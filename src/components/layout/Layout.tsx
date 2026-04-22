@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import styles from './Layout.module.css';
-import { LayoutDashboard, Briefcase, FileCheck2, BarChart2, HelpCircle, LogOut, Search, Bell, Settings, BrainCircuit } from 'lucide-react';
+import { LayoutDashboard, Briefcase, FileCheck2, HelpCircle, LogOut, Search, Bell, Settings, BrainCircuit } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
@@ -50,10 +50,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <NavLink to="/cv-evaluator" className={({ isActive }) => isActive ? `${styles.navItem} ${styles.navItemActive}` : styles.navItem}>
               <FileCheck2 size={18} className={styles.icon} strokeWidth={2} />
               <span>CV Evaluator</span>
-            </NavLink>
-            <NavLink to="/analytics" className={({ isActive }) => isActive ? `${styles.navItem} ${styles.navItemActive}` : styles.navItem}>
-              <BarChart2 size={18} className={styles.icon} strokeWidth={2} />
-              <span>Analytics</span>
             </NavLink>
           </div>
         </nav>
