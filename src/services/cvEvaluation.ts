@@ -302,15 +302,23 @@ async function sendToWebhook(
   },
   cvFileUrl: string,
   criteriaSetId?: string
-): Promise<void> {
+): Promise<{
+  success: boolean;
+  message?: string;
+  data?: any;
+  error?: string;
+}> {
   const webhookUrl = import.meta.env.VITE_CV_INTAKE_WEBHOOK_URL;
   
   if (!webhookUrl) {
     console.warn('Webhook URL not configured. Skipping webhook call.');
-    return;
+    return {
+      success: false,
+      message: 'Webhook URL not configured',
+    };
   }
 
-  console.log('Sending CV data to webhook:', webhookUrl);
+  console.log('📤 Sending CV data to webhook:', webhookUrl);
 
   try {
     // Create FormData to send binary file along with other data
@@ -378,7 +386,7 @@ async function sendToWebhook(
       },
     };
     
-    console.log('Webhook payload:', {
+    console.log('📦 Webhook payload summary:', {
       file_name: file.name,
       file_size: file.size,
       candidate_email: parsedData.email,
@@ -389,25 +397,64 @@ async function sendToWebhook(
     // Add JSON data
     formData.append('data', JSON.stringify(payload));
     
-    // Send to webhook
+    // Send to webhook with timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+    
     const response = await fetch(webhookUrl, {
       method: 'POST',
       body: formData,
+      signal: controller.signal,
     });
+    
+    clearTimeout(timeoutId);
     
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Webhook error:', response.status, errorText);
-      throw new Error(`Webhook failed with status ${response.status}: ${errorText}`);
+      console.error('❌ Webhook error:', response.status, errorText);
+      return {
+        success: false,
+        error: `Webhook failed with status ${response.status}`,
+        message: errorText,
+      };
     }
     
-    const responseData = await response.text();
-    console.log('Webhook response:', responseData);
+    // Try to parse JSON response
+    let responseData;
+    const contentType = response.headers.get('content-type');
+    
+    if (contentType && contentType.includes('application/json')) {
+      responseData = await response.json();
+      console.log('📥 Webhook JSON response:', responseData);
+    } else {
+      const textResponse = await response.text();
+      console.log('📥 Webhook text response:', textResponse);
+      responseData = { message: textResponse };
+    }
+    
     console.log('✅ Successfully sent data to webhook');
-  } catch (error) {
+    
+    return {
+      success: true,
+      message: responseData?.message || 'Data sent successfully',
+      data: responseData?.data || responseData,
+    };
+  } catch (error: any) {
+    if (error.name === 'AbortError') {
+      console.error('❌ Webhook timeout after 30 seconds');
+      return {
+        success: false,
+        error: 'Webhook request timeout',
+        message: 'The webhook took too long to respond',
+      };
+    }
+    
     console.error('❌ Error sending to webhook:', error);
-    // Don't throw error - we don't want to fail the entire evaluation if webhook fails
-    // Just log it for debugging
+    return {
+      success: false,
+      error: error.message || 'Unknown error',
+      message: 'Failed to send data to webhook',
+    };
   }
 }
 
@@ -552,10 +599,22 @@ export async function evaluateCv(
   // 4. Calculate scores
   const scores = calculateEvaluationScores(parsedData, project);
 
-  // 5. Send to webhook (non-blocking)
-  sendToWebhook(file, parsedData, project, scores, cvFileUrl, criteriaSetId).catch((err) => {
-    console.error('Webhook error (non-blocking):', err);
-  });
+  // 5. Send to webhook and get response
+  const webhookResponse = await sendToWebhook(
+    file,
+    parsedData,
+    project,
+    scores,
+    cvFileUrl,
+    criteriaSetId
+  );
+  
+  // Log webhook response for debugging
+  if (webhookResponse.success) {
+    console.log('✅ Webhook integration successful:', webhookResponse.message);
+  } else {
+    console.warn('⚠️ Webhook integration failed:', webhookResponse.error);
+  }
 
   // 6. Create or get candidate
   const { data: existingCandidate } = await supabase
