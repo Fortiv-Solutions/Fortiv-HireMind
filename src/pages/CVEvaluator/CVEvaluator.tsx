@@ -1,314 +1,529 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styles from './CVEvaluator.module.css';
-import { Settings, Plus, GripVertical, Trash2, Lightbulb, Loader2, Check } from 'lucide-react';
+import { Upload, FileText, CheckCircle, AlertCircle, Sparkles, Plus, Edit2, Trash2, Copy, Eye, BarChart3, Target, Clock, Zap } from 'lucide-react';
 import { useStore } from '../../store/useStore';
-import { supabase } from '../../lib/supabase';
 
-interface Criterion {
+type ViewMode = 'upload' | 'criteria';
+
+interface EvaluationCriteria {
   id: string;
-  title: string;
+  name: string;
   description: string;
-  weight: number;
-  importance: 'critical' | 'high' | 'medium' | 'low';
-  keywords: string;
+  criteriaCount: number;
+  projectsUsed: number;
+  status: 'Active' | 'Inactive' | 'Draft' | 'Archived';
+  createdAt: string;
 }
 
-const importanceColors: Record<string, string> = {
-  critical: 'badgeRed',
-  high: 'badgeBlue',
-  medium: 'badgePurple',
-  low: 'badgeGray',
-};
-const importanceLabels: Record<string, string> = {
-  critical: 'MUST HAVE',
-  high: 'EXPECTED',
-  medium: 'BONUS',
-  low: 'OPTIONAL',
-};
-
 export default function CVEvaluator() {
-  const { projects, projectsLoading, loadProjects } = useStore();
+  const [viewMode, setViewMode] = useState<ViewMode>('upload');
+  const { projects, loadProjects } = useStore();
   const [selectedProjectId, setSelectedProjectId] = useState<string>('');
-  const [criteria, setCriteria] = useState<Criterion[]>([]);
-  const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
+  const [uploadMode, setUploadMode] = useState<'new' | 'existing'>('new');
+  const [dragActive, setDragActive] = useState(false);
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [evaluating, setEvaluating] = useState(false);
+  const [evaluationResult, setEvaluationResult] = useState<any>(null);
+
+  // Mock criteria data
+  const [criteriaList, setCriteriaList] = useState<EvaluationCriteria[]>([
+    {
+      id: '1',
+      name: 'Software Engineer',
+      description: 'Screen every applicant against custom criteria.',
+      criteriaCount: 5,
+      projectsUsed: 1,
+      status: 'Active',
+      createdAt: '2024-04-27',
+    },
+  ]);
+
+  const [criteriaFilter, setCriteriaFilter] = useState<'Active' | 'Inactive' | 'Archived' | 'Draft'>('Active');
 
   useEffect(() => {
     loadProjects();
   }, [loadProjects]);
 
-  // When project changes, populate criteria from required_skills
-  useEffect(() => {
-    if (!selectedProjectId) return;
-    const project = projects.find((p) => p.id === selectedProjectId);
-    if (!project) return;
-
-    const skills = project.required_skills ?? [];
-    setCriteria(
-      skills.map((skill, i) => ({
-        id: `skill-${i}`,
-        title: skill,
-        description: `Evaluate candidate proficiency in ${skill}.`,
-        weight: Math.floor(100 / Math.max(skills.length, 1)),
-        importance: i === 0 ? 'critical' : i === 1 ? 'high' : 'medium',
-        keywords: skill,
-      }))
-    );
-  }, [selectedProjectId, projects]);
-
-  const totalWeight = criteria.reduce((s, c) => s + c.weight, 0);
-  const selectedProject = projects.find((p) => p.id === selectedProjectId);
-
-  function addCriterion() {
-    setCriteria((prev) => [
-      ...prev,
-      {
-        id: `new-${Date.now()}`,
-        title: 'New Criterion',
-        description: 'Describe what to evaluate.',
-        weight: 10,
-        importance: 'medium',
-        keywords: '',
-      },
-    ]);
-  }
-
-  function removeCriterion(id: string) {
-    setCriteria((prev) => prev.filter((c) => c.id !== id));
-  }
-
-  function updateCriterion(id: string, field: keyof Criterion, value: any) {
-    setCriteria((prev) =>
-      prev.map((c) => (c.id === id ? { ...c, [field]: value } : c))
-    );
-  }
-
-  async function saveFramework() {
-    if (!selectedProjectId) return;
-    setSaving(true);
-    try {
-      const skills = criteria.map((c) => c.title);
-      const { error } = await supabase
-        .from('hiring_projects')
-        .update({ required_skills: skills, updated_at: new Date().toISOString() })
-        .eq('id', selectedProjectId);
-      if (error) throw error;
-      await loadProjects();
-      setSaved(true);
-      setTimeout(() => setSaved(false), 2500);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setSaving(false);
+  const handleDrag = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === 'dragenter' || e.type === 'dragover') {
+      setDragActive(true);
+    } else if (e.type === 'dragleave') {
+      setDragActive(false);
     }
-  }
+  };
 
-  const dotColors = ['dotRed', 'dotBlue', 'dotPurple', 'dotOrange', 'dotGreen'];
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      handleFile(e.dataTransfer.files[0]);
+    }
+  };
+
+  const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      handleFile(e.target.files[0]);
+    }
+  };
+
+  const handleFile = (file: File) => {
+    // Validate file type
+    const validTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+    if (!validTypes.includes(file.type)) {
+      alert('Please upload a PDF or DOCX file');
+      return;
+    }
+
+    setUploadedFile(file);
+  };
+
+  const handleEvaluate = async () => {
+    if (!uploadedFile || !selectedProjectId) return;
+
+    setEvaluating(true);
+    
+    // Simulate evaluation (replace with actual API call)
+    setTimeout(() => {
+      setEvaluationResult({
+        candidateName: 'John Doe',
+        email: 'john.doe@example.com',
+        phone: '+91 98765 43210',
+        totalScore: 78,
+        skillsMatch: 85,
+        experienceScore: 75,
+        educationScore: 70,
+        strengths: [
+          'Strong proficiency in React and TypeScript',
+          '5+ years of relevant experience',
+          'Led multiple successful projects',
+        ],
+        concerns: [
+          'Limited experience with cloud platforms',
+          'No mention of testing frameworks',
+        ],
+        recommendation: 'Strong Match',
+      });
+      setEvaluating(false);
+    }, 2500);
+  };
+
+  const filteredCriteria = criteriaList.filter(c => c.status === criteriaFilter);
 
   return (
     <div className={styles.container}>
+      {/* Header */}
       <div className={styles.header}>
-        <div className={styles.breadcrumbs}>
-          <span>CV Evaluator</span>
-          {selectedProject && <> › <strong>{selectedProject.title}</strong></>}
-        </div>
-
-        <div className={styles.titleRow}>
-          <div>
-            <h1>Evaluation Framework</h1>
-            <p className={styles.subtitle}>
-              Select a hiring project, define criteria, and save. These skills drive the automated CV scoring.
-            </p>
-          </div>
-          <div className={styles.actionBtns}>
-            <button
-              className={styles.primaryBtn}
-              disabled={!selectedProjectId || saving}
-              onClick={saveFramework}
-            >
-              {saving ? <Loader2 size={16} className={styles.spinner} /> : saved ? <><Check size={16} /> Saved!</> : 'Save Framework'}
-            </button>
-          </div>
+        <div>
+          <h1>CV Evaluator</h1>
+          <p className={styles.subtitle}>
+            Screen every applicant against custom criteria. Spend less time on CVs — more time on candidates who matter.
+          </p>
         </div>
       </div>
 
-      {/* Project Selector */}
-      <div className={styles.projectSelectorCard}>
-        <label className={styles.selectorLabel}>Select Hiring Project</label>
-        {projectsLoading ? (
-          <div className={styles.loadingRow}><Loader2 size={20} className={styles.spinner} /> Loading projects…</div>
-        ) : (
-          <select
-            className={styles.projectSelect}
-            value={selectedProjectId}
-            onChange={(e) => setSelectedProjectId(e.target.value)}
-          >
-            <option value="">— Choose a project —</option>
-            {projects.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.title} {p.department ? `· ${p.department}` : ''} ({p.status})
-              </option>
-            ))}
-          </select>
-        )}
+      {/* View Mode Tabs */}
+      <div className={styles.tabs}>
+        <button
+          className={viewMode === 'upload' ? styles.tabActive : styles.tab}
+          onClick={() => setViewMode('upload')}
+        >
+          <Upload size={18} />
+          CV Upload & Evaluation
+        </button>
+        <button
+          className={viewMode === 'criteria' ? styles.tabActive : styles.tab}
+          onClick={() => setViewMode('criteria')}
+        >
+          <Target size={18} />
+          Evaluation Criteria
+        </button>
       </div>
 
-      {selectedProjectId && (
-        <div className={styles.mainLayout}>
-          <div className={styles.builderArea}>
-            {/* Project Parameters — read from DB */}
+      {/* Upload View */}
+      {viewMode === 'upload' && (
+        <div className={styles.uploadView}>
+          {/* Left Section - Upload & Settings */}
+          <div className={styles.uploadSection}>
             <div className={styles.card}>
-              <h3 className={styles.cardTitle}><Settings size={18} /> Project Parameters</h3>
-              <div className={styles.formRow}>
-                <div className={styles.inputGroup}>
-                  <label>Project Title</label>
-                  <input type="text" value={selectedProject?.title ?? ''} readOnly className={styles.readOnly} />
-                </div>
-                <div className={styles.inputGroup}>
-                  <label>Department</label>
-                  <input type="text" value={selectedProject?.department ?? '—'} readOnly className={styles.readOnly} />
-                </div>
-                <div className={styles.inputGroup}>
-                  <label>Experience Required</label>
-                  <input type="text" value={selectedProject ? `${selectedProject.required_experience_years}+ years` : ''} readOnly className={styles.readOnly} />
-                </div>
-              </div>
-            </div>
-
-            <div className={styles.criteriaHeader}>
-              <div>
-                <h3>Skill Criteria</h3>
-                <p>Each criterion maps to a required skill. Weight must total 100%.</p>
-              </div>
-              <button className={styles.addBtn} onClick={addCriterion}>
-                <Plus size={16} /> Add Criterion
-              </button>
-            </div>
-
-            <div className={styles.criteriaList}>
-              {criteria.length === 0 ? (
-                <div className={styles.emptyState}>
-                  <p>No criteria yet. Add a criterion or ensure this project has required skills set.</p>
-                </div>
-              ) : (
-                criteria.map((c, idx) => (
-                  <div key={c.id} className={styles.criteriaItem}>
-                    <div className={styles.dragHandle}><GripVertical size={20} /></div>
-                    <div className={styles.criteriaContent}>
-                      <div className={styles.critHeader}>
-                        <div className={styles.critTitleGroup}>
-                          <input
-                            className={styles.titleInput}
-                            value={c.title}
-                            onChange={(e) => updateCriterion(c.id, 'title', e.target.value)}
-                          />
-                          <span className={`${styles.badge} ${styles[importanceColors[c.importance]]}`}>
-                            {importanceLabels[c.importance]}
-                          </span>
-                        </div>
-                        <button className={styles.iconBtn} onClick={() => removeCriterion(c.id)}>
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
-
-                      <input
-                        className={styles.descInput}
-                        value={c.description}
-                        onChange={(e) => updateCriterion(c.id, 'description', e.target.value)}
-                        placeholder="Describe what to evaluate..."
-                      />
-
-                      <div className={styles.formRow}>
-                        <div className={styles.inputGroup}>
-                          <label>Importance</label>
-                          <select
-                            value={c.importance}
-                            onChange={(e) => updateCriterion(c.id, 'importance', e.target.value)}
-                          >
-                            <option value="critical">Critical (Must Have)</option>
-                            <option value="high">High (Expected)</option>
-                            <option value="medium">Medium (Bonus)</option>
-                            <option value="low">Low (Optional)</option>
-                          </select>
-                        </div>
-                        <div className={styles.inputGroup}>
-                          <label>Weight (%)</label>
-                          <input
-                            type="number"
-                            min={0}
-                            max={100}
-                            value={c.weight}
-                            onChange={(e) => updateCriterion(c.id, 'weight', Number(e.target.value))}
-                          />
-                        </div>
-                        <div className={styles.inputGroup}>
-                          <label>Keywords</label>
-                          <input
-                            type="text"
-                            value={c.keywords}
-                            onChange={(e) => updateCriterion(c.id, 'keywords', e.target.value)}
-                            placeholder="e.g. React, Hooks, TypeScript"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-
-          {/* Sidebar: live weight matrix */}
-          <div className={styles.sidebar}>
-            <div className={styles.matrixCard}>
-              <h3>Weight Matrix</h3>
-              <p>{criteria.length} active criteria</p>
-
-              <div className={styles.progressHeader}>
-                <span>Total Weight</span>
-                <span className={totalWeight === 100 ? styles.progressValOk : styles.progressValWarn}>
-                  {totalWeight}% / 100%
-                </span>
+              <div className={styles.cardHeader}>
+                <h3>Add CVs</h3>
+                <p>Upload new files or add from candidates you've already worked with.</p>
               </div>
 
-              <div className={styles.progressBar}>
-                {criteria.map((c, i) => (
-                  <div
-                    key={c.id}
-                    className={styles[`fill${['Red','Blue','Purple','Orange','Green'][i % 5]}`]}
-                    style={{ width: `${Math.min(c.weight, 100)}%` }}
+              {/* Mode Selector */}
+              <div className={styles.modeSelector}>
+                <button
+                  className={uploadMode === 'new' ? styles.modeBtnActive : styles.modeBtn}
+                  onClick={() => setUploadMode('new')}
+                >
+                  Upload new
+                </button>
+                <button
+                  className={uploadMode === 'existing' ? styles.modeBtnActive : styles.modeBtn}
+                  onClick={() => setUploadMode('existing')}
+                >
+                  Use existing
+                </button>
+              </div>
+
+              {/* Upload Area */}
+              {uploadMode === 'new' && (
+                <div
+                  className={`${styles.uploadArea} ${dragActive ? styles.uploadAreaActive : ''}`}
+                  onDragEnter={handleDrag}
+                  onDragLeave={handleDrag}
+                  onDragOver={handleDrag}
+                  onDrop={handleDrop}
+                >
+                  <Upload size={48} className={styles.uploadIcon} />
+                  <p className={styles.uploadText}>
+                    Drag & drop or click to upload
+                  </p>
+                  <p className={styles.uploadHint}>
+                    PDF, DOCX · 10 MB limit remaining
+                  </p>
+                  <input
+                    type="file"
+                    accept=".pdf,.doc,.docx"
+                    onChange={handleFileInput}
+                    className={styles.fileInput}
+                    id="cv-upload"
                   />
-                ))}
-              </div>
+                  <label htmlFor="cv-upload" className={styles.uploadBtn}>
+                    Choose File
+                  </label>
+                </div>
+              )}
 
-              <div className={styles.legend}>
-                {criteria.map((c, i) => (
-                  <div key={c.id} className={styles.legendItem}>
-                    <span className={styles[dotColors[i % 5]]}></span>
-                    <span className={styles.legendName}>{c.title}</span>
-                    <span className={styles.pct}>{c.weight}%</span>
-                  </div>
-                ))}
-              </div>
-
-              {totalWeight !== 100 && (
-                <div className={styles.tipBox}>
-                  <h4><Lightbulb size={16} /> Weight Warning</h4>
-                  <p>
-                    {totalWeight < 100
-                      ? `You have ${100 - totalWeight}% unallocated. Distribute remaining weight across criteria.`
-                      : `Weight exceeds 100% by ${totalWeight - 100}%. Reduce some criteria weights.`}
+              {uploadMode === 'existing' && (
+                <div className={styles.existingCandidates}>
+                  <p className={styles.comingSoon}>
+                    Select from existing candidates (Coming soon)
                   </p>
                 </div>
               )}
 
-              {totalWeight === 100 && (
-                <div className={styles.tipBoxGreen}>
-                  <h4><Check size={16} /> Matrix Balanced</h4>
-                  <p>All weights total 100%. Your framework is ready to save.</p>
+              {/* Uploaded File Display */}
+              {uploadedFile && (
+                <div className={styles.uploadedFile}>
+                  <FileText size={20} className={styles.fileIcon} />
+                  <div className={styles.fileInfo}>
+                    <p className={styles.fileName}>{uploadedFile.name}</p>
+                    <p className={styles.fileSize}>
+                      {(uploadedFile.size / 1024).toFixed(1)} KB
+                    </p>
+                  </div>
+                  <button
+                    className={styles.removeFileBtn}
+                    onClick={() => setUploadedFile(null)}
+                  >
+                    <Trash2 size={16} />
+                  </button>
                 </div>
               )}
             </div>
+
+            {/* Settings Card */}
+            <div className={styles.card}>
+              <div className={styles.cardHeader}>
+                <h3>Evaluation Settings</h3>
+              </div>
+
+              <div className={styles.formGroup}>
+                <label>Auto-Consider CVs</label>
+                <div className={styles.radioGroup}>
+                  <label className={styles.radioLabel}>
+                    <input type="radio" name="autoConsider" defaultChecked />
+                    <span>Select CV Criteria</span>
+                  </label>
+                  <label className={styles.radioLabel}>
+                    <input type="radio" name="autoConsider" />
+                    <span>Select a Hiring Project</span>
+                  </label>
+                </div>
+              </div>
+
+              <div className={styles.formGroup}>
+                <label>Select CV Criteria</label>
+                <select className={styles.select} disabled>
+                  <option>Choose criteria set...</option>
+                </select>
+              </div>
+
+              <div className={styles.formGroup}>
+                <label>Select a Hiring Project</label>
+                <select
+                  className={styles.select}
+                  value={selectedProjectId}
+                  onChange={(e) => setSelectedProjectId(e.target.value)}
+                >
+                  <option value="">Choose project...</option>
+                  {projects.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.title}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <button
+                className={styles.evaluateBtn}
+                onClick={handleEvaluate}
+                disabled={!uploadedFile || !selectedProjectId || evaluating}
+              >
+                {evaluating ? (
+                  <>
+                    <Sparkles size={18} className={styles.spinner} />
+                    Evaluating...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles size={18} />
+                    Evaluate CV
+                  </>
+                )}
+              </button>
+            </div>
+
+            {/* Features */}
+            <div className={styles.featuresCard}>
+              <div className={styles.feature}>
+                <div className={styles.featureIcon}>
+                  <Target size={20} />
+                </div>
+                <div>
+                  <h4>Reusable criteria sets</h4>
+                  <p>Not once. Reuse across every role.</p>
+                </div>
+              </div>
+              <div className={styles.feature}>
+                <div className={styles.featureIcon}>
+                  <Zap size={20} />
+                </div>
+                <div>
+                  <h4>Consistent scoring</h4>
+                  <p>Same rubric. No human. No bias.</p>
+                </div>
+              </div>
+              <div className={styles.feature}>
+                <div className={styles.featureIcon}>
+                  <Eye size={20} />
+                </div>
+                <div>
+                  <h4>Shared visibility</h4>
+                  <p>Everyone has same access. No domain.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Section - Results */}
+          <div className={styles.resultsSection}>
+            {!evaluationResult ? (
+              <div className={styles.emptyResults}>
+                <BarChart3 size={64} className={styles.emptyIcon} />
+                <h3>No evaluation yet</h3>
+                <p>Upload a CV and select a project to see AI-powered evaluation results here.</p>
+              </div>
+            ) : (
+              <div className={styles.resultsCard}>
+                <div className={styles.resultsHeader}>
+                  <div>
+                    <h2>{evaluationResult.candidateName}</h2>
+                    <p className={styles.contactInfo}>
+                      {evaluationResult.email} · {evaluationResult.phone}
+                    </p>
+                  </div>
+                  <div className={styles.scoreCircle}>
+                    <div className={styles.scoreValue}>{evaluationResult.totalScore}</div>
+                    <div className={styles.scoreLabel}>Overall</div>
+                  </div>
+                </div>
+
+                <div className={styles.scoreBreakdown}>
+                  <div className={styles.scoreItem}>
+                    <span className={styles.scoreItemLabel}>Skills Match</span>
+                    <div className={styles.scoreBar}>
+                      <div
+                        className={styles.scoreBarFill}
+                        style={{ width: `${evaluationResult.skillsMatch}%` }}
+                      ></div>
+                    </div>
+                    <span className={styles.scoreItemValue}>{evaluationResult.skillsMatch}%</span>
+                  </div>
+                  <div className={styles.scoreItem}>
+                    <span className={styles.scoreItemLabel}>Experience</span>
+                    <div className={styles.scoreBar}>
+                      <div
+                        className={styles.scoreBarFill}
+                        style={{ width: `${evaluationResult.experienceScore}%` }}
+                      ></div>
+                    </div>
+                    <span className={styles.scoreItemValue}>{evaluationResult.experienceScore}%</span>
+                  </div>
+                  <div className={styles.scoreItem}>
+                    <span className={styles.scoreItemLabel}>Education</span>
+                    <div className={styles.scoreBar}>
+                      <div
+                        className={styles.scoreBarFill}
+                        style={{ width: `${evaluationResult.educationScore}%` }}
+                      ></div>
+                    </div>
+                    <span className={styles.scoreItemValue}>{evaluationResult.educationScore}%</span>
+                  </div>
+                </div>
+
+                <div className={styles.recommendation}>
+                  <CheckCircle size={20} className={styles.recommendIcon} />
+                  <span className={styles.recommendText}>{evaluationResult.recommendation}</span>
+                </div>
+
+                <div className={styles.insights}>
+                  <div className={styles.insightSection}>
+                    <h4>
+                      <CheckCircle size={18} className={styles.strengthIcon} />
+                      Key Strengths
+                    </h4>
+                    <ul>
+                      {evaluationResult.strengths.map((s: string, i: number) => (
+                        <li key={i}>{s}</li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div className={styles.insightSection}>
+                    <h4>
+                      <AlertCircle size={18} className={styles.concernIcon} />
+                      Potential Concerns
+                    </h4>
+                    <ul>
+                      {evaluationResult.concerns.map((c: string, i: number) => (
+                        <li key={i}>{c}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+
+                <div className={styles.resultsActions}>
+                  <button className={styles.btnSecondary}>
+                    <Eye size={16} />
+                    View Full Report
+                  </button>
+                  <button className={styles.btnPrimary}>
+                    <Plus size={16} />
+                    Add to Project
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Criteria Management View */}
+      {viewMode === 'criteria' && (
+        <div className={styles.criteriaView}>
+          <div className={styles.criteriaHeader}>
+            <div className={styles.criteriaFilters}>
+              <button
+                className={criteriaFilter === 'Active' ? styles.filterBtnActive : styles.filterBtn}
+                onClick={() => setCriteriaFilter('Active')}
+              >
+                Active ({criteriaList.filter(c => c.status === 'Active').length})
+              </button>
+              <button
+                className={criteriaFilter === 'Inactive' ? styles.filterBtnActive : styles.filterBtn}
+                onClick={() => setCriteriaFilter('Inactive')}
+              >
+                Inactive
+              </button>
+              <button
+                className={criteriaFilter === 'Archived' ? styles.filterBtnActive : styles.filterBtn}
+                onClick={() => setCriteriaFilter('Archived')}
+              >
+                Archived
+              </button>
+              <button
+                className={criteriaFilter === 'Draft' ? styles.filterBtnActive : styles.filterBtn}
+                onClick={() => setCriteriaFilter('Draft')}
+              >
+                Draft
+              </button>
+            </div>
+
+            <button className={styles.newCriteriaBtn}>
+              <Plus size={18} />
+              New CV Evaluation Criteria
+            </button>
+          </div>
+
+          <div className={styles.criteriaGrid}>
+            {filteredCriteria.length === 0 ? (
+              <div className={styles.emptyCriteria}>
+                <Target size={64} className={styles.emptyIcon} />
+                <h3>No {criteriaFilter.toLowerCase()} criteria</h3>
+                <p>Create your first evaluation criteria set to get started.</p>
+                <button className={styles.createFirstBtn}>
+                  <Plus size={18} />
+                  Create First Criteria
+                </button>
+              </div>
+            ) : (
+              filteredCriteria.map((criteria) => (
+                <div key={criteria.id} className={styles.criteriaCard}>
+                  <div className={styles.criteriaCardHeader}>
+                    <h3>{criteria.name}</h3>
+                    <div className={styles.criteriaActions}>
+                      <button className={styles.iconBtn} title="Duplicate">
+                        <Copy size={16} />
+                      </button>
+                      <button className={styles.iconBtn} title="Edit">
+                        <Edit2 size={16} />
+                      </button>
+                      <button className={styles.iconBtn} title="Delete">
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </div>
+
+                  <p className={styles.criteriaDescription}>{criteria.description}</p>
+
+                  <div className={styles.criteriaStats}>
+                    <div className={styles.criteriaStat}>
+                      <span className={styles.statValue}>{criteria.criteriaCount}</span>
+                      <span className={styles.statLabel}>Criteria</span>
+                    </div>
+                    <div className={styles.criteriaStat}>
+                      <span className={styles.statValue}>{criteria.projectsUsed}</span>
+                      <span className={styles.statLabel}>Projects</span>
+                    </div>
+                  </div>
+
+                  <div className={styles.criteriaFooter}>
+                    <span className={`${styles.statusBadge} ${styles[`status${criteria.status}`]}`}>
+                      {criteria.status}
+                    </span>
+                    <span className={styles.criteriaDate}>
+                      <Clock size={14} />
+                      Created {new Date(criteria.createdAt).toLocaleDateString('en-IN', {
+                        day: 'numeric',
+                        month: 'short',
+                        year: 'numeric',
+                      })}
+                    </span>
+                  </div>
+
+                  <button className={styles.evaluateCriteriaBtn}>
+                    <Sparkles size={16} />
+                    Evaluate CV
+                  </button>
+                </div>
+              ))
+            )}
           </div>
         </div>
       )}
