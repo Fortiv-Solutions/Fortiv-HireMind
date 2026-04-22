@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import styles from './Layout.module.css';
 import { LayoutDashboard, Briefcase, FileCheck2, BarChart2, HelpCircle, LogOut, Search, Bell, Settings, BrainCircuit } from 'lucide-react';
+import { useStore } from '../../store/useStore';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
+  const navigate = useNavigate();
+  const { signOut } = useStore();
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -61,10 +64,17 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <HelpCircle size={18} strokeWidth={2} />
             <span>Help Center</span>
           </NavLink>
-          <NavLink to="/login" className={styles.footerItem}>
+          <button 
+            onClick={async () => {
+              await signOut();
+              navigate('/login');
+            }}
+            className={styles.footerItem}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', width: '100%', textAlign: 'left' }}
+          >
             <LogOut size={18} strokeWidth={2} />
             <span>Log Out</span>
-          </NavLink>
+          </button>
         </div>
       </aside>
 

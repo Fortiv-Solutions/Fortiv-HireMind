@@ -1,4 +1,6 @@
 import { create } from 'zustand';
+import { User } from '@supabase/supabase-js';
+import { supabase } from '../lib/supabase';
 import {
   fetchProjectsWithStats,
   fetchProjectById,
@@ -9,6 +11,10 @@ import {
 import type { ProjectWithStats, HiringProject, CvEvaluation } from '../types/database';
 
 interface AppState {
+  // Auth
+  user: User | null;
+  authLoading: boolean;
+  
   // Projects
   projects: ProjectWithStats[];
   projectsLoading: boolean;
@@ -20,6 +26,11 @@ interface AppState {
   evaluationsLoading: boolean;
   evaluationsError: string | null;
 
+  // Auth Actions
+  setUser: (user: User | null) => void;
+  setAuthLoading: (loading: boolean) => void;
+  signOut: () => Promise<void>;
+  
   // Actions
   loadProjects: () => Promise<void>;
   loadProjectDetail: (id: string) => Promise<void>;
@@ -39,6 +50,9 @@ interface AppState {
 }
 
 export const useStore = create<AppState>((set, get) => ({
+  user: null,
+  authLoading: true,
+  
   projects: [],
   projectsLoading: false,
   projectsError: null,
@@ -47,6 +61,14 @@ export const useStore = create<AppState>((set, get) => ({
   evaluations: [],
   evaluationsLoading: false,
   evaluationsError: null,
+
+  setUser: (user) => set({ user, authLoading: false }),
+  setAuthLoading: (loading) => set({ authLoading: loading }),
+  
+  signOut: async () => {
+    await supabase.auth.signOut();
+    set({ user: null, projects: [], activeProject: null, evaluations: [] });
+  },
 
   loadProjects: async () => {
     set({ projectsLoading: true, projectsError: null });

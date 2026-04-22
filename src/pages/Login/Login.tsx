@@ -1,15 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './Login.module.css';
 import { Mail, Lock, Eye, EyeOff, Loader2, BrainCircuit, Sparkles, BarChart3, Zap, Shield } from 'lucide-react';
+import { supabase } from '../../lib/supabase';
+import { useStore } from '../../store/useStore';
 
 export default function Login() {
   const navigate = useNavigate();
+  const { user } = useStore();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  // Redirect to dashboard if already logged in
+  useEffect(() => {
+    if (user) {
+      navigate('/dashboard-home');
+    }
+  }, [user, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,12 +38,37 @@ export default function Login() {
     setLoading(true);
     setError('');
 
-    // Simulate login (replace with actual authentication later)
-    setTimeout(() => {
+    try {
+      // Authenticate with Supabase
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password: password,
+      });
+
+      if (signInError) {
+        throw signInError;
+      }
+
+      if (data.user) {
+        // Successfully logged in, navigate to dashboard home
+        navigate('/dashboard-home');
+      }
+    } catch (err: any) {
+      console.error('Login error:', err);
+      
+      // Handle specific error messages
+      if (err.message?.includes('Invalid login credentials')) {
+        setError('Invalid email or password. Please try again.');
+      } else if (err.message?.includes('Email not confirmed')) {
+        setError('Please verify your email address before logging in.');
+      } else if (err.message?.includes('User not found')) {
+        setError('No account found with this email address.');
+      } else {
+        setError(err.message || 'Failed to sign in. Please try again.');
+      }
+    } finally {
       setLoading(false);
-      // Navigate to dashboard on successful login
-      navigate('/dashboard');
-    }, 1000);
+    }
   };
 
   return (
