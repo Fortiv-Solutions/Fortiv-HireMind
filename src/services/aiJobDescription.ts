@@ -144,6 +144,57 @@ Rules:
 - No intro or outro text outside the sections above`;
 }
 
+// ─── Skills prompt builder ────────────────────────────────────────────────────
+function buildSkillsPrompt(input: JobDescriptionInput, description?: string): string {
+  const { title, department, jobType, experienceYears, education } = input;
+
+  return `You are an expert HR specialist. Based on the job details below, return a JSON array of required skills — nothing else, no markdown, no explanation.
+
+Job Title: ${title}
+${department ? `Department: ${department}` : ''}
+Job Type: ${jobType}
+Minimum Experience: ${experienceYears} year${experienceYears !== 1 ? 's' : ''}
+${education ? `Education: ${education}` : ''}
+${description ? `Job Description:\n${description.slice(0, 4000)}` : ''}
+
+Return ONLY a JSON array of skill strings, e.g.:
+["React", "TypeScript", "Node.js", "REST APIs", "Git"]
+
+Rules:
+- 6 to 12 skills only
+- Each skill is a short, specific term (1-4 words)
+- Include both technical and soft skills relevant to the role
+- Return ONLY the JSON array, no other text`;
+}
+
+// ─── Skills response parser ───────────────────────────────────────────────────
+function parseSkillsResponse(raw: string): string[] {
+  let s = raw.trim();
+
+  // Strip markdown fences
+  s = s.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
+
+  // Extract first [...] block
+  const match = s.match(/\[[\s\S]*\]/);
+  if (match) s = match[0];
+
+  let parsed: any;
+  try {
+    parsed = JSON.parse(s);
+  } catch {
+    throw new Error('JSON parse failed — model returned malformed skills output');
+  }
+
+  if (!Array.isArray(parsed) || parsed.length === 0) {
+    throw new Error('Expected a non-empty array of skills from AI response');
+  }
+
+  return parsed
+    .map((item: any) => String(item).trim())
+    .filter((item) => item.length > 0)
+    .slice(0, 12);
+}
+
 // ─── User-friendly error messages ─────────────────────────────────────────────
 function friendlyMessage(raw: string): string {
   const m = raw.toLowerCase();
@@ -211,5 +262,68 @@ export async function generateJobDescription(input: JobDescriptionInput): Promis
   console.error('[Gemini] All models exhausted:', attemptLog);
   throw new Error(
     'Unable to generate job description right now. All AI models are busy or unavailable. Please try again in a moment.'
+  );
+}
+
+// ─── Public API: Skills Generator ─────────────────────────────────────────────
+export async function generateSkillsFromInput(
+  input: JobDescriptionInput,
+  description?: string
+): Promise<string[]> {
+  const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+
+  if (!apiKey || apiKey === 'YOUR_GEMINI_API_KEY_HERE') {
+    throw new Error(
+      'Gemini API key is not configured. Please add VITE_GEMINI_API_KEY to your .env file.'
+    );
+  }
+
+  if (!input.title.trim()) {
+    throw new Error('Please enter a job title before generating skills.');
+  }
+
+  const prompt = buildSkillsPrompt(input, description);
+  const attemptLog: string[] = [];
+
+  for (const model of GEMINI_MODELS) {
+    let attempt = 0;
+
+    while (attempt <= model.maxRetries) {
+      try {
+        console.log(`[Gemini Skills] Trying ${model.id} (attempt ${attempt + 1})`);
+        const raw = await callGemini(model, prompt, apiKey);
+        const skills = parseSkillsResponse(raw);
+        console.log(`[Gemini Skills] Success with ${model.id}`);
+        return skills;
+      } catch (err: any) {
+        const msg: string = err?.message || 'Unknown error';
+        const status: number | undefined = err?.status;
+        const kind = classifyError(msg, status);
+
+        console.warn(`[Gemini Skills] ${model.id} attempt ${attempt + 1} — ${kind}: ${msg}`);
+        attemptLog.push(`${model.id}[${attempt + 1}]: ${msg}`);
+
+        if (kind === 'HARD_FAIL') {
+          throw new Error(friendlyMessage(msg));
+        }
+
+        if (kind === 'MODEL_SKIP') {
+          break;
+        }
+
+        // TRANSIENT — wait and retry
+        attempt++;
+        if (attempt <= model.maxRetries) {
+          const backoff = Math.min(1000 * 2 ** attempt, 8000);
+          console.log(`[Gemini Skills] Retrying in ${backoff}ms...`);
+          await sleep(backoff);
+        }
+      }
+    }
+  }
+
+  console.error('[Gemini Skills] All models exhausted:', attemptLog);
+  throw new Error(
+    'Unable to generate skills right now. All AI models are busy or unavailable. Please try again in a moment.'
   );
 }

@@ -79,6 +79,12 @@
 }
 .sectionHeader h3 { margin: 0; }
 
+.sectionActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .formGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;

@@ -4,7 +4,7 @@ import { X, Loader2, Plus, Trash2, Sparkles } from 'lucide-react';
 import { createHiringProject } from '../../services/hiringProjects';
 import { useStore } from '../../store/useStore';
 import type { JobType, ProjectStatus } from '../../types/database';
-import { generateJobDescription } from '../../services/aiJobDescription';
+import { generateJobDescription, generateSkillsFromInput } from '../../services/aiJobDescription';
 
 interface Props {
   onClose: () => void;
@@ -15,6 +15,7 @@ export default function NewProjectModal({ onClose }: Props) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [generatingAI, setGeneratingAI] = useState(false);
+  const [generatingSkills, setGeneratingSkills] = useState(false);
 
   const [form, setForm] = useState({
     title: '',
@@ -65,6 +66,37 @@ export default function NewProjectModal({ onClose }: Props) {
       setError(err.message || 'Failed to generate job description. Please try again.');
     } finally {
       setGeneratingAI(false);
+    }
+  }
+
+  async function handleGenerateSkills() {
+    if (!form.title.trim()) {
+      setError('Please enter a job title before generating skills.');
+      return;
+    }
+
+    setGeneratingSkills(true);
+    setError(null);
+
+    try {
+      const generatedSkills = await generateSkillsFromInput(
+        {
+          title: form.title,
+          department: form.department,
+          location: form.location,
+          jobType: form.job_type,
+          experienceYears: Number(form.required_experience_years),
+          education: form.required_education,
+          skills: skills.filter(s => s.trim() !== ''),
+        },
+        form.description || undefined
+      );
+
+      setSkills(generatedSkills.length > 0 ? generatedSkills : ['']);
+    } catch (err: any) {
+      setError(err.message || 'Failed to generate skills. Please try again.');
+    } finally {
+      setGeneratingSkills(false);
     }
   }
 
@@ -194,9 +226,30 @@ export default function NewProjectModal({ onClose }: Props) {
           <div className={styles.section}>
             <div className={styles.sectionHeader}>
               <h3>Required Skills</h3>
-              <button type="button" className={styles.addSkillBtn} onClick={addSkill}>
-                <Plus size={14} /> Add Skill
-              </button>
+              <div className={styles.sectionActions}>
+                <button
+                  type="button"
+                  className={styles.aiGenerateBtn}
+                  onClick={handleGenerateSkills}
+                  disabled={generatingSkills || !form.title.trim()}
+                  title="Generate skills with AI"
+                >
+                  {generatingSkills ? (
+                    <>
+                      <Loader2 size={14} className={styles.spinner} />
+                      Generating...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles size={14} />
+                      Generate with AI
+                    </>
+                  )}
+                </button>
+                <button type="button" className={styles.addSkillBtn} onClick={addSkill} disabled={generatingSkills}>
+                  <Plus size={14} /> Add Skill
+                </button>
+              </div>
             </div>
             <div className={styles.skillsList}>
               {skills.map((skill, i) => (
