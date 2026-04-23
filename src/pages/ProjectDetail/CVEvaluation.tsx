@@ -5,8 +5,8 @@ import {
   Target, CheckCheck, AlertTriangle, ExternalLink, Hash,
   Files, Trash2, XCircle, RotateCcw,
 } from 'lucide-react';
-import { evaluateCv, bulkUploadCVs, type BulkFileResult } from '../../services/cvEvaluation';
-import type { CvEvaluation as CvEvaluationResult, WebhookResponseData } from '../../services/cvEvaluation';
+import { evaluateCv, bulkUploadCVs, type BulkFileResult, type WebhookResponseData } from '../../services/cvEvaluation';
+import type { CvEvaluation as CvEvaluationResult } from '../../types/database';
 import { useStore } from '../../store/useStore';
 
 interface Props {
