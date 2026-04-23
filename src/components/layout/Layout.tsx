@@ -1,10 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import styles from './Layout.module.css';
-import { LayoutDashboard, Briefcase, FileCheck2, Search, Bell, BrainCircuit, User } from 'lucide-react';
+import { LayoutDashboard, Briefcase, FileCheck2, Search, Bell, BrainCircuit, Target, Users, ChevronRight } from 'lucide-react';
+import { useStore } from '../../store/useStore';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [scrolled, setScrolled] = useState(false);
+  const { user } = useStore();
+
+  const userName = user?.user_metadata?.full_name
+                ?? user?.user_metadata?.name
+                ?? user?.email?.split('@')[0]
+                ?? 'User';
+  const userEmail = user?.email ?? '';
+  const initials = userName.split(' ').map((n: string) => n[0]).slice(0, 2).join('').toUpperCase();
 
   useEffect(() => {
     const handleScroll = (e: Event) => {
@@ -44,9 +53,17 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               <Briefcase size={18} className={styles.icon} strokeWidth={2} />
               <span>Hiring Projects</span>
             </NavLink>
+            <NavLink to="/candidates" className={({ isActive }) => isActive ? `${styles.navItem} ${styles.navItemActive}` : styles.navItem}>
+              <Users size={18} className={styles.icon} strokeWidth={2} />
+              <span>Candidates</span>
+            </NavLink>
             <NavLink to="/cv-evaluator" className={({ isActive }) => isActive ? `${styles.navItem} ${styles.navItemActive}` : styles.navItem}>
               <FileCheck2 size={18} className={styles.icon} strokeWidth={2} />
               <span>CV Evaluator</span>
+            </NavLink>
+            <NavLink to="/evaluation-criteria" className={({ isActive }) => isActive ? `${styles.navItem} ${styles.navItemActive}` : styles.navItem}>
+              <Target size={18} className={styles.icon} strokeWidth={2} />
+              <span>Evaluation Criteria</span>
             </NavLink>
           </div>
         </nav>
@@ -56,13 +73,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <div className={styles.profileSection}>
             <NavLink to="/profile" className={({ isActive }) => isActive ? `${styles.profileItem} ${styles.profileItemActive}` : styles.profileItem}>
               <div className={styles.profileAvatar}>
-                <User size={18} strokeWidth={2.5} />
+                <span style={{ fontSize: '12px', fontWeight: 700 }}>{initials}</span>
               </div>
               <div className={styles.profileInfo}>
-                <span className={styles.profileName}>Profile</span>
-                <span className={styles.profileSubtext}>Account & Settings</span>
+                <span className={styles.profileName}>{userName}</span>
+                <span className={styles.profileSubtext}>{userEmail}</span>
               </div>
-              <User size={16} strokeWidth={2} className={styles.profileIcon} />
+              <ChevronRight size={14} className={styles.profileIcon} />
             </NavLink>
           </div>
         </div>

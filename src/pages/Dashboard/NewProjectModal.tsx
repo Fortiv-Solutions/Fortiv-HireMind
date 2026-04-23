@@ -129,7 +129,7 @@ export default function NewProjectModal({ onClose }: Props) {
           <button className={styles.closeBtn} onClick={onClose}><X size={20} /></button>
         </div>
 
-        <form className={styles.form} onSubmit={handleSubmit}>
+        <form id="newProjectForm" className={styles.form} onSubmit={handleSubmit}>
           <div className={styles.section}>
             <h3>Basic Information</h3>
             <div className={styles.formGrid}>
@@ -271,14 +271,14 @@ export default function NewProjectModal({ onClose }: Props) {
           </div>
 
           {error && <div className={styles.errorBanner}>{error}</div>}
-
-          <div className={styles.formFooter}>
-            <button type="button" className={styles.cancelBtn} onClick={onClose}>Cancel</button>
-            <button type="submit" className={styles.submitBtn} disabled={saving}>
-              {saving ? <><Loader2 size={16} className={styles.spinner} /> Creating…</> : 'Create Project'}
-            </button>
-          </div>
         </form>
+
+        <div className={styles.formFooter}>
+          <button type="button" className={styles.cancelBtn} onClick={onClose}>Cancel</button>
+          <button type="submit" form="newProjectForm" className={styles.submitBtn} disabled={saving}>
+            {saving ? <><Loader2 size={16} className={styles.spinner} /> Creating…</> : 'Create Project'}
+          </button>
+        </div>
       </div>
     </>
   );

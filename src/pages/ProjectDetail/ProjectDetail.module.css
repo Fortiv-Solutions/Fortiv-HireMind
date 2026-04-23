@@ -60,55 +60,55 @@
 /* Tabs */
 .tabsContainer {
   background: white;
-  border-radius: 8px;
-  padding: 4px;
-  border: 1px solid var(--color-border);
-  box-shadow: var(--shadow-sm);
+  border-radius: 24px;
+  padding: 6px;
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  box-shadow: 0 4px 40px rgba(0, 0, 0, 0.04);
+  display: inline-flex;
+  align-self: flex-start;
 }
 
 .tabs {
   display: flex;
-  gap: 3px;
+  gap: 4px;
 }
 
 .tab {
-  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  padding: 8px 12px;
+  gap: 7px;
+  padding: 9px 20px;
   background: transparent;
   border: none;
-  border-radius: 6px;
+  border-radius: 18px;
   font-size: 12px;
   font-weight: 600;
   color: var(--color-text-secondary);
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
 }
 
 .tab:hover {
-  background: var(--color-bg-base);
+  background: rgba(0, 0, 0, 0.04);
   color: var(--color-primary);
 }
 
 .tabActive {
-  background: linear-gradient(135deg, var(--color-brand-purple) 0%, var(--color-brand-indigo) 100%);
+  background: var(--color-text-primary);
   color: white;
-  box-shadow: var(--shadow-brand);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
 }
 
 .tabActive:hover {
-  background: linear-gradient(135deg, var(--color-brand-purple) 0%, var(--color-brand-indigo) 100%);
+  background: var(--color-text-primary);
   color: white;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.35);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.22);
 }
 
 .tab svg {
-  transition: transform 0.3s ease;
+  transition: transform 0.25s ease;
 }
 
 .tabActive svg {
@@ -140,28 +140,28 @@
   align-items: center;
   gap: 8px;
   padding: 10px 20px;
-  border-radius: 8px;
-  font-weight: 600;
-  font-size: 14px;
+  border-radius: var(--radius-full);
+  font-weight: 500;
+  font-size: 13px;
   cursor: pointer;
   transition: all 0.2s;
 }
 .secondaryBtn {
   background: white;
   border: 1px solid var(--color-border);
-  color: var(--color-primary);
+  color: var(--color-text-primary);
 }
-.secondaryBtn:hover { background: #F8F9FC; }
+.secondaryBtn:hover { background: var(--color-bg-elevated); }
 .primaryBtn {
-  background: linear-gradient(135deg, var(--color-brand-purple) 0%, var(--color-brand-indigo) 100%);
+  background: var(--color-text-primary);
   border: none;
   color: white;
-  box-shadow: var(--shadow-brand);
+  box-shadow: var(--shadow-sm);
 }
 .primaryBtn:hover { 
-  background: linear-gradient(135deg, #6d28d9 0%, #4338ca 100%);
+  background: var(--color-secondary);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.35);
+  box-shadow: var(--shadow-md);
 }
 
 .statsStrip {
@@ -172,19 +172,19 @@
 .statBox {
   flex: 1;
   background: white;
-  padding: 12px 14px;
-  border-radius: 8px;
+  padding: 16px;
+  border-radius: var(--radius-xl);
   border: 1px solid var(--color-border);
   box-shadow: var(--shadow-sm);
   transition: all 0.2s ease;
 }
 .statBox:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-md);
 }
 .statBoxActive {
-  border: 2px solid var(--color-brand-purple);
-  background: linear-gradient(135deg, rgba(124, 58, 237, 0.05) 0%, rgba(99, 102, 241, 0.05) 100%);
+  border: 2px solid var(--color-text-primary);
+  background: var(--color-bg-base);
 }
 .statLabel { font-size: 10px; color: var(--color-text-secondary); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;}
 .statValue { font-size: 20px; font-weight: 700; color: var(--color-primary); font-variant-numeric: tabular-nums; line-height: 1; }
@@ -201,8 +201,8 @@
 .leftSidebar {
   width: 200px;
   background: white;
-  border-radius: 8px;
-  padding: 16px;
+  border-radius: var(--radius-xl);
+  padding: 24px;
   border: 1px solid var(--color-border);
   box-shadow: var(--shadow-sm);
 }
@@ -313,8 +313,8 @@
 .contentArea {
   flex: 1;
   background: white;
-  border-radius: 10px;
-  padding: 20px;
+  border-radius: var(--radius-xl);
+  padding: 24px 32px;
   border: 1px solid var(--color-border);
   box-shadow: var(--shadow-sm);
 }
@@ -342,20 +342,20 @@
   align-items: center;
   gap: 6px;
   padding: 8px 16px;
-  background: linear-gradient(135deg, var(--color-brand-purple) 0%, var(--color-brand-indigo) 100%);
+  background: var(--color-text-primary);
   color: white;
   border: none;
-  border-radius: 8px;
-  font-size: 12px;
-  font-weight: 600;
+  border-radius: var(--radius-full);
+  font-size: 13px;
+  font-weight: 500;
   cursor: pointer;
-  box-shadow: var(--shadow-brand);
+  box-shadow: var(--shadow-sm);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .addCandidateBtn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.35);
+  box-shadow: var(--shadow-md);
 }
 
 .bulkUploadBtn {
@@ -536,19 +536,20 @@
 }
 .errorState { color: #DC2626; }
 .errorState button, .emptyState button {
-  background: linear-gradient(135deg, var(--color-brand-purple) 0%, var(--color-brand-indigo) 100%);
+  background: var(--color-text-primary);
   color: white;
   border: none;
   padding: 10px 24px;
-  border-radius: 8px;
-  font-weight: 600;
+  border-radius: var(--radius-full);
+  font-weight: 500;
+  font-size: 13px;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: var(--shadow-brand);
+  box-shadow: var(--shadow-sm);
 }
 .errorState button:hover, .emptyState button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.35);
+  box-shadow: var(--shadow-md);
 }
 
 .emptyState h3 {
@@ -575,21 +576,21 @@
   align-items: center;
   gap: 8px;
   padding: 12px 24px;
-  background: linear-gradient(135deg, var(--color-brand-purple) 0%, var(--color-brand-indigo) 100%);
+  background: var(--color-text-primary);
   color: white;
   border: none;
-  border-radius: 10px;
-  font-size: 14px;
-  font-weight: 600;
+  border-radius: var(--radius-full);
+  font-size: 13px;
+  font-weight: 500;
   cursor: pointer;
-  box-shadow: var(--shadow-brand);
+  box-shadow: var(--shadow-sm);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   margin-top: 8px;
 }
 
 .emptyActionBtn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.35);
+  box-shadow: var(--shadow-md);
 }
 
 @keyframes spin {

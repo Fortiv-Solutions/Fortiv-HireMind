@@ -83,7 +83,7 @@ export default function ProjectDetail() {
 
       {/* Tabs */}
       <div className={styles.tabsContainer}>
-        <div className={styles.tabs}>
+        <div className={styles.tabs} role="tablist">
           {tabs.map((tab) => {
             const Icon = tab.icon;
             return (

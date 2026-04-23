@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './Login.module.css';
-import { Mail, Lock, Eye, EyeOff, Loader2, BrainCircuit, Sparkles, BarChart3, Zap, Shield } from 'lucide-react';
+import { Mail, Lock, ArrowRight, Loader2 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useStore } from '../../store/useStore';
 
@@ -10,7 +10,7 @@ export default function Login() {
   const { user } = useStore();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -75,44 +75,28 @@ export default function Login() {
     <div className={styles.container}>
       <div className={styles.leftPanel}>
         <div className={styles.brand}>
-          <div className={styles.logoBox}>
-            <BrainCircuit size={20} color="white" strokeWidth={2} />
-          </div>
-          <div className={styles.wordmark}>
-            <span className={styles.fortiv}>Fortiv</span>
-            <span className={styles.hiremind}>HireMind</span>
-          </div>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M16 8C18.2091 8 20 9.79086 20 12C20 14.2091 18.2091 16 16 16C13 16 11 8 8 8C5.79086 8 4 9.79086 4 12C4 14.2091 5.79086 16 8 16C11 16 13 8 16 8Z" stroke="#8c6a28" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+          <span className={styles.brandName}>HireFlow</span>
         </div>
 
-        <div className={styles.heroText}>
-          <h1>Intelligence Suite for Modern Recruitment</h1>
+        <div className={styles.heroContent}>
+          <h1>Intelligence Suite for<br/>Modern Recruitment</h1>
           <p>
-            Empower your hiring decisions with AI-driven insights. Streamline workflows, evaluate candidates with precision, and build exceptional teams faster.
+            Streamline your talent acquisition pipeline with data-driven<br/>insights and a frictionless candidate experience.
           </p>
         </div>
-
-        <div className={styles.features}>
-          <span className={styles.chip}><Sparkles size={14} /> AI Evaluation</span>
-          <span className={styles.chip}><BarChart3 size={14} /> Deep Analytics</span>
-          <span className={styles.chip}><Zap size={14} /> Accelerated Hiring</span>
-        </div>
-
-        <div className={styles.footerBrand}>
-          <Shield size={16} /> Enterprise Grade Security & Compliance
-        </div>
-
-        {/* Placeholder for the 3D Glassmorphism element (using CSS bubbles instead since no WebGL configured) */}
-        <div className={styles.glassOrb1}></div>
-        <div className={styles.glassOrb2}></div>
-        <div className={styles.glassOrb3}></div>
       </div>
 
       <div className={styles.rightPanel}>
-        <div className={styles.formContainer}>
-          <h2>Welcome back</h2>
-          <p className={styles.subTitle}>Sign in to your account to continue.</p>
+        <div className={styles.formCard}>
+          <div className={styles.formHeader}>
+            <h2>Welcome back</h2>
+            <p className={styles.subTitle}>Please enter your details to sign in.</p>
+          </div>
 
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} className={styles.form}>
             {error && (
               <div className={styles.errorBanner}>
                 {error}
@@ -120,9 +104,9 @@ export default function Login() {
             )}
 
             <div className={styles.inputGroup}>
-              <label>Work Email</label>
+              <label>Email</label>
               <div className={styles.inputWrapper}>
-                <Mail className={styles.inputIcon} size={18} />
+                <Mail className={styles.inputIcon} size={16} />
                 <input 
                   type="email" 
                   placeholder="name@company.com"
@@ -135,34 +119,31 @@ export default function Login() {
             </div>
 
             <div className={styles.inputGroup}>
-              <div className={styles.labelRow}>
-                <label>Password</label>
-                <a href="#" className={styles.forgot}>Forgot password?</a>
-              </div>
+              <label>Password</label>
               <div className={styles.inputWrapper}>
-                <Lock className={styles.inputIcon} size={18} />
+                <Lock className={styles.inputIcon} size={16} />
                 <input 
-                  type={showPassword ? 'text' : 'password'}
+                  type="password"
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   disabled={loading}
                   autoComplete="current-password"
                 />
-                <button
-                  type="button"
-                  className={styles.eyeButton}
-                  onClick={() => setShowPassword(!showPassword)}
-                  disabled={loading}
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
-                >
-                  {showPassword ? (
-                    <EyeOff className={styles.inputActionIcon} size={18} />
-                  ) : (
-                    <Eye className={styles.inputActionIcon} size={18} />
-                  )}
-                </button>
               </div>
+            </div>
+
+            <div className={styles.optionsRow}>
+              <label className={styles.rememberMe}>
+                <input 
+                  type="checkbox" 
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                />
+                <span className={styles.checkmark}></span>
+                Remember me
+              </label>
+              <a href="#" className={styles.forgot}>Forgot password?</a>
             </div>
 
             <button 
@@ -171,18 +152,15 @@ export default function Login() {
               disabled={loading}
             >
               {loading ? (
-                <>
-                  <Loader2 size={18} className={styles.spinner} />
-                  Signing in...
-                </>
+                <Loader2 size={18} className={styles.spinner} />
               ) : (
-                'Sign In to Workspace'
+                <>Sign In <ArrowRight size={18} className={styles.arrowIcon} /></>
               )}
             </button>
           </form>
 
           <div className={styles.troubleText}>
-            Having trouble signing in? <a href="#">Contact IT Support</a>
+            Don't have an account? <a href="#">Request access</a>
           </div>
         </div>
       </div>

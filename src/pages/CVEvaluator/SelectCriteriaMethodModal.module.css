@@ -13,7 +13,7 @@
 /* ─── Modal ──────────────────────────────────────────────────────────────── */
 .modal {
   background: #fff;
-  border-radius: 16px;
+  border-radius: var(--radius-xl);
   width: 100%;
   max-width: 560px;
   box-shadow: 0 24px 64px rgba(0, 0, 0, 0.18);
@@ -33,7 +33,7 @@
 .backBtn {
   background: var(--color-bg-secondary, #f5f5f5);
   border: 1px solid var(--color-border, #e5e7eb);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   padding: 7px 14px;
   font-size: 13px;
   font-weight: 600;
@@ -57,7 +57,7 @@
   color: var(--color-text-secondary, #6b7280);
   cursor: pointer;
   padding: 6px;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -107,7 +107,7 @@
   gap: 12px;
   padding: 16px 18px;
   border: 1.5px solid var(--color-border, #e5e7eb);
-  border-radius: 12px;
+  border-radius: var(--radius-xl);
   background: #fff;
   cursor: pointer;
   text-align: left;
@@ -115,14 +115,14 @@
 }
 
 .option:hover {
-  border-color: var(--color-brand-purple);
+  border-color: var(--color-text-primary);
   background: #faf5ff;
 }
 
 .optionSelected {
-  border-color: var(--color-brand-purple);
+  border-color: var(--color-text-primary);
   background: #f3e8ff;
-  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+  box-shadow: 0 0 0 3px rgba(118, 91, 0, 0.1);
 }
 
 .optionLeft {
@@ -147,7 +147,7 @@
 }
 
 .optionSelected .radio {
-  border-color: var(--color-brand-purple);
+  border-color: var(--color-text-primary);
 }
 
 .radioDot {
@@ -161,7 +161,7 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: var(--color-brand-purple);
+  background: var(--color-text-primary);
 }
 
 /* ─── Option text ────────────────────────────────────────────────────────── */
@@ -191,9 +191,9 @@
   font-size: 11px;
   font-weight: 600;
   background: #ede9fe;
-  color: var(--color-brand-purple);
+  color: var(--color-text-primary);
   padding: 2px 8px;
-  border-radius: 20px;
+  border-radius: var(--radius-full);
   white-space: nowrap;
 }
 
@@ -203,7 +203,7 @@
 }
 
 .optionSelected .optionIcon {
-  color: var(--color-brand-purple);
+  color: var(--color-text-primary);
 }
 
 /* ─── JD Section ─────────────────────────────────────────────────────────── */
@@ -224,7 +224,7 @@
   width: 100%;
   padding: 12px 14px;
   border: 1.5px solid var(--color-border, #e5e7eb);
-  border-radius: 10px;
+  border-radius: var(--radius-xl);
   font-size: 13px;
   font-family: inherit;
   line-height: 1.6;
@@ -237,8 +237,8 @@
 
 .jdTextarea:focus {
   outline: none;
-  border-color: var(--color-brand-purple);
-  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+  border-color: var(--color-text-primary);
+  box-shadow: 0 0 0 3px rgba(118, 91, 0, 0.1);
 }
 
 .jdTextarea:disabled {
@@ -261,7 +261,7 @@
 .error {
   background: #fef2f2;
   border: 1px solid #fecaca;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   padding: 10px 14px;
   color: #dc2626;
   font-size: 13px;
@@ -279,10 +279,10 @@
   align-items: center;
   gap: 8px;
   padding: 11px 24px;
-  background: var(--color-brand-purple);
+  background: var(--color-text-primary);
   color: #fff;
   border: none;
-  border-radius: 10px;
+  border-radius: var(--radius-xl);
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
@@ -292,7 +292,7 @@
 .continueBtn:hover:not(:disabled) {
   background: var(--color-brand-purple-light);
   transform: translateY(-1px);
-  box-shadow: 0 4px 14px rgba(124, 58, 237, 0.35);
+  box-shadow: 0 4px 14px rgba(118, 91, 0, 0.35);
 }
 
 .continueBtn:disabled {
@@ -317,7 +317,7 @@
 @media (max-width: 600px) {
   .modal {
     max-width: 100%;
-    border-radius: 12px;
+    border-radius: var(--radius-xl);
   }
 
   .options,
@@ -333,3 +333,4 @@
     padding-right: 16px;
   }
 }
+

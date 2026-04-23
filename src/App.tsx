@@ -8,6 +8,8 @@ import ProjectDetail from './pages/ProjectDetail/ProjectDetail';
 import CVEvaluator from './pages/CVEvaluator/CVEvaluator';
 import HomeOverview from './pages/HomeOverview/HomeOverview';
 import Profile from './pages/Profile/Profile';
+import EvaluationCriteria from './pages/EvaluationCriteria/EvaluationCriteria';
+import Candidates from './pages/Candidates/Candidates';
 
 export default function App() {
   return (
@@ -48,6 +50,20 @@ export default function App() {
             <ProtectedRoute>
               <Layout>
                 <Profile />
+              </Layout>
+            </ProtectedRoute>
+          } />
+          <Route path="/evaluation-criteria" element={
+            <ProtectedRoute>
+              <Layout>
+                <EvaluationCriteria />
+              </Layout>
+            </ProtectedRoute>
+          } />
+          <Route path="/candidates" element={
+            <ProtectedRoute>
+              <Layout>
+                <Candidates />
               </Layout>
             </ProtectedRoute>
           } />

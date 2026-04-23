@@ -1,5 +1,51 @@
 import { supabase } from '../lib/supabase';
-import type { HiringProject, ProjectWithStats, CvEvaluation } from '../types/database';
+import type { HiringProject, ProjectWithStats, CvEvaluation, Candidate } from '../types/database';
+
+export interface CandidateWithStats extends Candidate {
+  project_count: number;
+  latest_status: string | null;
+  latest_score: number | null;
+  latest_project_title: string | null;
+}
+
+// Fetch all candidates with their evaluation stats
+export async function fetchAllCandidates(): Promise<CandidateWithStats[]> {
+  const { data: candidates, error } = await supabase
+    .from('candidates')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+  if (!candidates) return [];
+
+  // Enrich each candidate with evaluation stats
+  const enriched = await Promise.all(
+    candidates.map(async (candidate: Candidate) => {
+      const { data: evals } = await supabase
+        .from('cv_evaluations')
+        .select(`
+          status,
+          total_score,
+          hiring_project:hiring_projects (title)
+        `)
+        .eq('candidate_id', candidate.id)
+        .order('created_at', { ascending: false });
+
+      const allEvals = evals || [];
+      const latest = allEvals[0] as any;
+
+      return {
+        ...candidate,
+        project_count: allEvals.length,
+        latest_status: latest?.status ?? null,
+        latest_score: latest?.total_score ?? null,
+        latest_project_title: latest?.hiring_project?.title ?? null,
+      } as CandidateWithStats;
+    })
+  );
+
+  return enriched;
+}
 
 // Fetch all hiring projects with aggregated candidate stats
 export async function fetchProjectsWithStats(): Promise<ProjectWithStats[]> {
@@ -276,6 +322,30 @@ export async function updateJobPostStatus(
     .eq('id', postId);
 
   if (error) throw error;
+}
+
+// Fetch the most recent cv_evaluation for a candidate (with full data)
+export async function fetchLatestEvaluationForCandidate(candidateId: string): Promise<CvEvaluation | null> {
+  const { data, error } = await supabase
+    .from('cv_evaluations')
+    .select(`
+      *,
+      candidate:candidates (
+        id,
+        full_name,
+        email,
+        phone,
+        linkedin_url,
+        location
+      )
+    `)
+    .eq('candidate_id', candidateId)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .single();
+
+  if (error) return null;
+  return data;
 }
 
 // Delete job post

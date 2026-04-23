@@ -1,29 +1,18 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import styles from './CVEvaluator.module.css';
-import { Upload, FileText, CheckCircle, AlertCircle, Sparkles, Plus, Edit2, Trash2, Copy, Eye, BarChart3, Target, Clock, Zap, ExternalLink, Files, XCircle, RotateCcw } from 'lucide-react';
+import { Upload, FileText, CheckCircle, AlertCircle, Sparkles, BarChart3, Target, Eye, Trash2, Zap, ExternalLink, Files, XCircle, RotateCcw } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 import {
   fetchCriteriaWithStats,
   evaluateCv,
   fetchExistingCandidates,
   evaluateExistingCandidate,
-  deleteCriteriaSet,
-  duplicateCriteriaSet,
-  updateCriteriaSet,
-  createCriteriaSetWithItems,
-  fetchCriteriaWithItems,
-  updateCriteriaSetWithItems,
   bulkUploadCVs,
 } from '../../services/cvEvaluation';
 import type { CriteriaWithStats, CvEvaluation } from '../../types/database';
 import type { WebhookResponseData, BulkFileResult } from '../../services/cvEvaluation';
-import CreateCriteriaModal from './CreateCriteriaModal';
-import EditCriteriaModal from './EditCriteriaModal';
-import CriteriaDetailModal from './CriteriaDetailModal';
-import SelectCriteriaMethodModal from './SelectCriteriaMethodModal';
-import type { GeneratedCriteria } from '../../services/aiCriteriaGenerator';
 
-type ViewMode = 'upload' | 'bulk' | 'criteria';
+type ViewMode = 'upload' | 'bulk';
 
 const ACCEPTED_MIME = [
   'application/pdf',
@@ -58,19 +47,8 @@ export default function CVEvaluator() {
   const [evaluationResult, setEvaluationResult] = useState<EvalResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // Criteria management
+  // Criteria list (for dropdowns)
   const [criteriaList, setCriteriaList] = useState<CriteriaWithStats[]>([]);
-  const [criteriaFilter, setCriteriaFilter] = useState<'Active' | 'Inactive' | 'Archived' | 'Draft'>('Active');
-  const [loadingCriteria, setLoadingCriteria] = useState(false);
-  const [showCreateModal, setShowCreateModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [editingCriteriaId, setEditingCriteriaId] = useState<string | null>(null);
-  const [showDetailModal, setShowDetailModal] = useState(false);
-  const [detailCriteriaId, setDetailCriteriaId] = useState<string | null>(null);
-
-  // Method selection modal (shown before create)
-  const [showMethodModal, setShowMethodModal] = useState(false);
-  const [prefilledCriteria, setPrefilledCriteria] = useState<GeneratedCriteria | null>(null);
 
   // Existing candidates
   const [existingCandidates, setExistingCandidates] = useState<Array<{ id: string; full_name: string; email: string; phone: string | null; location: string | null }>>([]);
@@ -146,15 +124,11 @@ export default function CVEvaluator() {
   }, [uploadMode]);
 
   const loadCriteria = async () => {
-    setLoadingCriteria(true);
     try {
       const data = await fetchCriteriaWithStats();
       setCriteriaList(data);
     } catch (err) {
       console.error('Error loading criteria:', err);
-      setError('Failed to load evaluation criteria');
-    } finally {
-      setLoadingCriteria(false);
     }
   };
 
@@ -272,148 +246,6 @@ export default function CVEvaluator() {
     }
   };
 
-  const handleDeleteCriteria = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this criteria set?')) return;
-
-    try {
-      await deleteCriteriaSet(id);
-      await loadCriteria();
-    } catch (err: any) {
-      console.error('Error deleting criteria:', err);
-      const message = err?.message || 'Failed to delete criteria set';
-
-      // If it's a FK conflict, offer to archive instead
-      if (
-        message.includes('referenced') ||
-        message.includes('evaluations') ||
-        message.includes('Archive')
-      ) {
-        const shouldArchive = confirm(
-          `${message}\n\nWould you like to archive it instead?`
-        );
-        if (shouldArchive) {
-          await handleArchiveCriteria(id);
-        }
-      } else {
-        setError(message);
-      }
-    }
-  };
-
-  const handleDuplicateCriteria = async (id: string) => {
-    try {
-      await duplicateCriteriaSet(id);
-      await loadCriteria();
-    } catch (err) {
-      console.error('Error duplicating criteria:', err);
-      setError('Failed to duplicate criteria set');
-    }
-  };
-
-  const handleArchiveCriteria = async (id: string) => {
-    try {
-      await updateCriteriaSet(id, { status: 'Archived' });
-      await loadCriteria();
-    } catch (err) {
-      console.error('Error archiving criteria:', err);
-      setError('Failed to archive criteria set');
-    }
-  };
-
-  const handleCreateCriteria = async (data: {
-    name: string;
-    description: string;
-    status: 'Active' | 'Inactive' | 'Draft' | 'Archived';
-    items: Array<{
-      criterion_name: string;
-      criterion_description: string;
-      weight: number;
-      criterion_type: 'skill' | 'experience' | 'education' | 'custom';
-      expected_value: string;
-    }>;
-  }) => {
-    try {
-      await createCriteriaSetWithItems(
-        {
-          name: data.name,
-          description: data.description,
-          status: data.status,
-        },
-        data.items
-      );
-      await loadCriteria();
-      setShowCreateModal(false);
-    } catch (err: any) {
-      console.error('Error creating criteria:', err);
-      throw new Error(err.message || 'Failed to create criteria set');
-    }
-  };
-
-  const handleEditCriteria = (id: string) => {
-    setEditingCriteriaId(id);
-    setShowEditModal(true);
-  };
-
-  const handleGenerateDone = (generated: GeneratedCriteria) => {
-    setPrefilledCriteria(generated);
-    setShowCreateModal(true);
-  };
-
-  const handleUpdateCriteria = async (
-    criteriaId: string,
-    data: {
-      name: string;
-      description: string;
-      status: 'Active' | 'Inactive' | 'Draft' | 'Archived';
-      itemsToAdd: Array<{
-        criterion_name: string;
-        criterion_description: string;
-        weight: number;
-        criterion_type: 'skill' | 'experience' | 'education' | 'custom';
-        expected_value: string;
-      }>;
-      itemsToUpdate: Array<{
-        id: string;
-        criterion_name?: string;
-        criterion_description?: string;
-        weight?: number;
-        criterion_type?: 'skill' | 'experience' | 'education' | 'custom';
-        expected_value?: string;
-      }>;
-      itemsToDelete: string[];
-    }
-  ) => {
-    try {
-      await updateCriteriaSetWithItems(
-        criteriaId,
-        {
-          name: data.name,
-          description: data.description,
-          status: data.status,
-        },
-        data.itemsToAdd,
-        data.itemsToUpdate,
-        data.itemsToDelete
-      );
-      await loadCriteria();
-      setShowEditModal(false);
-      setEditingCriteriaId(null);
-    } catch (err: any) {
-      console.error('Error updating criteria:', err);
-      throw new Error(err.message || 'Failed to update criteria set');
-    }
-  };
-
-  const handleLoadCriteriaForEdit = async (id: string) => {
-    return await fetchCriteriaWithItems(id);
-  };
-
-  const handleViewCriteriaDetail = (id: string) => {
-    setDetailCriteriaId(id);
-    setShowDetailModal(true);
-  };
-
-  const filteredCriteria = criteriaList.filter(c => c.status === criteriaFilter);
 
   // Generate recommendation text based on score
   const getRecommendation = (score: number): string => {
@@ -479,50 +311,7 @@ export default function CVEvaluator() {
         </div>
       )}
 
-      {/* Method Selection Modal — shown first when clicking "New CV Evaluation Criteria" */}
-      <SelectCriteriaMethodModal
-        isOpen={showMethodModal}
-        onClose={() => setShowMethodModal(false)}
-        onSelectManual={() => {
-          setPrefilledCriteria(null);
-          setShowCreateModal(true);
-        }}
-        onGenerateDone={handleGenerateDone}
-      />
 
-      {/* Create Criteria Modal */}
-      <CreateCriteriaModal
-        isOpen={showCreateModal}
-        onClose={() => {
-          setShowCreateModal(false);
-          setPrefilledCriteria(null);
-        }}
-        onSave={handleCreateCriteria}
-        prefilled={prefilledCriteria}
-      />
-
-      {/* Edit Criteria Modal */}
-      <EditCriteriaModal
-        isOpen={showEditModal}
-        criteriaId={editingCriteriaId}
-        onClose={() => {
-          setShowEditModal(false);
-          setEditingCriteriaId(null);
-        }}
-        onSave={handleUpdateCriteria}
-        onLoadCriteria={handleLoadCriteriaForEdit}
-      />
-
-      {/* Criteria Detail Modal */}
-      <CriteriaDetailModal
-        isOpen={showDetailModal}
-        criteriaId={detailCriteriaId}
-        onClose={() => {
-          setShowDetailModal(false);
-          setDetailCriteriaId(null);
-        }}
-        onLoadCriteria={handleLoadCriteriaForEdit}
-      />
 
       {/* View Mode Tabs */}
       <div className={styles.tabs}>
@@ -539,13 +328,6 @@ export default function CVEvaluator() {
         >
           <Files size={18} />
           Bulk Upload
-        </button>
-        <button
-          className={viewMode === 'criteria' ? styles.tabActive : styles.tab}
-          onClick={() => setViewMode('criteria')}
-        >
-          <Target size={18} />
-          Evaluation Criteria
         </button>
       </div>
 
@@ -1137,150 +919,6 @@ export default function CVEvaluator() {
               </div>
             )}
           </div>
-        </div>
-      )}
-
-      {/* Criteria Management View */}
-      {viewMode === 'criteria' && (
-        <div className={styles.criteriaView}>
-          <div className={styles.criteriaHeader}>
-            <div className={styles.criteriaFilters}>
-              <button
-                className={criteriaFilter === 'Active' ? styles.filterBtnActive : styles.filterBtn}
-                onClick={() => setCriteriaFilter('Active')}
-              >
-                Active ({criteriaList.filter(c => c.status === 'Active').length})
-              </button>
-              <button
-                className={criteriaFilter === 'Inactive' ? styles.filterBtnActive : styles.filterBtn}
-                onClick={() => setCriteriaFilter('Inactive')}
-              >
-                Inactive ({criteriaList.filter(c => c.status === 'Inactive').length})
-              </button>
-              <button
-                className={criteriaFilter === 'Archived' ? styles.filterBtnActive : styles.filterBtn}
-                onClick={() => setCriteriaFilter('Archived')}
-              >
-                Archived ({criteriaList.filter(c => c.status === 'Archived').length})
-              </button>
-              <button
-                className={criteriaFilter === 'Draft' ? styles.filterBtnActive : styles.filterBtn}
-                onClick={() => setCriteriaFilter('Draft')}
-              >
-                Draft ({criteriaList.filter(c => c.status === 'Draft').length})
-              </button>
-            </div>
-
-            <button className={styles.newCriteriaBtn} onClick={() => setShowMethodModal(true)}>
-              <Plus size={18} />
-              New CV Evaluation Criteria
-            </button>
-          </div>
-
-          {loadingCriteria ? (
-            <div className={styles.loading}>Loading criteria...</div>
-          ) : (
-            <div className={styles.criteriaGrid}>
-              {filteredCriteria.length === 0 ? (
-                <div className={styles.emptyCriteria}>
-                  <Target size={64} className={styles.emptyIcon} />
-                  <h3>No {criteriaFilter.toLowerCase()} criteria</h3>
-                  <p>Create your first evaluation criteria set to get started.</p>
-                  <button className={styles.createFirstBtn} onClick={() => setShowMethodModal(true)}>
-                    <Plus size={18} />
-                    Create First Criteria
-                  </button>
-                </div>
-              ) : (
-                filteredCriteria.map((criteria) => (
-                  <div 
-                    key={criteria.id} 
-                    className={styles.criteriaCard}
-                    onClick={() => handleViewCriteriaDetail(criteria.id)}
-                    style={{ cursor: 'pointer' }}
-                  >
-                    <div className={styles.criteriaCardHeader}>
-                      <h3>{criteria.name}</h3>
-                      <div className={styles.criteriaActions}>
-                        <button
-                          className={styles.iconBtn}
-                          title="Duplicate"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDuplicateCriteria(criteria.id);
-                          }}
-                        >
-                          <Copy size={16} />
-                        </button>
-                        <button
-                          className={styles.iconBtn}
-                          title="Edit"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleEditCriteria(criteria.id);
-                          }}
-                        >
-                          <Edit2 size={16} />
-                        </button>
-                        <button
-                          className={styles.iconBtn}
-                          title="Delete"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDeleteCriteria(criteria.id);
-                          }}
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
-                    </div>
-
-                    <p className={styles.criteriaDescription}>
-                      {criteria.description || 'No description'}
-                    </p>
-
-                    <div className={styles.criteriaStats}>
-                      <div className={styles.criteriaStat}>
-                        <span className={styles.statValue}>{criteria.criteriaCount}</span>
-                        <span className={styles.statLabel}>Criteria</span>
-                      </div>
-                      <div className={styles.criteriaStat}>
-                        <span className={styles.statValue}>{criteria.projectsUsed}</span>
-                        <span className={styles.statLabel}>Projects</span>
-                      </div>
-                    </div>
-
-                    <div className={styles.criteriaFooter}>
-                      <span className={`${styles.statusBadge} ${styles[`status${criteria.status}`]}`}>
-                        {criteria.status}
-                      </span>
-                      <span className={styles.criteriaDate}>
-                        <Clock size={14} />
-                        Created {new Date(criteria.created_at).toLocaleDateString('en-IN', {
-                          day: 'numeric',
-                          month: 'short',
-                          year: 'numeric',
-                        })}
-                      </span>
-                    </div>
-
-                    <button
-                      className={styles.evaluateCriteriaBtn}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedCriteriaId(criteria.id);
-                        setAutoConsiderMode('criteria');
-                        setViewMode('upload');
-                      }}
-                    >
-                      <Sparkles size={16} />
-                      Evaluate CV
-                    </button>
-                  </div>
-                ))
-              )}
-            </div>
-          )}
         </div>
       )}
     </div>

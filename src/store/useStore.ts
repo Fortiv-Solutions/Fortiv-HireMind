@@ -12,6 +12,9 @@ import {
   createJobPost,
   updateJobPostStatus,
   deleteJobPost,
+  fetchAllCandidates,
+  fetchLatestEvaluationForCandidate,
+  type CandidateWithStats,
 } from '../services/hiringProjects';
 import type { ProjectWithStats, HiringProject, CvEvaluation, JobPost } from '../types/database';
 
@@ -34,6 +37,11 @@ interface AppState {
   // Job posts
   jobPosts: JobPost[];
   jobPostsLoading: boolean;
+
+  // All candidates
+  candidates: CandidateWithStats[];
+  candidatesLoading: boolean;
+  candidatesError: string | null;
 
   // Auth Actions
   setUser: (user: User | null) => void;
@@ -66,6 +74,8 @@ interface AppState {
   }) => Promise<void>;
   toggleJobPostStatus: (postId: string, currentStatus: 'Active' | 'Closed') => Promise<void>;
   removeJobPost: (postId: string) => Promise<void>;
+  loadAllCandidates: () => Promise<void>;
+  fetchCandidateEvaluation: (candidateId: string) => Promise<CvEvaluation | null>;
 }
 
 export const useStore = create<AppState>((set, get) => ({
@@ -83,6 +93,10 @@ export const useStore = create<AppState>((set, get) => ({
   
   jobPosts: [],
   jobPostsLoading: false,
+
+  candidates: [],
+  candidatesLoading: false,
+  candidatesError: null,
 
   setUser: (user) => set({ user, authLoading: false }),
   setAuthLoading: (loading) => set({ authLoading: loading }),
@@ -201,5 +215,19 @@ export const useStore = create<AppState>((set, get) => ({
     set(state => ({
       jobPosts: state.jobPosts.filter(post => post.id !== postId),
     }));
+  },
+
+  loadAllCandidates: async () => {
+    set({ candidatesLoading: true, candidatesError: null });
+    try {
+      const candidates = await fetchAllCandidates();
+      set({ candidates, candidatesLoading: false });
+    } catch (err: any) {
+      set({ candidatesError: err.message ?? 'Failed to load candidates', candidatesLoading: false });
+    }
+  },
+
+  fetchCandidateEvaluation: async (candidateId: string) => {
+    return await fetchLatestEvaluationForCandidate(candidateId);
   },
 }));

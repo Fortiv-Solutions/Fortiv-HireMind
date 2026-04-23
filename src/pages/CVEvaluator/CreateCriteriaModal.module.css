@@ -17,7 +17,7 @@
 /* ─── Modal ──────────────────────────────────────────────────────────────── */
 .modal {
   background: white;
-  border-radius: 12px;
+  border-radius: var(--radius-xl);
   width: 100%;
   max-width: 900px;
   max-height: 90vh;
@@ -55,7 +55,7 @@
   color: var(--color-text-secondary);
   cursor: pointer;
   padding: 4px;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   transition: all 0.2s;
   display: flex;
   align-items: center;
@@ -78,7 +78,7 @@
 .error {
   background: #fee;
   border: 1px solid #fcc;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   padding: 12px 16px;
   color: #c33;
   font-size: 13px;
@@ -136,7 +136,7 @@
   width: 100%;
   padding: 10px 12px;
   border: 1px solid var(--color-border);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   font-size: 13px;
   font-family: inherit;
   transition: all 0.2s;
@@ -147,8 +147,8 @@
 .select:focus,
 .textarea:focus {
   outline: none;
-  border-color: var(--color-brand-purple);
-  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+  border-color: var(--color-text-primary);
+  box-shadow: 0 0 0 3px rgba(118, 91, 0, 0.1);
 }
 
 .textarea {
@@ -164,7 +164,7 @@
   padding: 8px 14px;
   background: var(--color-bg-secondary);
   border: 1px solid var(--color-border);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   font-size: 13px;
   font-weight: 600;
   color: var(--color-primary);
@@ -173,9 +173,9 @@
 }
 
 .addItemBtn:hover {
-  background: var(--color-brand-purple);
+  background: var(--color-text-primary);
   color: white;
-  border-color: var(--color-brand-purple);
+  border-color: var(--color-text-primary);
 }
 
 /* ─── Criteria Items ─────────────────────────────────────────────────────── */
@@ -188,7 +188,7 @@
 .criteriaItem {
   background: var(--color-bg-secondary);
   border: 1px solid var(--color-border);
-  border-radius: 10px;
+  border-radius: var(--radius-xl);
   padding: 16px;
 }
 
@@ -202,10 +202,10 @@
 .itemNumber {
   font-size: 12px;
   font-weight: 700;
-  color: var(--color-brand-purple);
-  background: rgba(124, 58, 237, 0.1);
+  color: var(--color-text-primary);
+  background: rgba(118, 91, 0, 0.1);
   padding: 4px 10px;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -235,7 +235,7 @@
   color: #e74c3c;
   cursor: pointer;
   padding: 6px;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   transition: all 0.2s;
   display: flex;
   align-items: center;
@@ -267,7 +267,7 @@
 .btnSecondary,
 .btnPrimary {
   padding: 10px 20px;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
@@ -289,14 +289,14 @@
 }
 
 .btnPrimary {
-  background: var(--color-brand-purple);
+  background: var(--color-text-primary);
   color: white;
 }
 
 .btnPrimary:hover:not(:disabled) {
   background: var(--color-brand-purple-light);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+  box-shadow: 0 4px 12px rgba(118, 91, 0, 0.3);
 }
 
 .btnSecondary:disabled,
@@ -347,7 +347,7 @@
   width: 40px;
   height: 40px;
   border: 3px solid var(--color-border);
-  border-top-color: var(--color-brand-purple);
+  border-top-color: var(--color-text-primary);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
@@ -357,3 +357,4 @@
     transform: rotate(360deg);
   }
 }
+

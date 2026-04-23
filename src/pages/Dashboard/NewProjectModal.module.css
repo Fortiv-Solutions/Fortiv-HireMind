@@ -249,6 +249,8 @@
   gap: 12px;
   padding: 16px 28px 20px;
   border-top: 1px solid var(--color-border);
+  background: white;
+  flex-shrink: 0;
 }
 
 .cancelBtn {
@@ -267,7 +269,7 @@
   padding: 12px 28px;
   border-radius: 10px;
   border: none;
-  background: linear-gradient(135deg, var(--color-brand-purple) 0%, var(--color-brand-indigo) 100%);
+  background: #1a1c1c;
   color: white;
   font-size: 14px;
   font-weight: 600;
@@ -275,13 +277,14 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  box-shadow: var(--shadow-brand);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  transition: all 0.2s ease;
 }
 .submitBtn:disabled { opacity: 0.6; cursor: not-allowed; }
 .submitBtn:hover:not(:disabled) { 
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.35);
+  background: #2d2d2d;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.18);
 }
 
 @keyframes spin {

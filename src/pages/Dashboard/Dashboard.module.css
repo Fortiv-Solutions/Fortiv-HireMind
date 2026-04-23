@@ -14,6 +14,7 @@
   font-size: 12px;
   margin-bottom: 6px;
 }
+
 .breadcrumbs span {
   color: var(--color-primary);
   font-weight: 500;
@@ -25,6 +26,7 @@
   align-items: center;
   margin-bottom: 14px;
 }
+
 .titleRow h1 {
   margin: 0;
   font-size: 20px;
@@ -32,21 +34,22 @@
   color: var(--color-primary);
   letter-spacing: -0.3px;
 }
+
 .newBtn {
-  background: linear-gradient(135deg, var(--color-brand-purple) 0%, var(--color-brand-indigo) 100%);
-  color: white;
+  background: #f8cf61;
+  color: #111111;
   border: none;
-  border-radius: 8px;
-  padding: 8px 18px;
-  font-size: 12px;
-  font-weight: 600;
+  border-radius: 24px;
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 500;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: var(--shadow-brand);
+  transition: all 0.2s ease;
 }
+
 .newBtn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.35);
+  background: #f1c34a;
+  transform: translateY(-1px);
 }
 
 .statsGrid {
@@ -57,15 +60,16 @@
 
 .statCard {
   background: white;
-  border-radius: 10px;
-  padding: 16px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.02);
-  border: 1px solid rgba(0,0,0,0.03);
+  border-radius: 24px;
+  padding: 28px 24px;
+  box-shadow: 0 4px 40px rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(0, 0, 0, 0.02);
   transition: transform 0.2s, box-shadow 0.2s;
 }
+
 .statCard:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(0,0,0,0.04);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
 }
 
 .statHeader {
@@ -82,24 +86,41 @@
 }
 
 .iconWrap {
-  width: 28px;
-  height: 28px;
-  border-radius: 7px;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
-.iconWrap.blue   { background: #EFF6FF; color: #3B82F6; }
-.iconWrap.purple { background: #F3E8FF; color: #A855F7; }
-.iconWrap.green  { background: #F0FDF4; color: #22C55E; }
-.iconWrap.red    { background: #FEF2F2; color: #EF4444; }
+
+.iconWrap.blue {
+  background: rgba(248, 207, 97, 0.15);
+  color: #8c6a28;
+}
+
+.iconWrap.purple {
+  background: rgba(0, 0, 0, 0.04);
+  color: #1a1a1a;
+}
+
+.iconWrap.green {
+  background: rgba(248, 207, 97, 0.25);
+  color: #6d511a;
+}
+
+.iconWrap.red {
+  background: rgba(0, 0, 0, 0.08);
+  color: #111;
+}
 
 .statValue {
-  font-size: 22px;
+  font-size: 28px;
   font-weight: 700;
   color: var(--color-text-primary);
-  letter-spacing: -0.3px;
+  letter-spacing: -0.5px;
 }
+
 .statValueRow {
   display: flex;
   align-items: center;
@@ -107,8 +128,8 @@
 }
 
 .badgeSuccess {
-  background: #E0F2FE;
-  color: #0284C7;
+  background: rgba(248, 207, 97, 0.2);
+  color: #6d511a;
   padding: 3px 7px;
   border-radius: 10px;
   font-size: 11px;
@@ -117,10 +138,10 @@
 
 .tableContainer {
   background: white;
-  border-radius: 10px;
-  padding: 16px 20px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.02);
-  border: 1px solid rgba(0,0,0,0.03);
+  border-radius: 24px;
+  padding: 32px;
+  box-shadow: 0 4px 40px rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(0, 0, 0, 0.02);
 }
 
 .tableToolbar {
@@ -129,6 +150,7 @@
   align-items: center;
   margin-bottom: 16px;
 }
+
 .tableToolbar h2 {
   margin: 0;
   font-size: 15px;
@@ -149,8 +171,9 @@
   padding: 6px;
   border-radius: 6px;
 }
+
 .iconBtn:hover {
-  background: rgba(0,0,0,0.04);
+  background: rgba(0, 0, 0, 0.04);
   color: var(--color-primary);
 }
 
@@ -173,31 +196,32 @@
 
 .tableRow {
   background: #FFFFFF;
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+  border: 1px solid rgba(0, 0, 0, 0.03);
+  border-radius: 16px;
   transition: all 0.2s ease;
 }
+
 .tableRow:hover {
-  transform: scale(1.005);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-  border-color: var(--color-brand-purple);
-  background: rgba(124, 58, 237, 0.01);
+  transform: scale(1.002);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  background: rgba(248, 207, 97, 0.02);
 }
 
 .tableRow td {
   padding: 12px;
-  border-top: 1px solid rgba(0,0,0,0.04);
-  border-bottom: 1px solid rgba(0,0,0,0.04);
+  border-top: 1px solid rgba(0, 0, 0, 0.04);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
   font-size: 12px;
 }
+
 .tableRow td:first-child {
-  border-left: 1px solid rgba(0,0,0,0.04);
+  border-left: 1px solid rgba(0, 0, 0, 0.04);
   border-top-left-radius: 8px;
   border-bottom-left-radius: 8px;
 }
+
 .tableRow td:last-child {
-  border-right: 1px solid rgba(0,0,0,0.04);
+  border-right: 1px solid rgba(0, 0, 0, 0.04);
   border-top-right-radius: 8px;
   border-bottom-right-radius: 8px;
 }
@@ -207,32 +231,49 @@
   align-items: center;
   gap: 10px;
 }
+
 .projectIcon {
-  width: 32px;
-  height: 32px;
-  border-radius: 7px;
-  background: linear-gradient(135deg, rgba(124, 58, 237, 0.1) 0%, rgba(99, 102, 241, 0.1) 100%);
-  color: var(--color-brand-purple);
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  background: rgba(248, 207, 97, 0.2);
+  color: #8c6a28;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 700;
-  font-size: 12px;
+  font-size: 13px;
 }
+
 .projectName {
   font-weight: 600;
-  color: var(--color-primary);
-  font-size: 13px;
+  color: var(--color-text-primary);
+  font-size: 14px;
   margin-bottom: 2px;
 }
+
 .projectMeta {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--color-text-secondary);
 }
 
-.boldNum { font-weight: 600; font-size: 13px; color: var(--color-primary); }
-.blueNum { font-weight: 600; font-size: 13px; color: #0284C7; }
-.redNum  { font-weight: 600; font-size: 13px; color: #DC2626; }
+.boldNum {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--color-text-primary);
+}
+
+.blueNum {
+  font-weight: 600;
+  font-size: 14px;
+  color: #8c6a28;
+}
+
+.redNum {
+  font-weight: 600;
+  font-size: 14px;
+  color: #555;
+}
 
 .actionCell {
   display: flex;
@@ -241,18 +282,19 @@
 }
 
 .viewBtn {
-  background: linear-gradient(135deg, rgba(124, 58, 237, 0.1) 0%, rgba(99, 102, 241, 0.1) 100%);
-  color: var(--color-brand-purple);
+  background: rgba(248, 207, 97, 0.15);
+  color: #8c6a28;
   border: none;
-  padding: 5px 14px;
-  border-radius: 14px;
+  padding: 8px 20px;
+  border-radius: 24px;
   font-weight: 600;
-  font-size: 12px;
+  font-size: 13px;
   cursor: pointer;
   transition: all 0.2s ease;
 }
+
 .viewBtn:hover {
-  background: linear-gradient(135deg, rgba(124, 58, 237, 0.15) 0%, rgba(99, 102, 241, 0.15) 100%);
+  background: rgba(248, 207, 97, 0.3);
   transform: translateY(-1px);
 }
 
@@ -262,16 +304,30 @@
 }
 
 .statusBadge {
-  padding: 3px 8px;
-  border-radius: 10px;
+  padding: 4px 12px;
+  border-radius: 12px;
   font-size: 11px;
   font-weight: 600;
 }
-.statusActive  { background: #DCFCE7; color: #166534; }
-.statusPaused  { background: #FEF3C7; color: #92400E; }
-.statusClosed  { background: #F3F4F6; color: #6B7280; }
 
-.loadingState, .errorState, .emptyState {
+.statusActive {
+  background: rgba(248, 207, 97, 0.2);
+  color: #6d511a;
+}
+
+.statusPaused {
+  background: #f5f5f5;
+  color: #555;
+}
+
+.statusClosed {
+  background: #eee;
+  color: #777;
+}
+
+.loadingState,
+.errorState,
+.emptyState {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -280,26 +336,42 @@
   gap: 16px;
   color: var(--color-text-secondary);
 }
-.errorState { color: #DC2626; }
-.errorState button, .emptyState button, .loadingState button {
-  margin-top: 8px;
-  background: linear-gradient(135deg, var(--color-brand-purple) 0%, var(--color-brand-indigo) 100%);
-  color: white;
+
+.errorState {
+  color: #DC2626;
+}
+
+.errorState button,
+.emptyState button,
+.loadingState button {
+  margin-top: 12px;
+  background: #f8cf61;
+  color: #111111;
   border: none;
-  padding: 10px 24px;
-  border-radius: 8px;
+  padding: 12px 24px;
+  border-radius: 24px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: var(--shadow-brand);
 }
-.errorState button:hover, .emptyState button:hover, .loadingState button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.35);
+
+.errorState button:hover,
+.emptyState button:hover,
+.loadingState button:hover {
+  background: #f1c34a;
+  transform: translateY(-1px);
 }
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to   { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }
-.spinner { animation: spin 0.8s linear infinite; }
+
+.spinner {
+  animation: spin 0.8s linear infinite;
+}
