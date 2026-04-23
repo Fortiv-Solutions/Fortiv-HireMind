@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import styles from './CVEvaluator.module.css';
-import { Upload, FileText, CheckCircle, AlertCircle, Sparkles, Plus, Edit2, Trash2, Copy, Eye, BarChart3, Target, Clock, Zap, ExternalLink } from 'lucide-react';
+import { Upload, FileText, CheckCircle, AlertCircle, Sparkles, Plus, Edit2, Trash2, Copy, Eye, BarChart3, Target, Clock, Zap, ExternalLink, Files, XCircle, RotateCcw } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 import {
   fetchCriteriaWithStats,
@@ -13,16 +13,33 @@ import {
   createCriteriaSetWithItems,
   fetchCriteriaWithItems,
   updateCriteriaSetWithItems,
+  bulkUploadCVs,
 } from '../../services/cvEvaluation';
 import type { CriteriaWithStats, CvEvaluation } from '../../types/database';
-import type { WebhookResponseData } from '../../services/cvEvaluation';
+import type { WebhookResponseData, BulkFileResult } from '../../services/cvEvaluation';
 import CreateCriteriaModal from './CreateCriteriaModal';
 import EditCriteriaModal from './EditCriteriaModal';
 import CriteriaDetailModal from './CriteriaDetailModal';
 import SelectCriteriaMethodModal from './SelectCriteriaMethodModal';
 import type { GeneratedCriteria } from '../../services/aiCriteriaGenerator';
 
-type ViewMode = 'upload' | 'criteria';
+type ViewMode = 'upload' | 'bulk' | 'criteria';
+
+const ACCEPTED_MIME = [
+  'application/pdf',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+];
+const ACCEPTED_EXT = ['.pdf', '.doc', '.docx'];
+const MAX_BULK_MB = 10;
+const MAX_BULK_FILES = 20;
+
+function validateBulkFile(file: File): string | null {
+  if (!ACCEPTED_MIME.includes(file.type) && !ACCEPTED_EXT.some((e) => file.name.toLowerCase().endsWith(e)))
+    return 'Unsupported format. Use PDF, DOC, or DOCX.';
+  if (file.size > MAX_BULK_MB * 1024 * 1024) return `Exceeds ${MAX_BULK_MB}MB limit.`;
+  return null;
+}
 
 interface EvalResult {
   evaluation: CvEvaluation;
@@ -62,6 +79,60 @@ export default function CVEvaluator() {
 
   // Auto-consider mode
   const [autoConsiderMode, setAutoConsiderMode] = useState<'criteria' | 'project'>('project');
+
+  // ── Bulk upload state ──
+  const [bulkFiles, setBulkFiles] = useState<File[]>([]);
+  const [bulkFileErrors, setBulkFileErrors] = useState<Record<string, string>>({});
+  const [bulkResults, setBulkResults] = useState<BulkFileResult[]>([]);
+  const [bulkRunning, setBulkRunning] = useState(false);
+  const [bulkDone, setBulkDone] = useState(false);
+  const [bulkGlobalError, setBulkGlobalError] = useState<string | null>(null);
+  const [bulkIsDragging, setBulkIsDragging] = useState(false);
+  const [bulkProjectId, setBulkProjectId] = useState<string>('');
+  const [bulkCriteriaId, setBulkCriteriaId] = useState<string>('');
+  const bulkInputRef = useRef<HTMLInputElement>(null);
+
+  const addBulkFiles = useCallback((incoming: FileList | File[]) => {
+    const arr = Array.from(incoming);
+    const errors: Record<string, string> = {};
+    const valid: File[] = [];
+    for (const f of arr) {
+      const err = validateBulkFile(f);
+      if (err) errors[f.name] = err;
+      else valid.push(f);
+    }
+    setBulkFiles((prev) => {
+      const combined = [...prev, ...valid];
+      if (combined.length > MAX_BULK_FILES) {
+        setBulkGlobalError(`Maximum ${MAX_BULK_FILES} files allowed at once.`);
+        return combined.slice(0, MAX_BULK_FILES);
+      }
+      setBulkGlobalError(null);
+      return combined;
+    });
+    if (Object.keys(errors).length) setBulkFileErrors((prev) => ({ ...prev, ...errors }));
+  }, []);
+
+  const handleBulkUpload = async () => {
+    if (!bulkFiles.length) return;
+    if (!bulkProjectId) { setBulkGlobalError('Please select a hiring project first.'); return; }
+    setBulkRunning(true); setBulkGlobalError(null);
+    setBulkResults(bulkFiles.map((f) => ({ file: f, status: 'pending' })));
+    try {
+      await bulkUploadCVs(bulkFiles, bulkProjectId, bulkCriteriaId || undefined, (updated) => {
+        setBulkResults([...updated]);
+      });
+    } catch (err: any) {
+      setBulkGlobalError(err.message || 'An unexpected error occurred.');
+    } finally {
+      setBulkRunning(false); setBulkDone(true);
+    }
+  };
+
+  const handleBulkReset = () => {
+    setBulkFiles([]); setBulkFileErrors({}); setBulkResults([]);
+    setBulkDone(false); setBulkRunning(false); setBulkGlobalError(null);
+  };
 
   useEffect(() => {
     loadProjects();
@@ -461,6 +532,13 @@ export default function CVEvaluator() {
         >
           <Upload size={18} />
           CV Upload & Evaluation
+        </button>
+        <button
+          className={viewMode === 'bulk' ? styles.tabActive : styles.tab}
+          onClick={() => setViewMode('bulk')}
+        >
+          <Files size={18} />
+          Bulk Upload
         </button>
         <button
           className={viewMode === 'criteria' ? styles.tabActive : styles.tab}
@@ -877,6 +955,185 @@ export default function CVEvaluator() {
                   )}
                 </div>
 
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Bulk Upload View */}
+      {viewMode === 'bulk' && (
+        <div className={styles.uploadView}>
+          {/* Left: settings + drop zone */}
+          <div className={styles.uploadSection}>
+            {/* Project / Criteria settings */}
+            <div className={styles.card}>
+              <div className={styles.cardHeader}>
+                <h3>Bulk Settings</h3>
+                <p>Select a project before uploading. Criteria is optional.</p>
+              </div>
+              <div className={styles.formGroup}>
+                <label>Hiring Project <span style={{ color: '#DC2626' }}>*</span></label>
+                <select className={styles.select} value={bulkProjectId} onChange={(e) => setBulkProjectId(e.target.value)}>
+                  <option value="">Choose project…</option>
+                  {projects.map((p) => <option key={p.id} value={p.id}>{p.title}</option>)}
+                </select>
+              </div>
+              <div className={styles.formGroup}>
+                <label>Evaluation Criteria (optional)</label>
+                <select className={styles.select} value={bulkCriteriaId} onChange={(e) => setBulkCriteriaId(e.target.value)}>
+                  <option value="">None</option>
+                  {criteriaList.filter((c) => c.status === 'Active').map((c) => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Drop zone — hidden while running */}
+            {!bulkRunning && !bulkDone && (
+              <div className={styles.card}>
+                <div className={styles.cardHeader}>
+                  <h3>Upload CVs</h3>
+                  <p>PDF, DOC, DOCX · Max {MAX_BULK_MB}MB per file · Up to {MAX_BULK_FILES} files</p>
+                </div>
+
+                <div
+                  className={`${styles.uploadArea} ${bulkIsDragging ? styles.uploadAreaActive : ''}`}
+                  onDragEnter={(e) => { e.preventDefault(); setBulkIsDragging(true); }}
+                  onDragOver={(e) => { e.preventDefault(); setBulkIsDragging(true); }}
+                  onDragLeave={() => setBulkIsDragging(false)}
+                  onDrop={(e) => { e.preventDefault(); setBulkIsDragging(false); addBulkFiles(e.dataTransfer.files); }}
+                  onClick={() => bulkInputRef.current?.click()}
+                >
+                  <input ref={bulkInputRef} type="file" multiple accept=".pdf,.doc,.docx"
+                    onChange={(e) => { if (e.target.files) addBulkFiles(e.target.files); e.target.value = ''; }}
+                    className={styles.fileInput}
+                  />
+                  <Upload size={40} className={styles.uploadIcon} />
+                  <p className={styles.uploadText}>Drag & drop or click to browse</p>
+                  <p className={styles.uploadHint}>Select multiple files at once</p>
+                </div>
+
+                {bulkGlobalError && (
+                  <div className={styles.bulkInlineError}>
+                    <AlertCircle size={14} /> {bulkGlobalError}
+                  </div>
+                )}
+
+                {bulkFiles.length > 0 && (
+                  <div className={styles.bulkFileList}>
+                    <div className={styles.bulkFileListHeader}>
+                      <span>{bulkFiles.length} file{bulkFiles.length !== 1 ? 's' : ''} selected</span>
+                      <button className={styles.bulkClearBtn} onClick={() => { setBulkFiles([]); setBulkFileErrors({}); setBulkGlobalError(null); }}>Clear all</button>
+                    </div>
+                    {bulkFiles.map((f, i) => (
+                      <div key={`${f.name}-${i}`} className={`${styles.bulkFileRow} ${bulkFileErrors[f.name] ? styles.bulkFileRowError : ''}`}>
+                        <FileText size={14} style={{ color: 'var(--color-brand-purple)', flexShrink: 0 }} />
+                        <div className={styles.bulkFileInfo}>
+                          <span className={styles.bulkFileName}>{f.name}</span>
+                          {bulkFileErrors[f.name]
+                            ? <span className={styles.bulkFileErrText}>{bulkFileErrors[f.name]}</span>
+                            : <span className={styles.bulkFileSize}>{(f.size / 1024).toFixed(0)} KB</span>}
+                        </div>
+                        <button className={styles.removeFileBtn} onClick={() => {
+                          setBulkFiles((prev) => { const u = [...prev]; u.splice(i, 1); return u; });
+                          setBulkFileErrors((e) => { const c = { ...e }; delete c[f.name]; return c; });
+                        }}><Trash2 size={13} /></button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <button
+                  className={styles.evaluateBtn}
+                  onClick={handleBulkUpload}
+                  disabled={bulkFiles.length === 0 || !bulkProjectId}
+                >
+                  <Files size={18} />
+                  Upload & Evaluate {bulkFiles.length > 0 ? `${bulkFiles.length} CV${bulkFiles.length !== 1 ? 's' : ''}` : 'CVs'}
+                </button>
+              </div>
+            )}
+
+            {/* Features */}
+            <div className={styles.featuresCard}>
+              <div className={styles.feature}>
+                <div className={styles.featureIcon}><Files size={20} /></div>
+                <div><h4>Up to {MAX_BULK_FILES} CVs at once</h4><p>Batch process your entire applicant pool.</p></div>
+              </div>
+              <div className={styles.feature}>
+                <div className={styles.featureIcon}><Zap size={20} /></div>
+                <div><h4>Real-time progress</h4><p>Watch each CV get evaluated as it processes.</p></div>
+              </div>
+              <div className={styles.feature}>
+                <div className={styles.featureIcon}><Target size={20} /></div>
+                <div><h4>Auto-added to pipeline</h4><p>All candidates land in My Candidates automatically.</p></div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right: results */}
+          <div className={styles.resultsSection}>
+            {!bulkRunning && !bulkDone ? (
+              <div className={styles.emptyResults}>
+                <Files size={64} className={styles.emptyIcon} />
+                <h3>No bulk upload yet</h3>
+                <p>Select a project, add your CV files, and click Upload & Evaluate to get started.</p>
+              </div>
+            ) : (
+              <div className={styles.resultsCard}>
+                {/* Summary */}
+                {bulkDone && (() => {
+                  const ok  = bulkResults.filter((r) => r.status === 'success').length;
+                  const err = bulkResults.filter((r) => r.status === 'error').length;
+                  return (
+                    <div className={`${styles.bulkSummaryBanner} ${err > 0 && ok === 0 ? styles.bulkSummaryErr : err > 0 ? styles.bulkSummaryPartial : styles.bulkSummaryOk}`}>
+                      {err === 0
+                        ? <><CheckCircle size={16} /> All {ok} CV{ok !== 1 ? 's' : ''} evaluated successfully</>
+                        : ok === 0
+                        ? <><XCircle size={16} /> All {err} upload{err !== 1 ? 's' : ''} failed</>
+                        : <><AlertCircle size={16} /> {ok} succeeded · {err} failed</>}
+                    </div>
+                  );
+                })()}
+
+                {bulkRunning && (
+                  <div className={styles.bulkProgressInfo}>
+                    <Sparkles size={14} className={styles.spinner} />
+                    <span>Processing {bulkResults.findIndex((r) => r.status === 'processing') + 1} of {bulkResults.length}…</span>
+                  </div>
+                )}
+
+                <div className={styles.bulkResultGrid}>
+                  {bulkResults.map((r, i) => (
+                    <div key={i} className={`${styles.bulkResultRow} ${styles[`bulkResult_${r.status}`]}`}>
+                      <div className={styles.bulkResultIcon}>
+                        {r.status === 'pending'    && <div className={styles.pendingDot} />}
+                        {r.status === 'processing' && <Sparkles size={15} className={styles.spinner} />}
+                        {r.status === 'success'    && <CheckCircle size={15} />}
+                        {r.status === 'error'      && <XCircle size={15} />}
+                      </div>
+                      <div className={styles.bulkResultInfo}>
+                        <span className={styles.bulkResultName}>{r.candidateName ?? r.file.name}</span>
+                        {r.status === 'success' && r.totalScore !== undefined && (
+                          <span className={styles.bulkResultScore}>Score: {Math.round(r.totalScore)}%</span>
+                        )}
+                        {r.status === 'error'      && <span className={styles.bulkResultError}>{r.error}</span>}
+                        {r.status === 'pending'    && <span className={styles.bulkResultMeta}>Waiting…</span>}
+                        {r.status === 'processing' && <span className={styles.bulkResultMeta}>Evaluating…</span>}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {bulkDone && (
+                  <div style={{ paddingTop: '8px', borderTop: '1px solid var(--color-border)' }}>
+                    <button className={styles.btnSecondary} onClick={handleBulkReset}>
+                      <RotateCcw size={15} /> Upload More CVs
+                    </button>
+                  </div>
+                )}
               </div>
             )}
           </div>

@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import styles from './ProjectDetail.module.css';
-import { Plus, Upload, Loader2 } from 'lucide-react';
+import { Plus, Upload, Loader2, Files } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 import CandidateDrawer from './CandidateDrawer';
 import AddCandidateModal from './AddCandidateModal';
+import BulkUploadModal from './BulkUploadModal';
 import StatusDropdown from './StatusDropdown';
 import type { CvEvaluation } from '../../types/database';
 
@@ -12,6 +13,7 @@ export default function MyCandidates() {
   const [selectedEval, setSelectedEval] = useState<CvEvaluation | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>('All');
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showBulkModal, setShowBulkModal] = useState(false);
 
   const filteredEvals = statusFilter === 'All'
     ? evaluations
@@ -107,10 +109,16 @@ export default function MyCandidates() {
               Showing <strong>{filteredEvals.length}</strong> candidate{filteredEvals.length !== 1 ? 's' : ''}
               {statusFilter !== 'All' ? ` · ${statusFilter}` : ''}
             </div>
-            <button className={styles.addCandidateBtn} onClick={() => setShowAddModal(true)}>
-              <Plus size={16} strokeWidth={2.5} />
-              <span>Add Candidate</span>
-            </button>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button className={styles.bulkUploadBtn} onClick={() => setShowBulkModal(true)}>
+                <Files size={16} strokeWidth={2.5} />
+                <span>Bulk Upload</span>
+              </button>
+              <button className={styles.addCandidateBtn} onClick={() => setShowAddModal(true)}>
+                <Plus size={16} strokeWidth={2.5} />
+                <span>Add Candidate</span>
+              </button>
+            </div>
           </div>
 
           {filteredEvals.length === 0 ? (
@@ -187,6 +195,10 @@ export default function MyCandidates() {
 
       {showAddModal && (
         <AddCandidateModal onClose={() => setShowAddModal(false)} projectId={activeProject.id} />
+      )}
+
+      {showBulkModal && (
+        <BulkUploadModal onClose={() => setShowBulkModal(false)} projectId={activeProject.id} />
       )}
     </>
   );

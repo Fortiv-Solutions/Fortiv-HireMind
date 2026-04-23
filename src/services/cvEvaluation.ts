@@ -756,3 +756,72 @@ export async function evaluateExistingCandidate(
     throw error;
   }
 }
+
+// ============================================
+// BULK CV UPLOAD
+// ============================================
+
+export type BulkFileStatus = 'pending' | 'processing' | 'success' | 'error';
+
+export interface BulkFileResult {
+  file: File;
+  status: BulkFileStatus;
+  evaluation?: CvEvaluation;
+  candidateName?: string;
+  totalScore?: number;
+  error?: string;
+}
+
+/**
+ * Upload and evaluate multiple CVs sequentially.
+ * Calls onProgress after each file so the UI can update in real time.
+ */
+export async function bulkUploadCVs(
+  files: File[],
+  projectId: string,
+  criteriaSetId: string | undefined,
+  onProgress: (results: BulkFileResult[]) => void
+): Promise<BulkFileResult[]> {
+  // Initialise all as pending
+  const results: BulkFileResult[] = files.map((file) => ({
+    file,
+    status: 'pending',
+  }));
+
+  onProgress([...results]);
+
+  for (let i = 0; i < files.length; i++) {
+    // Mark current file as processing
+    results[i] = { ...results[i], status: 'processing' };
+    onProgress([...results]);
+
+    try {
+      const { evaluation, webhookData } = await evaluateCv(files[i], projectId, criteriaSetId);
+
+      results[i] = {
+        ...results[i],
+        status: 'success',
+        evaluation,
+        candidateName:
+          evaluation.candidate?.full_name ??
+          evaluation.parsed_name ??
+          webhookData.original_filename ??
+          files[i].name,
+        totalScore: evaluation.total_score,
+      };
+    } catch (err: any) {
+      const message: string =
+        err?.message?.includes('fetch') || err?.message?.includes('CORS')
+          ? 'Network error — check webhook CORS settings.'
+          : err?.message?.includes('timeout') || err?.name === 'AbortError'
+          ? 'Request timed out. The webhook took too long to respond.'
+          : err?.message || 'Evaluation failed. Please try again.';
+
+      results[i] = { ...results[i], status: 'error', error: message };
+    }
+
+    onProgress([...results]);
+  }
+
+  return results;
+}

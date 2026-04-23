@@ -358,6 +358,27 @@
   box-shadow: 0 6px 20px rgba(124, 58, 237, 0.35);
 }
 
+.bulkUploadBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: white;
+  color: var(--color-brand-purple);
+  border: 1.5px solid var(--color-brand-purple);
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.bulkUploadBtn:hover {
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.06) 0%, rgba(99, 102, 241, 0.06) 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.18);
+}
+
 .viewToggles {
   display: flex;
   background: white;
