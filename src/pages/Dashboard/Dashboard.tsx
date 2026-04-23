@@ -32,7 +32,7 @@ export default function Dashboard() {
 
   return (
     <div className={styles.container}>
-      <div className={styles.header}>
+  <div className={styles.header}>
         <div className={styles.breadcrumbs}>
           Dashboard <ChevronRight size={14} /> <span>Hiring Projects</span>
         </div>

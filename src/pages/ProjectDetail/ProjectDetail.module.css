@@ -2,33 +2,33 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
-  max-width: 1800px;
+  max-width: 1600px;
   margin: 0 auto;
 }
 
 .header {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .breadcrumbs {
   font-size: 12px;
-  color: var(--color-text-secondary);
+  color: var(--color-text-tertiary);
   display: flex;
   align-items: center;
   gap: 6px;
 }
 .breadcrumbs a {
-  color: var(--color-text-secondary);
+  color: var(--color-text-tertiary);
   text-decoration: none;
-  transition: color 0.2s ease;
+  transition: color 150ms ease;
 }
 .breadcrumbs a:hover {
-  color: var(--color-brand-purple);
+  color: var(--color-text-primary);
 }
 .breadcrumbs span {
-  color: var(--color-primary);
+  color: var(--color-text-primary);
   font-weight: 500;
 }
 
@@ -38,39 +38,40 @@
   align-items: flex-start;
 }
 .titleRow h1 {
-  margin: 0 0 4px 0;
-  font-size: 20px;
-  color: var(--color-primary);
-  letter-spacing: -0.3px;
+  margin: 0 0 6px 0;
+  font-size: 22px;
+  color: var(--color-text-primary);
+  letter-spacing: -0.03em;
   font-weight: 700;
 }
 
 .meta {
   display: flex;
-  gap: 20px;
+  gap: 16px;
   color: var(--color-text-secondary);
   font-size: 12px;
+  flex-wrap: wrap;
 }
 .metaItem {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 4px;
 }
 
 /* Tabs */
 .tabsContainer {
   background: white;
-  border-radius: 24px;
-  padding: 6px;
-  border: 1px solid rgba(0, 0, 0, 0.04);
-  box-shadow: 0 4px 40px rgba(0, 0, 0, 0.04);
+  border-radius: var(--radius-xl);
+  padding: 4px;
+  border: 1px solid var(--color-border-light);
+  box-shadow: var(--shadow-xs);
   display: inline-flex;
   align-self: flex-start;
 }
 
 .tabs {
   display: flex;
-  gap: 4px;
+  gap: 2px;
 }
 
 .tab {
@@ -78,52 +79,51 @@
   align-items: center;
   justify-content: center;
   gap: 7px;
-  padding: 9px 20px;
+  padding: 8px 18px;
   background: transparent;
   border: none;
-  border-radius: 18px;
+  border-radius: var(--radius-md);
   font-size: 12px;
   font-weight: 600;
   color: var(--color-text-secondary);
   cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: background 150ms ease, color 150ms ease;
   white-space: nowrap;
 }
 
 .tab:hover {
-  background: rgba(0, 0, 0, 0.04);
-  color: var(--color-primary);
+  background: var(--color-bg-elevated);
+  color: var(--color-text-primary);
 }
 
 .tabActive {
   background: var(--color-text-primary);
   color: white;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+  box-shadow: var(--shadow-sm);
 }
 
 .tabActive:hover {
-  background: var(--color-text-primary);
+  background: #2a2c2c;
   color: white;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.22);
 }
 
 .tab svg {
-  transition: transform 0.25s ease;
+  transition: transform 200ms var(--ease-out);
 }
 
 .tabActive svg {
-  transform: scale(1.1);
+  transform: scale(1.05);
 }
 
 /* Tab Content */
 .tabContent {
-  animation: fadeIn 0.3s ease;
+  animation: fadeIn 0.2s var(--ease-out);
 }
 
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(6px);
   }
   to {
     opacity: 1;
@@ -314,8 +314,8 @@
   flex: 1;
   background: white;
   border-radius: var(--radius-xl);
-  padding: 24px 32px;
-  border: 1px solid var(--color-border);
+  padding: 22px 28px;
+  border: 1px solid var(--color-border-light);
   box-shadow: var(--shadow-sm);
 }
 
@@ -401,50 +401,35 @@
 
 .candidateTable {
   width: 100%;
-  border-collapse: separate;
-  border-spacing: 0 6px;
+  border-collapse: collapse;
 }
 .candidateTable th {
   text-align: left;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
-  color: var(--color-text-secondary);
-  letter-spacing: 0.08em;
+  color: var(--color-text-tertiary);
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  padding: 12px 12px 14px;
-  border-bottom: none;
+  padding: 0 12px 10px;
+  border-bottom: 1px solid var(--color-border);
   background: transparent;
   white-space: nowrap;
 }
 
 .candidateRow {
   background: white;
-  border-radius: 8px;
-  transition: all 0.2s ease;
-  border: 1px solid transparent;
+  transition: background 150ms ease;
+  border-bottom: 1px solid var(--color-border-light);
 }
+.candidateRow:last-child { border-bottom: none; }
 .candidateRow:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
-  border-color: rgba(124, 58, 237, 0.2);
+  background: var(--color-bg-subtle);
 }
 .candidateRow td {
-  padding: 14px 12px;
-  border-top: 1px solid var(--color-border);
-  border-bottom: 1px solid var(--color-border);
+  padding: 13px 12px;
   cursor: pointer;
   font-size: 13px;
   vertical-align: middle;
-}
-.candidateRow td:first-child {
-  border-left: 1px solid var(--color-border);
-  border-top-left-radius: 8px;
-  border-bottom-left-radius: 8px;
-}
-.candidateRow td:last-child {
-  border-right: 1px solid var(--color-border);
-  border-top-right-radius: 8px;
-  border-bottom-right-radius: 8px;
 }
 
 .candidateProfile {

@@ -11,8 +11,9 @@
 .header h1 {
   font-size: 22px;
   font-weight: 700;
-  color: var(--color-primary);
+  color: var(--color-text-primary);
   margin: 0 0 6px 0;
+  letter-spacing: -0.03em;
 }
 
 .subtitle {
@@ -99,7 +100,7 @@
 }
 
 .filterBtnActive {
-  background: var(--color-primary);
+  background: var(--color-text-primary);
   color: white;
 }
 
@@ -156,9 +157,9 @@
 }
 
 .criteriaCard:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-  border-color: var(--color-text-primary);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--color-border);
 }
 
 .criteriaCardHeader {

@@ -28,10 +28,10 @@
 }
 
 .header h1 {
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 700;
   color: var(--color-text-primary);
-  letter-spacing: -0.3px;
+  letter-spacing: -0.03em;
   margin: 0;
 }
 
@@ -44,11 +44,11 @@
 /* Cards */
 .card {
   background: white;
-  border-radius: 24px;
-  border: 1px solid rgba(0, 0, 0, 0.04);
-  box-shadow: 0 4px 40px rgba(0, 0, 0, 0.04);
-  padding: 28px 32px;
-  transition: box-shadow 0.2s;
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--color-border-light);
+  box-shadow: var(--shadow-sm);
+  padding: 24px 28px;
+  transition: box-shadow 200ms ease;
 }
 
 .cardHeader {

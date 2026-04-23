@@ -31,7 +31,7 @@ export default function HomeOverview() {
     <div className={styles.container}>
       <div className={styles.header}>
         <div>
-          <h2>Executive Dashboard</h2>
+          <h1 style={{ fontSize: '22px', fontWeight: 700, letterSpacing: '-0.03em', color: 'var(--color-text-primary)', margin: '0 0 4px 0' }}>Executive Dashboard</h1>
           <p className={styles.subtitle}>Company-wide recruitment telemetry — live from your database.</p>
         </div>
       </div>

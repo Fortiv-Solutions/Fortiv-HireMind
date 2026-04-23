@@ -44,7 +44,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         {/* Navigation */}
         <nav className={`${styles.nav} ${scrolled ? styles.navScrolled : ''}`}>
           <div className={styles.navSection}>
-            <span className={styles.navLabel}>Main</span>
             <NavLink to="/dashboard-home" className={({ isActive }) => isActive ? `${styles.navItem} ${styles.navItemActive}` : styles.navItem}>
               <LayoutDashboard size={18} className={styles.icon} strokeWidth={2} />
               <span>Dashboard</span>
@@ -87,16 +86,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
       <div className={styles.main}>
         <header className={styles.topbar}>
-          <div className={styles.topbarLeft}>
-            HireMind
-          </div>
           <div className={styles.topbarRight}>
-            <div style={{ position: 'relative' }}>
-              <Search size={16} style={{ position: 'absolute', left: '12px', top: '10px', color: '#9CA3AF' }} />
-              <input type="text" placeholder="Search..." className={styles.searchBar} />
+            <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+              <Search size={15} className={styles.searchIcon} style={{ position: 'absolute', left: '14px', pointerEvents: 'none', color: 'var(--color-text-tertiary)' }} />
+              <input type="text" placeholder="Search…" className={styles.searchBar} aria-label="Search" />
             </div>
             <div className={styles.iconGrp}>
-              <Bell size={20} />
+              <Bell size={18} aria-label="Notifications" />
             </div>
           </div>
         </header>

@@ -37,10 +37,10 @@
 }
 .modalHeader h2 {
   margin: 0;
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 700;
-  color: var(--color-primary);
-  letter-spacing: -0.3px;
+  color: var(--color-text-primary);
+  letter-spacing: -0.02em;
 }
 
 .closeBtn {
@@ -63,12 +63,12 @@
 }
 
 .section h3 {
-  font-size: 14px;
+  font-size: 11px;
   font-weight: 700;
-  color: var(--color-primary);
-  letter-spacing: 0.05em;
+  color: var(--color-text-secondary);
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  margin: 0 0 16px 0;
+  margin: 0 0 14px 0;
 }
 
 .sectionHeader {
@@ -113,8 +113,8 @@
   color: var(--color-text-primary);
 }
 .inputGroup input:focus, .inputGroup select:focus {
-  border-color: var(--color-brand-purple);
-  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+  border-color: #c8a84b;
+  box-shadow: 0 0 0 3px rgba(200, 168, 75, 0.12);
 }
 
 .inputGroupFull {
@@ -141,8 +141,8 @@
   white-space: pre-wrap;
 }
 .inputGroupFull textarea:focus {
-  border-color: var(--color-brand-purple);
-  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+  border-color: #c8a84b;
+  box-shadow: 0 0 0 3px rgba(200, 168, 75, 0.12);
 }
 
 .textareaLoading {
@@ -166,9 +166,9 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  background: linear-gradient(135deg, rgba(124, 58, 237, 0.1) 0%, rgba(99, 102, 241, 0.1) 100%);
-  color: var(--color-brand-purple);
-  border: 1px solid rgba(124, 58, 237, 0.2);
+  background: rgba(248, 207, 97, 0.12);
+  color: var(--color-primary-mid);
+  border: 1px solid rgba(248, 207, 97, 0.4);
   padding: 6px 12px;
   border-radius: 8px;
   font-size: 12px;
@@ -177,8 +177,8 @@
   transition: all 0.2s ease;
 }
 .aiGenerateBtn:hover:not(:disabled) {
-  background: linear-gradient(135deg, rgba(124, 58, 237, 0.15) 0%, rgba(99, 102, 241, 0.15) 100%);
-  border-color: rgba(124, 58, 237, 0.3);
+  background: rgba(248, 207, 97, 0.2);
+  border-color: rgba(248, 207, 97, 0.6);
   transform: translateY(-1px);
 }
 .aiGenerateBtn:disabled {
@@ -195,8 +195,8 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  background: linear-gradient(135deg, rgba(124, 58, 237, 0.1) 0%, rgba(99, 102, 241, 0.1) 100%);
-  color: var(--color-brand-purple);
+  background: rgba(248, 207, 97, 0.12);
+  color: var(--color-primary-mid);
   border: none;
   padding: 8px 16px;
   border-radius: 8px;
@@ -206,7 +206,7 @@
   transition: all 0.2s ease;
 }
 .addSkillBtn:hover {
-  background: linear-gradient(135deg, rgba(124, 58, 237, 0.15) 0%, rgba(99, 102, 241, 0.15) 100%);
+  background: rgba(248, 207, 97, 0.2);
 }
 
 .skillsList { display: flex; flex-direction: column; gap: 12px; }
@@ -224,7 +224,7 @@
   outline: none;
   transition: border-color 0.2s;
 }
-.skillRow input:focus { border-color: var(--color-brand-purple); box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1); }
+.skillRow input:focus { border-color: #c8a84b; box-shadow: 0 0 0 3px rgba(200, 168, 75, 0.12); }
 .removeSkillBtn {
   background: #FEF2F2;
   border: none;
