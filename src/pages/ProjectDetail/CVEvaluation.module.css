@@ -63,12 +63,12 @@
 }
 
 .uploadLabel:hover {
-  border-color: var(--color-brand-purple);
-  background: linear-gradient(135deg, rgba(124, 58, 237, 0.03) 0%, rgba(99, 102, 241, 0.03) 100%);
+  border-color: var(--color-primary);
+  background: rgba(166, 25, 46, 0.03);
 }
 
 .uploadIcon {
-  color: var(--color-brand-purple);
+  color: var(--color-primary);
   margin-bottom: 16px;
 }
 
@@ -91,9 +91,9 @@
   align-items: center;
   gap: 10px;
   padding: 12px 20px;
-  background: linear-gradient(135deg, rgba(124, 58, 237, 0.1) 0%, rgba(99, 102, 241, 0.1) 100%);
+  background: rgba(166, 25, 46, 0.1);
   border-radius: 8px;
-  color: var(--color-brand-purple);
+  color: var(--color-primary);
   font-weight: 600;
   font-size: 13px;
 }
@@ -105,7 +105,7 @@
   justify-content: center;
   gap: 8px;
   padding: 12px 24px;
-  background: linear-gradient(135deg, var(--color-brand-purple) 0%, var(--color-brand-indigo) 100%);
+  background: var(--color-primary);
   color: white;
   border: none;
   border-radius: 10px;
@@ -118,7 +118,7 @@
 
 .evaluateBtn:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.35);
+  box-shadow: 0 6px 20px rgba(166, 25, 46, 0.35);
 }
 
 .evaluateBtn:disabled {
@@ -127,8 +127,8 @@
 }
 
 .infoCard {
-  background: linear-gradient(135deg, rgba(124, 58, 237, 0.05) 0%, rgba(99, 102, 241, 0.05) 100%);
-  border: 1px solid rgba(124, 58, 237, 0.2);
+  background: rgba(166, 25, 46, 0.05);
+  border: 1px solid rgba(166, 25, 46, 0.2);
   border-radius: 12px;
   padding: 24px;
 }
@@ -225,14 +225,14 @@
 .scoreNumber {
   font-size: 26px;
   font-weight: 700;
-  color: var(--color-brand-purple);
+  color: var(--color-primary);
   line-height: 1;
 }
 
 .scorePercent {
   font-size: 14px;
   font-weight: 600;
-  color: var(--color-brand-purple);
+  color: var(--color-primary);
 }
 
 .scoreLabel h3 {
@@ -246,7 +246,7 @@
   margin: 0;
   font-size: 13px;
   font-weight: 600;
-  color: var(--color-brand-purple);
+  color: var(--color-primary);
 }
 
 .scoreBreakdown {
@@ -279,7 +279,7 @@
 
 .scoreBarFill {
   height: 100%;
-  background: linear-gradient(90deg, var(--color-brand-purple) 0%, var(--color-brand-indigo) 100%);
+  background: var(--color-primary);
   border-radius: 5px;
   transition: width 1s ease;
 }
@@ -336,8 +336,8 @@
 
 /* AI Summary */
 .aiSummary {
-  background: linear-gradient(135deg, rgba(124, 58, 237, 0.05) 0%, rgba(99, 102, 241, 0.05) 100%);
-  border: 1px solid rgba(124, 58, 237, 0.2);
+  background: rgba(166, 25, 46, 0.05);
+  border: 1px solid rgba(166, 25, 46, 0.2);
   border-radius: 12px;
   padding: 20px 24px;
 }
@@ -349,7 +349,7 @@
 .aiBadge {
   display: inline-block;
   padding: 6px 14px;
-  background: linear-gradient(135deg, var(--color-brand-purple) 0%, var(--color-brand-indigo) 100%);
+  background: var(--color-primary);
   color: white;
   border-radius: 8px;
   font-size: 12px;
@@ -474,7 +474,7 @@
   content: '•';
   position: absolute;
   left: 0;
-  color: var(--color-brand-purple);
+  color: var(--color-primary);
   font-weight: bold;
   font-size: 16px;
 }
@@ -501,13 +501,13 @@
 
 .resetBtn:hover {
   background: var(--color-bg-base);
-  border-color: var(--color-brand-purple);
-  color: var(--color-brand-purple);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
 }
 
 .addToPipelineBtn {
   padding: 10px 22px;
-  background: linear-gradient(135deg, var(--color-brand-purple) 0%, var(--color-brand-indigo) 100%);
+  background: var(--color-primary);
   color: white;
   border: none;
   border-radius: 10px;
@@ -520,7 +520,7 @@
 
 .addToPipelineBtn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.35);
+  box-shadow: 0 6px 20px rgba(166, 25, 46, 0.35);
 }
 
 @keyframes spin {
@@ -587,7 +587,7 @@ svg defs {
 }
 
 .idsHeader svg {
-  color: var(--color-brand-purple);
+  color: var(--color-primary);
 }
 
 .idsGrid {
@@ -637,7 +637,7 @@ svg defs {
 }
 
 .fileInfoCard svg {
-  color: var(--color-brand-purple);
+  color: var(--color-primary);
   flex-shrink: 0;
 }
 
@@ -655,7 +655,7 @@ svg defs {
   gap: 4px;
   font-size: 12px;
   font-weight: 600;
-  color: var(--color-brand-purple);
+  color: var(--color-primary);
   text-decoration: none;
   white-space: nowrap;
   flex-shrink: 0;
@@ -696,7 +696,7 @@ svg defs {
 
 .modeBtnActive {
   background: white;
-  color: var(--color-brand-purple);
+  color: var(--color-primary);
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
 }
 
@@ -735,12 +735,12 @@ svg defs {
 
 .bulkDropZone:hover,
 .bulkDropZoneDragging {
-  border-color: var(--color-brand-purple);
-  background: linear-gradient(135deg, rgba(124, 58, 237, 0.04) 0%, rgba(99, 102, 241, 0.04) 100%);
+  border-color: var(--color-primary);
+  background: rgba(166, 25, 46, 0.04);
 }
 
 .bulkDropZoneDragging {
-  box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.12);
+  box-shadow: 0 0 0 4px rgba(166, 25, 46, 0.12);
 }
 
 .bulkDropZone h3 {
@@ -820,7 +820,7 @@ svg defs {
 .bulkFileRow:hover { background: var(--color-bg-base); }
 .bulkFileRowError { background: #FFF5F5; }
 
-.fileRowIcon { color: var(--color-brand-purple); flex-shrink: 0; }
+.fileRowIcon { color: var(--color-primary); flex-shrink: 0; }
 
 .fileRowInfo {
   flex: 1;
@@ -914,13 +914,13 @@ svg defs {
 }
 
 .bulkResult_pending    { opacity: 0.5; }
-.bulkResult_processing { border-color: rgba(124, 58, 237, 0.3); background: rgba(124, 58, 237, 0.03); }
+.bulkResult_processing { border-color: rgba(166, 25, 46, 0.3); background: rgba(166, 25, 46, 0.03); }
 .bulkResult_success    { border-color: #BBF7D0; background: #F0FDF4; }
 .bulkResult_error      { border-color: #FECACA; background: #FEF2F2; }
 
 .bulkResultIcon { flex-shrink: 0; margin-top: 1px; }
 .bulkResult_pending .bulkResultIcon    { color: var(--color-text-secondary); }
-.bulkResult_processing .bulkResultIcon { color: var(--color-brand-purple); }
+.bulkResult_processing .bulkResultIcon { color: var(--color-primary); }
 .bulkResult_success .bulkResultIcon    { color: #16A34A; }
 .bulkResult_error .bulkResultIcon      { color: #DC2626; }
 

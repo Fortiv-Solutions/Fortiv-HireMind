@@ -49,8 +49,15 @@ export default function HomeOverview() {
   const totalCandidates = projects.reduce((s, p) => s + p.total_candidates, 0);
   const totalShortlisted = projects.reduce((s, p) => s + p.shortlisted, 0);
   const totalScreened = projects.reduce((s, p) => s + p.screened, 0);
+  const totalRejected = projects.reduce((s, p) => s + p.rejected, 0);
   const activeProjects = projects.filter((p) => p.status === 'Active').length;
-  const offerRate = totalCandidates > 0 ? Math.round((totalShortlisted / totalCandidates) * 100) : 0;
+
+  // Real derived rates
+  const screenedRate = totalCandidates > 0 ? Math.round((totalScreened / totalCandidates) * 100) : 0;
+  const shortlistRate = totalCandidates > 0 ? Math.round((totalShortlisted / totalCandidates) * 100) : 0;
+  const activeProjectRate = projects.length > 0 ? Math.round((activeProjects / projects.length) * 100) : 0;
+  const rejectedRate = totalCandidates > 0 ? Math.round((totalRejected / totalCandidates) * 100) : 0;
+  const offerRate = shortlistRate;
 
   const recentProjects = [...projects]
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
@@ -72,30 +79,30 @@ export default function HomeOverview() {
 
           <div className={styles.progressRow}>
             <div className={styles.progressItem}>
-              <span className={styles.progressLabel}>Interviews</span>
+              <span className={styles.progressLabel}>Screened</span>
               <div className={styles.progressTrack}>
-                <div className={styles.progressFillDark} style={{ width: '15%' }} />
+                <div className={styles.progressFillDark} style={{ width: `${screenedRate}%` }} />
               </div>
-              <span className={styles.progressPct}>15%</span>
+              <span className={styles.progressPct}>{screenedRate}%</span>
             </div>
             <div className={styles.progressItem}>
-              <span className={styles.progressLabel}>Hired</span>
+              <span className={styles.progressLabel}>Shortlisted</span>
               <div className={styles.progressTrack}>
-                <div className={styles.progressFillGold} style={{ width: '15%' }} />
+                <div className={styles.progressFillGold} style={{ width: `${shortlistRate}%` }} />
               </div>
-              <span className={styles.progressPct}>15%</span>
+              <span className={styles.progressPct}>{shortlistRate}%</span>
             </div>
             <div className={styles.progressItem}>
-              <span className={styles.progressLabel}>Project time</span>
+              <span className={styles.progressLabel}>Active Projects</span>
               <div className={styles.progressTrack}>
-                <div className={styles.progressFillGray} style={{ width: `${Math.min(offerRate + 40, 100)}%` }} />
+                <div className={styles.progressFillGray} style={{ width: `${activeProjectRate}%` }} />
               </div>
-              <span className={styles.progressPct}>{Math.min(offerRate + 40, 100)}%</span>
+              <span className={styles.progressPct}>{activeProjectRate}%</span>
             </div>
             <div className={styles.progressItem}>
-              <span className={styles.progressLabel}>Output</span>
+              <span className={styles.progressLabel}>Rejected</span>
               <div className={styles.progressTrackOutline}>
-                <span className={styles.progressOutlinePct}>10%</span>
+                <span className={styles.progressOutlinePct}>{rejectedRate}%</span>
               </div>
             </div>
           </div>

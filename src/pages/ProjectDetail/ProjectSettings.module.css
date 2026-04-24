@@ -77,8 +77,8 @@
 
 .inputGroup input:focus,
 .inputGroup select:focus {
-  border-color: var(--color-brand-purple);
-  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(166, 25, 46, 0.08);
 }
 
 .inputGroupFull {
@@ -108,8 +108,8 @@
 
 .inputGroupFull input:focus,
 .inputGroupFull textarea:focus {
-  border-color: var(--color-brand-purple);
-  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(166, 25, 46, 0.08);
 }
 
 .inputGroupFull textarea {
@@ -144,20 +144,20 @@
   align-items: center;
   gap: 6px;
   padding: 10px 24px;
-  background: linear-gradient(135deg, var(--color-brand-purple) 0%, var(--color-brand-indigo) 100%);
+  background: var(--color-primary);
   color: white;
   border: none;
   border-radius: 8px;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  box-shadow: var(--shadow-brand);
+  box-shadow: 0 4px 14px rgba(166, 25, 46, 0.25);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .saveBtn:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.35);
+  box-shadow: 0 6px 20px rgba(166, 25, 46, 0.35);
 }
 
 .saveBtn:disabled {

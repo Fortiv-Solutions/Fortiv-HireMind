@@ -25,7 +25,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  color: var(--color-brand-purple);
+  color: var(--color-primary);
 }
 
 .sectionTitle h2 {
@@ -41,8 +41,8 @@
   align-items: center;
   gap: 6px;
   padding: 8px 16px;
-  background: linear-gradient(135deg, rgba(124, 58, 237, 0.1) 0%, rgba(99, 102, 241, 0.1) 100%);
-  color: var(--color-brand-purple);
+  background: rgba(166, 25, 46, 0.07);
+  color: var(--color-primary);
   border: none;
   border-radius: 8px;
   font-size: 12px;
@@ -53,9 +53,9 @@
 
 .editBtn:hover,
 .addBtn:hover {
-  background: linear-gradient(135deg, rgba(124, 58, 237, 0.15) 0%, rgba(99, 102, 241, 0.15) 100%);
+  background: rgba(166, 25, 46, 0.12);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.2);
+  box-shadow: 0 4px 12px rgba(166, 25, 46, 0.15);
 }
 
 .editActions {
@@ -93,20 +93,20 @@
   align-items: center;
   gap: 6px;
   padding: 8px 16px;
-  background: linear-gradient(135deg, var(--color-brand-purple) 0%, var(--color-brand-indigo) 100%);
+  background: var(--color-primary);
   color: white;
   border: none;
   border-radius: 8px;
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
-  box-shadow: var(--shadow-brand);
+  box-shadow: 0 4px 14px rgba(166, 25, 46, 0.25);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .saveBtn:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.35);
+  box-shadow: 0 6px 20px rgba(166, 25, 46, 0.35);
 }
 
 .saveBtn:disabled {
@@ -152,8 +152,8 @@
 
 .descriptionTextarea:focus {
   outline: none;
-  border-color: var(--color-brand-purple);
-  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(166, 25, 46, 0.08);
 }
 
 .descriptionTextarea:disabled {
@@ -215,12 +215,12 @@
 
 .skillTag {
   padding: 5px 12px;
-  background: linear-gradient(135deg, rgba(124, 58, 237, 0.1) 0%, rgba(99, 102, 241, 0.1) 100%);
-  color: var(--color-brand-purple);
+  background: rgba(166, 25, 46, 0.07);
+  color: var(--color-primary);
   border-radius: 7px;
   font-size: 12px;
   font-weight: 600;
-  border: 1px solid rgba(124, 58, 237, 0.2);
+  border: 1px solid rgba(166, 25, 46, 0.15);
 }
 
 /* Job Postings */
@@ -241,7 +241,7 @@
 .postCard:hover {
   transform: translateY(-4px);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-  border-color: var(--color-brand-purple);
+  border-color: rgba(166, 25, 46, 0.3);
 }
 
 .postHeader {
@@ -259,12 +259,12 @@
 
 .platformBadge {
   padding: 5px 12px;
-  background: linear-gradient(135deg, var(--color-brand-purple) 0%, var(--color-brand-indigo) 100%);
+  background: var(--color-primary);
   color: white;
   border-radius: 7px;
   font-size: 12px;
   font-weight: 700;
-  box-shadow: var(--shadow-brand);
+  box-shadow: 0 4px 10px rgba(166, 25, 46, 0.2);
 }
 
 .toggleBtn {
@@ -352,7 +352,7 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  color: var(--color-brand-purple);
+  color: var(--color-primary);
   font-size: 13px;
   font-weight: 600;
   text-decoration: none;
@@ -361,7 +361,7 @@
 }
 
 .postLink:hover {
-  color: var(--color-brand-indigo);
+  color: var(--color-primary);
   gap: 7px;
 }
 
@@ -400,7 +400,7 @@
   align-items: center;
   gap: 6px;
   padding: 10px 20px;
-  background: linear-gradient(135deg, var(--color-brand-purple) 0%, var(--color-brand-indigo) 100%);
+  background: var(--color-primary);
   color: white;
   border: none;
   border-radius: 8px;
@@ -413,7 +413,7 @@
 
 .emptyActionBtn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.35);
+  box-shadow: 0 6px 20px rgba(166, 25, 46, 0.35);
 }
 
 /* Modal Styles */
@@ -514,8 +514,8 @@
 .input:focus,
 .select:focus {
   outline: none;
-  border-color: var(--color-brand-purple);
-  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(166, 25, 46, 0.1);
 }
 
 .input:disabled,
@@ -573,7 +573,7 @@
 
 .btnPrimary {
   padding: 10px 20px;
-  background: linear-gradient(135deg, var(--color-brand-purple) 0%, var(--color-brand-indigo) 100%);
+  background: var(--color-primary);
   color: white;
   border: none;
   border-radius: 8px;
@@ -586,7 +586,7 @@
 
 .btnPrimary:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.35);
+  box-shadow: 0 6px 20px rgba(166, 25, 46, 0.35);
 }
 
 .btnPrimary:disabled {

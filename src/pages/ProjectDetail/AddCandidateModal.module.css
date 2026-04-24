@@ -98,22 +98,22 @@
 }
 
 .modeBtn:hover {
-  border-color: var(--color-brand-purple);
-  color: var(--color-brand-purple);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.15);
+  box-shadow: 0 4px 12px rgba(166, 25, 46, 0.15);
 }
 
 .modeBtnActive {
-  background: linear-gradient(135deg, var(--color-brand-purple) 0%, var(--color-brand-indigo) 100%);
-  border-color: var(--color-brand-purple);
+  background: var(--color-primary);
+  border-color: var(--color-primary);
   color: white;
   box-shadow: var(--shadow-brand);
 }
 
 .modeBtnActive:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.35);
+  box-shadow: 0 6px 20px rgba(166, 25, 46, 0.35);
 }
 
 /* Form */
@@ -153,12 +153,12 @@
 }
 
 .uploadLabel:hover {
-  border-color: var(--color-brand-purple);
-  background: linear-gradient(135deg, rgba(124, 58, 237, 0.03) 0%, rgba(99, 102, 241, 0.03) 100%);
+  border-color: var(--color-primary);
+  background: rgba(166, 25, 46, 0.03);
 }
 
 .uploadIcon {
-  color: var(--color-brand-purple);
+  color: var(--color-primary);
   margin-bottom: 16px;
 }
 
@@ -178,16 +178,16 @@
 .selectedFile {
   margin-top: 16px;
   padding: 12px 20px;
-  background: linear-gradient(135deg, rgba(124, 58, 237, 0.1) 0%, rgba(99, 102, 241, 0.1) 100%);
+  background: rgba(166, 25, 46, 0.1);
   border-radius: 8px;
-  color: var(--color-brand-purple);
+  color: var(--color-primary);
   font-weight: 600;
   font-size: 14px;
 }
 
 .uploadInfo {
-  background: linear-gradient(135deg, rgba(124, 58, 237, 0.05) 0%, rgba(99, 102, 241, 0.05) 100%);
-  border: 1px solid rgba(124, 58, 237, 0.2);
+  background: rgba(166, 25, 46, 0.05);
+  border: 1px solid rgba(166, 25, 46, 0.2);
   border-radius: 12px;
   padding: 20px 24px;
 }
@@ -217,7 +217,7 @@
   content: '✓';
   position: absolute;
   left: -16px;
-  color: var(--color-brand-purple);
+  color: var(--color-primary);
   font-weight: bold;
 }
 
@@ -258,8 +258,8 @@
 
 .inputGroup input:focus,
 .inputGroupFull input[type="url"]:focus {
-  border-color: var(--color-brand-purple);
-  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(166, 25, 46, 0.1);
 }
 
 .inputGroupFull {
@@ -285,15 +285,15 @@
 }
 
 .fileInputSmall:hover {
-  border-color: var(--color-brand-purple);
+  border-color: var(--color-primary);
 }
 
 .fileNameDisplay {
   margin-top: 8px;
   padding: 8px 12px;
-  background: linear-gradient(135deg, rgba(124, 58, 237, 0.1) 0%, rgba(99, 102, 241, 0.1) 100%);
+  background: rgba(166, 25, 46, 0.1);
   border-radius: 8px;
-  color: var(--color-brand-purple);
+  color: var(--color-primary);
   font-size: 13px;
   font-weight: 600;
 }
@@ -374,7 +374,7 @@
   padding: 12px 28px;
   border-radius: 10px;
   border: none;
-  background: linear-gradient(135deg, var(--color-brand-purple) 0%, var(--color-brand-indigo) 100%);
+  background: var(--color-primary);
   color: white;
   font-size: 14px;
   font-weight: 600;
@@ -393,7 +393,7 @@
 
 .submitBtn:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.35);
+  box-shadow: 0 6px 20px rgba(166, 25, 46, 0.35);
 }
 
 @keyframes spin {

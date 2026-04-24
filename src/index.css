@@ -8,10 +8,6 @@
   --color-accent: #e53935;
   --color-accent-hover: #8b1325;
 
-  /* Semantic aliases */
-  --color-brand-purple: #7c3aed;
-  --color-brand-indigo: #4338ca;
-
   --color-secondary: #64748b;
 
   /* ── Surfaces ── */
@@ -63,7 +59,7 @@ body {
   margin: 0;
   padding: 0;
   font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  background: #fff9fa;
   background-attachment: fixed;
   color: var(--color-text-primary);
   -webkit-font-smoothing: antialiased;
