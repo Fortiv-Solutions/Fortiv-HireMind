@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
-  max-width: 1600px;
+  max-width: 1800px;
   margin: 0 auto;
 }
 
@@ -13,10 +13,10 @@
   justify-content: space-between;
   gap: 32px;
   background: linear-gradient(135deg, #fffafa 0%, #fff1f2 50%, #fdf2f2 100%);
-  border: 1px solid rgba(166, 25, 46, 0.15);
+  border: 1.5px solid rgba(166, 25, 46, 0.12);
   border-radius: 28px;
   padding: 32px 40px;
-  box-shadow: 0 10px 30px rgba(166, 25, 46, 0.05);
+  box-shadow: 0 4px 12px rgba(166, 25, 46, 0.04);
   position: relative;
   overflow: hidden;
   flex-shrink: 0;
@@ -107,12 +107,11 @@
 .kpiBannerStats {
   display: flex;
   align-items: center;
-  background: rgba(255, 255, 255, 0.7);
-  border: 1px solid rgba(255, 255, 255, 0.9);
+  background: white;
+  border: 1.5px solid var(--color-border-light);
   border-radius: 22px;
   padding: 18px 24px;
-  box-shadow: 0 8px 32px rgba(166, 25, 46, 0.06);
-  backdrop-filter: blur(12px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
   flex-shrink: 0;
 }
 
@@ -168,17 +167,17 @@
 .kpiGrid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
+  gap: 20px;
 }
 
 .kpiCard {
   background: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(0, 0, 0, 0.04);
-  border-radius: var(--radius-xl);
+  border: 1.5px solid var(--color-border-light);
+  border-radius: 28px;
   padding: 24px;
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
   position: relative;
   overflow: hidden;
   transition: transform 300ms var(--ease-out), box-shadow 300ms ease, border-color 300ms ease;
@@ -302,19 +301,17 @@
 
 .chartArea {
   flex: 2;
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(166, 25, 46, 0.08);
-  border-radius: var(--radius-2xl);
-  padding: 32px;
-  box-shadow: var(--shadow-sm);
+  background: white;
+  border: 1.5px solid var(--color-border-light);
+  border-radius: 28px;
+  padding: 28px 32px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
   transition: all 300ms var(--ease-out);
 }
 
 .chartArea:hover {
-  box-shadow: var(--shadow-md);
-  border-color: rgba(166, 25, 46, 0.12);
+  box-shadow: 0 12px 32px rgba(166, 25, 46, 0.06);
+  border-color: rgba(166, 25, 46, 0.15);
 }
 
 .chartHeader {
@@ -453,19 +450,17 @@
 /* ── Schedule / pipeline area ── */
 .scheduleArea {
   flex: 1;
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(166, 25, 46, 0.08);
-  border-radius: var(--radius-2xl);
-  padding: 32px;
-  box-shadow: var(--shadow-sm);
+  background: white;
+  border: 1.5px solid var(--color-border-light);
+  border-radius: 28px;
+  padding: 28px 32px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
   transition: all 300ms var(--ease-out);
 }
 
 .scheduleArea:hover {
-  box-shadow: var(--shadow-md);
-  border-color: rgba(166, 25, 46, 0.12);
+  box-shadow: 0 12px 32px rgba(166, 25, 46, 0.06);
+  border-color: rgba(166, 25, 46, 0.15);
 }
 
 .scheduleArea h3 {

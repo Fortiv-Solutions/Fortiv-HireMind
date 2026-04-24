@@ -177,6 +177,11 @@ export default function EvaluationCriteria() {
     <div className={styles.container}>
       {/* Header */}
       <div className={styles.header}>
+        <div className={styles.breadcrumb}>
+          <span className={styles.breadcrumbLink}>Dashboard</span>
+          <span className={styles.breadcrumbSep}>›</span>
+          <span className={styles.breadcrumbCurrent}>Evaluation Criteria</span>
+        </div>
         <div>
           <h1>Evaluation Criteria</h1>
           <p className={styles.subtitle}>

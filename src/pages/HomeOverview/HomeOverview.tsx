@@ -41,10 +41,6 @@ export default function HomeOverview() {
     'there';
   const firstName = fullName.split(' ')[0];
 
-  useEffect(() => {
-    loadProjects();
-  }, [loadProjects]);
-
   const totalCandidates = projects.reduce((s, p) => s + p.total_candidates, 0);
   const totalShortlisted = projects.reduce((s, p) => s + p.shortlisted, 0);
   const totalScreened = projects.reduce((s, p) => s + p.screened, 0);

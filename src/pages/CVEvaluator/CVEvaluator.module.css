@@ -8,11 +8,42 @@
 }
 
 /* ─── Header ─────────────────────────────────────────────────────────────── */
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0 4px;
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text-tertiary);
+}
+
+.breadcrumbLink {
+  color: var(--color-text-tertiary);
+  cursor: pointer;
+  transition: color 150ms;
+}
+
+.breadcrumbLink:hover { color: var(--color-text-primary); }
+
+.breadcrumbSep { color: var(--color-text-tertiary); }
+
+.breadcrumbCurrent {
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
 .header h1 {
   font-size: 32px;
   font-weight: 800;
   color: var(--color-text-primary);
-  margin: 0 0 8px 0;
+  margin: 0 0 4px 0;
   letter-spacing: -0.05em;
 }
 

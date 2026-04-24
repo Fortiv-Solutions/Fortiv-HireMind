@@ -9,13 +9,15 @@
 
 /* ── Top Nav ──────────────────────────────────────────────────────────── */
 .topnav {
-  height: 80px;
+  height: 64px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 32px 0 40px;
   flex-shrink: 0;
   z-index: 10;
+  border-bottom: 1px solid var(--color-border-light);
+  background: var(--color-bg-base);
 }
 
 /* Brand */
@@ -267,7 +269,7 @@
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 0 40px 40px;
+  padding: 28px 40px 40px;
 }
 
 .content::-webkit-scrollbar {

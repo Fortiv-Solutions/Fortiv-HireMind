@@ -1,7 +1,7 @@
 .container {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 20px;
   max-width: 1800px;
   margin: 0 auto;
 }
@@ -317,6 +317,11 @@
 
 .thBtn:hover { color: var(--color-primary); }
 
+.sortIconInactive {
+  color: var(--color-text-tertiary);
+  flex-shrink: 0;
+}
+
 .sortIconActive {
   color: var(--color-primary);
   flex-shrink: 0;
@@ -404,6 +409,13 @@
   gap: 6px;
   font-size: 12.5px;
   color: var(--color-text-secondary);
+}
+
+/* wrapper for stacked contact items */
+.contactCell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .locationCell {
