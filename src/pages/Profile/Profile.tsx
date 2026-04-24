@@ -107,45 +107,43 @@ export default function Profile() {
         <p>Manage your account information and preferences</p>
       </div>
 
-      {/* Profile card */}
-      <div className={styles.card}>
-        <div className={styles.cardHeader}>
-          <User size={16} />
-          <h2>Profile Information</h2>
-        </div>
+      {/* Profile hero card */}
+      <div className={styles.heroCard}>
+        <div className={styles.heroCardBanner} />
+        <div className={styles.heroCardBody}>
+          <div className={styles.heroRow}>
+            <div className={styles.avatarWrap}>
+              <div className={styles.avatar}>{initials}</div>
+            </div>
+            <div className={styles.userDetails}>
+              <div className={styles.userName}>{userName}</div>
+              <div className={styles.userEmail}>{userEmail}</div>
+              <span className={styles.roleBadge}>{userRole}</span>
+            </div>
+            <button className={styles.editBtn} onClick={openEditName}>
+              <Edit3 size={14} /> Edit Name
+            </button>
+          </div>
 
-        <div className={styles.profileHero}>
-          <div className={styles.avatarWrap}>
-            <div className={styles.avatar}>{initials}</div>
-          </div>
-          <div className={styles.userDetails}>
-            <div className={styles.userName}>{userName}</div>
-            <div className={styles.userEmail}>{userEmail}</div>
-            <span className={styles.roleBadge}>{userRole}</span>
-          </div>
-          <button className={styles.editBtn} onClick={openEditName}>
-            <Edit3 size={14} /> Edit Name
-          </button>
-        </div>
+          <div className={styles.divider} />
 
-        <div className={styles.divider} />
-
-        <div className={styles.infoGrid}>
-          <div className={styles.infoItem}>
-            <span className={styles.infoLabel}>Email</span>
-            <span className={styles.infoValue}>{userEmail}</span>
-          </div>
-          <div className={styles.infoItem}>
-            <span className={styles.infoLabel}>Member since</span>
-            <span className={styles.infoValue}>{joinedDate}</span>
-          </div>
-          <div className={styles.infoItem}>
-            <span className={styles.infoLabel}>Role</span>
-            <span className={styles.infoValue}>{userRole}</span>
-          </div>
-          <div className={styles.infoItem}>
-            <span className={styles.infoLabel}>Account ID</span>
-            <span className={styles.infoValue}>{user?.id?.slice(0, 8) ?? '—'}…</span>
+          <div className={styles.infoGrid}>
+            <div className={styles.infoItem}>
+              <span className={styles.infoLabel}>Email</span>
+              <span className={styles.infoValue}>{userEmail}</span>
+            </div>
+            <div className={styles.infoItem}>
+              <span className={styles.infoLabel}>Member since</span>
+              <span className={styles.infoValue}>{joinedDate}</span>
+            </div>
+            <div className={styles.infoItem}>
+              <span className={styles.infoLabel}>Role</span>
+              <span className={styles.infoValue}>{userRole}</span>
+            </div>
+            <div className={styles.infoItem}>
+              <span className={styles.infoLabel}>Account ID</span>
+              <span className={styles.infoValue}>{user?.id?.slice(0, 8) ?? '—'}…</span>
+            </div>
           </div>
         </div>
       </div>

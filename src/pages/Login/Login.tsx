@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './Login.module.css';
-import { Mail, Lock, ArrowRight, Loader2 } from 'lucide-react';
+import { Mail, Lock, ArrowRight, Loader2, Eye, EyeOff } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useStore } from '../../store/useStore';
 
@@ -10,53 +10,32 @@ export default function Login() {
   const { user } = useStore();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // Redirect to dashboard if already logged in
   useEffect(() => {
-    if (user) {
-      navigate('/dashboard-home');
-    }
+    if (user) navigate('/dashboard-home');
   }, [user, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Basic validation
-    if (!email || !password) {
-      setError('Please enter both email and password');
-      return;
-    }
 
-    if (!email.includes('@')) {
-      setError('Please enter a valid email address');
-      return;
-    }
+    if (!email || !password) { setError('Please enter both email and password'); return; }
+    if (!email.includes('@')) { setError('Please enter a valid email address'); return; }
 
     setLoading(true);
     setError('');
 
     try {
-      // Authenticate with Supabase
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
-        password: password,
+        password,
       });
-
-      if (signInError) {
-        throw signInError;
-      }
-
-      if (data.user) {
-        // Successfully logged in, navigate to dashboard home
-        navigate('/dashboard-home');
-      }
+      if (signInError) throw signInError;
+      if (data.user) navigate('/dashboard-home');
     } catch (err: any) {
-      console.error('Login error:', err);
-      
-      // Handle specific error messages
       if (err.message?.includes('Invalid login credentials')) {
         setError('Invalid email or password. Please try again.');
       } else if (err.message?.includes('Email not confirmed')) {
@@ -73,27 +52,66 @@ export default function Login() {
 
   return (
     <div className={styles.container}>
+
+      {/* ── Left panel ── */}
       <div className={styles.leftPanel}>
+        {/* Brand mark */}
         <div className={styles.brand}>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M16 8C18.2091 8 20 9.79086 20 12C20 14.2091 18.2091 16 16 16C13 16 11 8 8 8C5.79086 8 4 9.79086 4 12C4 14.2091 5.79086 16 8 16C11 16 13 8 16 8Z" stroke="#8c6a28" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-          <span className={styles.brandName}>HireFlow</span>
+          <span className={styles.brandUK}>UK</span>
+          <span className={styles.brandRealty}>REALTY</span>
         </div>
 
+        {/* Decorative geometric accent */}
+        <div className={styles.accentCircle} />
+        <div className={styles.accentCircle2} />
+
         <div className={styles.heroContent}>
-          <h1>Intelligence Suite for<br/>Modern Recruitment</h1>
+          <div className={styles.heroEyebrow}>Recruitment Intelligence</div>
+          <h1>Hire smarter.<br />Move faster.</h1>
           <p>
-            Streamline your talent acquisition pipeline with data-driven<br/>insights and a frictionless candidate experience.
+            A unified platform to screen, evaluate, and shortlist top talent —
+            powered by AI and built for modern hiring teams.
           </p>
+
+          <div className={styles.heroPills}>
+            <span className={styles.heroPill}>AI CV Evaluation</span>
+            <span className={styles.heroPill}>Pipeline Analytics</span>
+            <span className={styles.heroPill}>Bulk Screening</span>
+          </div>
+        </div>
+
+        {/* Bottom stat strip */}
+        <div className={styles.statStrip}>
+          <div className={styles.statItem}>
+            <span className={styles.statNum}>10×</span>
+            <span className={styles.statLabel}>Faster screening</span>
+          </div>
+          <div className={styles.statDivider} />
+          <div className={styles.statItem}>
+            <span className={styles.statNum}>98%</span>
+            <span className={styles.statLabel}>Accuracy rate</span>
+          </div>
+          <div className={styles.statDivider} />
+          <div className={styles.statItem}>
+            <span className={styles.statNum}>Zero</span>
+            <span className={styles.statLabel}>Bias in scoring</span>
+          </div>
         </div>
       </div>
 
+      {/* ── Right panel ── */}
       <div className={styles.rightPanel}>
         <div className={styles.formCard}>
+
+          {/* Logo repeat on right for context */}
+          <div className={styles.formLogo}>
+            <span className={styles.formLogoUK}>UK</span>
+            <span className={styles.formLogoRealty}>REALTY</span>
+          </div>
+
           <div className={styles.formHeader}>
             <h2>Welcome back</h2>
-            <p className={styles.subTitle}>Please enter your details to sign in.</p>
+            <p className={styles.subTitle}>Sign in to your HireMind workspace.</p>
           </div>
 
           <form onSubmit={handleSubmit} className={styles.form}>
@@ -104,11 +122,11 @@ export default function Login() {
             )}
 
             <div className={styles.inputGroup}>
-              <label>Email</label>
+              <label>Email address</label>
               <div className={styles.inputWrapper}>
-                <Mail className={styles.inputIcon} size={16} />
-                <input 
-                  type="email" 
+                <Mail className={styles.inputIcon} size={15} />
+                <input
+                  type="email"
                   placeholder="name@company.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -121,40 +139,45 @@ export default function Login() {
             <div className={styles.inputGroup}>
               <label>Password</label>
               <div className={styles.inputWrapper}>
-                <Lock className={styles.inputIcon} size={16} />
-                <input 
-                  type="password"
+                <Lock className={styles.inputIcon} size={15} />
+                <input
+                  type={showPassword ? 'text' : 'password'}
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   disabled={loading}
                   autoComplete="current-password"
                 />
+                <button
+                  type="button"
+                  className={styles.eyeBtn}
+                  onClick={() => setShowPassword((v) => !v)}
+                  tabIndex={-1}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                </button>
               </div>
             </div>
 
             <div className={styles.optionsRow}>
               <label className={styles.rememberMe}>
-                <input 
-                  type="checkbox" 
+                <input
+                  type="checkbox"
                   checked={rememberMe}
                   onChange={(e) => setRememberMe(e.target.checked)}
                 />
-                <span className={styles.checkmark}></span>
+                <span className={styles.checkmark} />
                 Remember me
               </label>
               <a href="#" className={styles.forgot}>Forgot password?</a>
             </div>
 
-            <button 
-              type="submit" 
-              className={styles.submitBtn}
-              disabled={loading}
-            >
+            <button type="submit" className={styles.submitBtn} disabled={loading}>
               {loading ? (
                 <Loader2 size={18} className={styles.spinner} />
               ) : (
-                <>Sign In <ArrowRight size={18} className={styles.arrowIcon} /></>
+                <>Sign In <ArrowRight size={17} className={styles.arrowIcon} /></>
               )}
             </button>
           </form>
