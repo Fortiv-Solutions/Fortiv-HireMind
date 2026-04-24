@@ -1,0 +1,117 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800&display=swap');
+
+:root {
+  /* ── Premium UK REALTY Red Theme ── */
+  --color-primary: #a6192e; /* UK REALTY Red */
+  --color-primary-mid: #c41e3a;
+  --color-primary-container: #fff1f2; /* Light Rose from image */
+  --color-accent: #e53935;
+  --color-accent-hover: #8b1325;
+
+  /* Semantic aliases */
+  --color-brand-purple: #7c3aed;
+  --color-brand-indigo: #4338ca;
+
+  --color-secondary: #64748b;
+
+  /* ── Surfaces ── */
+  --color-bg-base: #fff9fa; /* Airy rose-white background */
+  --color-bg-card: #ffffff;
+  --color-bg-elevated: #ffffff;
+  --color-bg-subtle: #fff1f2; /* Matching the image color */
+
+  /* ── Borders ── */
+  --color-border: #fce7e9; /* Soft red border */
+  --color-border-light: #fff1f2;
+
+  /* ── Text ── */
+  --color-text-primary: #1a0a0c; /* Deep burgundy-black */
+  --color-text-secondary: #6b4f53; /* Warm reddish-gray */
+  --color-text-tertiary: #a3898c;
+
+  /* ── Shadows (Premium soft shadows) ── */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.04), 0 2px 4px -1px rgba(0, 0, 0, 0.02);
+  --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.04), 0 4px 6px -2px rgba(0, 0, 0, 0.02);
+  --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.04), 0 10px 10px -5px rgba(0, 0, 0, 0.01);
+  --shadow-brand: 0 10px 25px rgba(166, 25, 46, 0.15);
+
+  /* ── Radius ── */
+  --radius-xs: 8px;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+  --radius-2xl: 32px;
+  --radius-full: 9999px;
+
+  /* ── Easing ── */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-move: cubic-bezier(0.25, 1, 0.5, 1);
+
+  /* ── Typography ── */
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 16px;
+  box-sizing: border-box;
+}
+
+*, *:before, *:after {
+  box-sizing: inherit;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  background-attachment: fixed;
+  color: var(--color-text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  line-height: 1.5;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  font-variant-numeric: tabular-nums;
+  font-size: 13.5px;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+
+h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.03em; }
+h2 { font-size: 18px; font-weight: 700; letter-spacing: -0.02em; }
+h3 { font-size: 15px; font-weight: 600; }
+h4 { font-size: 13px; font-weight: 600; }
+h5 { font-size: 12px; }
+h6 { font-size: 11px; }
+
+p {
+  margin: 0;
+  line-height: 1.65;
+}
+
+button {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+input, select, textarea {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+/* ── Focus visible — accessible, non-intrusive ── */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

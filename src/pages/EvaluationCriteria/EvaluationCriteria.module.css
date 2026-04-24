@@ -1,0 +1,337 @@
+/* ─── Container ─────────────────────────────────────────────────────────── */
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 1800px;
+  margin: 0 auto;
+}
+
+/* ─── Container ─────────────────────────────────────────────────────────── */
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 1800px;
+  margin: 0 auto;
+}
+
+/* ─── Header ─────────────────────────────────────────────────────────────── */
+.header h1 {
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--color-text-primary);
+  margin: 0 0 8px 0;
+  letter-spacing: -0.05em;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  margin: 0;
+  max-width: 600px;
+  line-height: 1.6;
+  font-weight: 500;
+}
+
+/* ─── Toolbar ────────────────────────────────────────────────────────────── */
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  background: white;
+  padding: 12px 24px;
+  border-radius: 20px;
+  border: 1.5px solid var(--color-border-light);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+}
+
+/* ─── Filters ────────────────────────────────────────────────────────────── */
+.criteriaFilters {
+  display: flex;
+  gap: 6px;
+  background: var(--color-bg-subtle);
+  border-radius: 14px;
+  padding: 5px;
+  border: 1px solid var(--color-border-light);
+}
+
+.filterBtn,
+.filterBtnActive {
+  padding: 8px 20px;
+  border: none;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 250ms var(--ease-out);
+}
+
+.filterBtn {
+  background: transparent;
+  color: var(--color-text-secondary);
+}
+
+.filterBtn:hover {
+  color: var(--color-primary);
+  background: white;
+}
+
+.filterBtnActive {
+  background: white;
+  color: var(--color-primary);
+  box-shadow: 0 4px 12px rgba(166, 25, 46, 0.08);
+}
+
+/* ─── New Criteria Button ────────────────────────────────────────────────── */
+.newCriteriaBtn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 24px;
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: 99px;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(166, 25, 46, 0.2);
+  transition: all 300ms var(--ease-out);
+}
+
+.newCriteriaBtn:hover {
+  background: var(--color-accent-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(166, 25, 46, 0.3);
+}
+
+/* ─── Criteria Grid ──────────────────────────────────────────────────────── */
+.criteriaGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 20px;
+}
+
+/* ─── Criteria Card ──────────────────────────────────────────────────────── */
+.criteriaCard {
+  background: white;
+  border: 1.5px solid var(--color-border-light);
+  border-radius: 28px;
+  padding: 28px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  transition: all 300ms var(--ease-out);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.criteriaCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(166, 25, 46, 0.08);
+  border-color: rgba(166, 25, 46, 0.2);
+}
+
+.criteriaCardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.criteriaCardHeader h3 {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--color-text-primary);
+  margin: 0;
+  flex: 1;
+  min-width: 0;
+  word-wrap: break-word;
+  letter-spacing: -0.02em;
+}
+
+.criteriaActions {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.iconBtn {
+  background: white;
+  border: 1px solid var(--color-border-light);
+  cursor: pointer;
+  padding: 8px;
+  color: var(--color-text-secondary);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 200ms ease;
+}
+
+.iconBtn:hover {
+  background: rgba(166, 25, 46, 0.05);
+  color: var(--color-primary);
+  border-color: rgba(166, 25, 46, 0.2);
+}
+
+.criteriaDescription {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  margin: 0;
+  line-height: 1.6;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-weight: 500;
+}
+
+/* ─── Criteria Stats ─────────────────────────────────────────────────────── */
+.criteriaStats {
+  display: flex;
+  gap: 32px;
+  padding: 16px 0;
+  border-top: 1.5px solid var(--color-border-light);
+  border-bottom: 1.5px solid var(--color-border-light);
+}
+
+.criteriaStat {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.statValue {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--color-primary);
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.statLabel {
+  font-size: 12px;
+  color: var(--color-text-tertiary);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ─── Criteria Footer ────────────────────────────────────────────────────── */
+.criteriaFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.statusBadge {
+  padding: 5px 14px;
+  border-radius: 99px;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.statusActive { background: rgba(16, 185, 129, 0.1); color: #059669; }
+.statusInactive { background: #f1f5f9; color: #475569; }
+.statusArchived { background: rgba(245, 158, 11, 0.1); color: #b45309; }
+.statusDraft { background: rgba(166, 25, 46, 0.08); color: var(--color-primary); }
+
+.criteriaDate {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-text-tertiary);
+}
+
+/* ─── Evaluate Criteria Button ───────────────────────────────────────────── */
+.evaluateCriteriaBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px;
+  background: var(--color-bg-subtle);
+  color: var(--color-primary);
+  border: 1.5px solid rgba(166, 25, 46, 0.1);
+  border-radius: 14px;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 300ms var(--ease-out);
+}
+
+.evaluateCriteriaBtn:hover {
+  background: var(--color-primary);
+  color: white;
+  border-color: transparent;
+  box-shadow: 0 4px 12px rgba(166, 25, 46, 0.2);
+  transform: translateY(-1px);
+}
+
+/* ─── Empty Criteria ─────────────────────────────────────────────────────── */
+.emptyCriteria {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 100px 40px;
+  text-align: center;
+  background: white;
+  border: 1.5px solid var(--color-border-light);
+  border-radius: 32px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.03);
+}
+
+.emptyIcon {
+  color: rgba(166, 25, 46, 0.1);
+  margin-bottom: 24px;
+}
+
+.emptyCriteria h3 {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--color-text-primary);
+  margin: 0 0 12px 0;
+}
+
+.emptyCriteria p {
+  font-size: 15px;
+  color: var(--color-text-secondary);
+  margin: 0 0 32px 0;
+  max-width: 400px;
+  line-height: 1.6;
+}
+
+.createFirstBtn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 32px;
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: 99px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(166, 25, 46, 0.2);
+  transition: all 300ms var(--ease-out);
+}
+
+.createFirstBtn:hover {
+  background: var(--color-accent-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(166, 25, 46, 0.3);
+}
