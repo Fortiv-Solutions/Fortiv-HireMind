@@ -113,11 +113,41 @@ src/
 
 ## Deployment
 
+### Building for Production
+
 ```bash
 npm run build
 ```
 
-The production build outputs to `dist/`. Deploy to any static host (Vercel, Netlify, etc.).
+The production build outputs to `dist/`. 
+
+### Deployment Platforms
+
+This project includes configuration files for multiple hosting platforms:
+
+#### Vercel (Recommended)
+- The `vercel.json` file is already configured
+- Simply connect your GitHub repo to Vercel
+- Vercel will automatically detect the Vite project and deploy
+
+#### Netlify
+- The `netlify.toml` file is already configured
+- Connect your GitHub repo to Netlify
+- Build command: `npm run build`
+- Publish directory: `dist`
+
+#### Other Static Hosts
+- The `public/_redirects` file handles SPA routing for most static hosts
+- For Apache servers, `.htaccess` is included in the `public` folder
+
+### Important: SPA Routing Configuration
+
+This is a Single Page Application (SPA) using client-side routing. When users refresh the page or access a route directly (e.g., `/candidates`), the server needs to serve `index.html` for all routes. The configuration files mentioned above handle this automatically.
+
+If you encounter 404 errors when refreshing pages:
+1. Ensure the appropriate config file is deployed with your app
+2. Verify your hosting platform supports SPA redirects
+3. Check that the build output includes the redirect configuration
 
 ## License
 
