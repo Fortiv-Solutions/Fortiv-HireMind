@@ -153,6 +153,30 @@
   flex-shrink: 0;
 }
 
+/* ── Custom scrollbar styling ── */
+.fileList::-webkit-scrollbar {
+  width: 6px;
+}
+
+.fileList::-webkit-scrollbar-track {
+  background: transparent;
+  margin: 4px 0;
+}
+
+.fileList::-webkit-scrollbar-thumb {
+  background: rgba(166, 25, 46, 0.12);
+  border-radius: 10px;
+  transition: background 0.2s ease;
+}
+
+.fileList::-webkit-scrollbar-thumb:hover {
+  background: rgba(166, 25, 46, 0.25);
+}
+
+.fileList::-webkit-scrollbar-thumb:active {
+  background: rgba(166, 25, 46, 0.35);
+}
+
 .fileListHeader {
   display: flex;
   justify-content: space-between;
@@ -262,6 +286,30 @@
   flex-direction: column;
   gap: 12px;
   min-height: 0;
+}
+
+/* ── Custom scrollbar styling ── */
+.progressSection::-webkit-scrollbar {
+  width: 6px;
+}
+
+.progressSection::-webkit-scrollbar-track {
+  background: transparent;
+  margin: 4px 0;
+}
+
+.progressSection::-webkit-scrollbar-thumb {
+  background: rgba(166, 25, 46, 0.12);
+  border-radius: 10px;
+  transition: background 0.2s ease;
+}
+
+.progressSection::-webkit-scrollbar-thumb:hover {
+  background: rgba(166, 25, 46, 0.25);
+}
+
+.progressSection::-webkit-scrollbar-thumb:active {
+  background: rgba(166, 25, 46, 0.35);
 }
 
 .summary {

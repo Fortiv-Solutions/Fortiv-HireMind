@@ -226,7 +226,33 @@
   flex-direction: column;
   gap: 10px;
   min-height: 0;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 8px;
+}
+
+/* ── Custom scrollbar styling ── */
+.col::-webkit-scrollbar {
+  width: 6px;
+}
+
+.col::-webkit-scrollbar-track {
+  background: transparent;
+  margin: 4px 0;
+}
+
+.col::-webkit-scrollbar-thumb {
+  background: rgba(166, 25, 46, 0.15);
+  border-radius: 10px;
+  transition: background 0.2s ease;
+}
+
+.col::-webkit-scrollbar-thumb:hover {
+  background: rgba(166, 25, 46, 0.3);
+}
+
+.col::-webkit-scrollbar-thumb:active {
+  background: rgba(166, 25, 46, 0.4);
 }
 
 /* ── Card ── */

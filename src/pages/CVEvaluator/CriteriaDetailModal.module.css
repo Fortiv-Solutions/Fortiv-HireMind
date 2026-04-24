@@ -137,6 +137,30 @@
   flex: 1;
 }
 
+/* ── Custom scrollbar styling ── */
+.modalBody::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modalBody::-webkit-scrollbar-track {
+  background: transparent;
+  margin: 4px 0;
+}
+
+.modalBody::-webkit-scrollbar-thumb {
+  background: rgba(166, 25, 46, 0.12);
+  border-radius: 10px;
+  transition: background 0.2s ease;
+}
+
+.modalBody::-webkit-scrollbar-thumb:hover {
+  background: rgba(166, 25, 46, 0.25);
+}
+
+.modalBody::-webkit-scrollbar-thumb:active {
+  background: rgba(166, 25, 46, 0.35);
+}
+
 /* ─── Loading State ──────────────────────────────────────────────────────── */
 .loading {
   display: flex;
