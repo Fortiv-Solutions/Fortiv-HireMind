@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './Profile.module.css';
 import {
-  User, LogOut, Key, Edit3, Eye, EyeOff,
+  LogOut, Key, Edit3, Eye, EyeOff,
   ChevronDown, ChevronUp, ChevronRight, Shield,
 } from 'lucide-react';
 import { useStore } from '../../store/useStore';

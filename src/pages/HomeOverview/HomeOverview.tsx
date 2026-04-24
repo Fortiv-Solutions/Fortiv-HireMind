@@ -7,7 +7,6 @@ import {
   Briefcase as FcBriefcase, 
   RefreshCcw as FcSynchronize, 
   Building2 as FcOrganization,
-  ArrowRight
 } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 import { useNavigate } from 'react-router-dom';

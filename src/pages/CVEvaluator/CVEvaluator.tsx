@@ -13,7 +13,6 @@ import {
   Layers as Files, 
   XCircle, 
   RotateCcw,
-  CheckCircle2,
 } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 import {
