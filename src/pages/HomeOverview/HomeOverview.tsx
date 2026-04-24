@@ -28,8 +28,19 @@ const itemVariants: Variants = {
 };
 
 export default function HomeOverview() {
-  const { projects, projectsLoading, loadProjects } = useStore();
+  const { projects, projectsLoading, loadProjects, user } = useStore();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    loadProjects();
+  }, [loadProjects]);
+
+  const fullName =
+    user?.user_metadata?.full_name ??
+    user?.user_metadata?.name ??
+    user?.email?.split('@')[0] ??
+    'there';
+  const firstName = fullName.split(' ')[0];
 
   useEffect(() => {
     loadProjects();
@@ -56,7 +67,7 @@ export default function HomeOverview() {
         transition={{ duration: 0.4 }}
       >
         <div className={styles.welcomeLeft}>
-          <h1 className={styles.welcomeTitle}>Welcome back, Hiring Team 👋</h1>
+          <h1 className={styles.welcomeTitle}>Welcome back, {firstName}</h1>
           <p className={styles.welcomeSub}>Here's what's happening with your recruitment pipeline today.</p>
 
           <div className={styles.progressRow}>

@@ -1,7 +1,7 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import styles from './Layout.module.css';
-import { FcSettings, FcInspection, FcPortraitMode } from 'react-icons/fc';
+import { FcPortraitMode } from 'react-icons/fc';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
 
@@ -37,12 +37,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
         {/* Actions */}
         <div className={styles.actions}>
-          <button className={styles.iconRoundBtn} title="Settings">
-            <FcSettings size={20} />
-          </button>
-          <button className={styles.iconRoundBtn} title="Notifications">
-            <FcInspection size={20} />
-          </button>
           <a href="/profile" className={styles.profileAvatar} title="Profile">
             <FcPortraitMode size={26} />
           </a>

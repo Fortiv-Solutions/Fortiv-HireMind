@@ -7,16 +7,13 @@ import {
   AlertCircle, 
   Sparkles, 
   BarChart3, 
-  Settings as Target, 
   Search as Eye, 
   Trash2, 
-  ClipboardCheck as Zap, 
   ExternalLink, 
   Layers as Files, 
   XCircle, 
   RotateCcw,
   CheckCircle2,
-  Users
 } from 'lucide-react';
 import { useStore } from '../../store/useStore';
 import {
@@ -351,171 +348,164 @@ export default function CVEvaluator() {
       {/* Upload View */}
       {viewMode === 'upload' && (
         <div className={styles.uploadView}>
-          {/* Left Section - Upload & Settings */}
+          {/* Left Section — merged CV + Settings card */}
           <div className={styles.uploadSection}>
             <div className={styles.card}>
-              <div className={styles.cardHeader}>
-                <h3>Add CVs</h3>
-                <p>Upload new files or add from candidates you've already worked with.</p>
-              </div>
 
-              {/* Mode Selector */}
-              <div className={styles.modeSelector}>
-                <button
-                  className={uploadMode === 'new' ? styles.modeBtnActive : styles.modeBtn}
-                  onClick={() => setUploadMode('new')}
-                >
-                  Upload new
-                </button>
-                <button
-                  className={uploadMode === 'existing' ? styles.modeBtnActive : styles.modeBtn}
-                  onClick={() => setUploadMode('existing')}
-                >
-                  Use existing
-                </button>
-              </div>
-
-              {/* Upload Area */}
-              {uploadMode === 'new' && (
-                <div
-                  className={`${styles.uploadArea} ${dragActive ? styles.uploadAreaActive : ''}`}
-                  onDragEnter={handleDrag}
-                  onDragLeave={handleDrag}
-                  onDragOver={handleDrag}
-                  onDrop={handleDrop}
-                >
-                  <Upload size={48} className={styles.uploadIcon} />
-                  <p className={styles.uploadText}>
-                    Drag & drop or click to upload
-                  </p>
-                  <p className={styles.uploadHint}>
-                    PDF, DOCX · 10 MB limit remaining
-                  </p>
-                  <input
-                    type="file"
-                    accept=".pdf,.doc,.docx"
-                    onChange={handleFileInput}
-                    className={styles.fileInput}
-                    id="cv-upload"
-                  />
-                  <label htmlFor="cv-upload" className={styles.uploadBtn}>
-                    Choose File
-                  </label>
+              {/* ── Section 1: CV Source ── */}
+              <div className={styles.cardSection}>
+                <div className={styles.cardSectionLabel}>
+                  <span className={styles.cardSectionNum}>1</span>
+                  CV Source
                 </div>
-              )}
 
-              {uploadMode === 'existing' && (
-                <div className={styles.existingCandidates}>
-                  {loadingCandidates ? (
-                    <p className={styles.loading}>Loading candidates...</p>
-                  ) : existingCandidates.length === 0 ? (
-                    <p className={styles.comingSoon}>No existing candidates found</p>
-                  ) : (
-                    <div className={styles.candidatesList}>
-                      <label>Select a candidate</label>
-                      <select
-                        className={styles.select}
-                        value={selectedCandidateId}
-                        onChange={(e) => setSelectedCandidateId(e.target.value)}
-                      >
-                        <option value="">Choose candidate...</option>
-                        {existingCandidates.map((candidate) => (
-                          <option key={candidate.id} value={candidate.id}>
-                            {candidate.full_name} ({candidate.email})
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Uploaded File Display */}
-              {uploadedFile && (
-                <div className={styles.uploadedFile}>
-                  <FileText size={20} className={styles.fileIcon} />
-                  <div className={styles.fileInfo}>
-                    <p className={styles.fileName}>{uploadedFile.name}</p>
-                    <p className={styles.fileSize}>
-                      {(uploadedFile.size / 1024).toFixed(1)} KB
-                    </p>
-                  </div>
+                <div className={styles.modeSelector}>
                   <button
-                    className={styles.removeFileBtn}
-                    onClick={() => setUploadedFile(null)}
+                    className={uploadMode === 'new' ? styles.modeBtnActive : styles.modeBtn}
+                    onClick={() => setUploadMode('new')}
                   >
-                    <Trash2 size={16} />
+                    Upload new
+                  </button>
+                  <button
+                    className={uploadMode === 'existing' ? styles.modeBtnActive : styles.modeBtn}
+                    onClick={() => setUploadMode('existing')}
+                  >
+                    Use existing
                   </button>
                 </div>
-              )}
-            </div>
 
-            {/* Settings Card */}
-            <div className={styles.card}>
-              <div className={styles.cardHeader}>
-                <h3>Evaluation Settings</h3>
+                {uploadMode === 'new' && (
+                  <div
+                    className={`${styles.uploadArea} ${dragActive ? styles.uploadAreaActive : ''}`}
+                    onDragEnter={handleDrag}
+                    onDragLeave={handleDrag}
+                    onDragOver={handleDrag}
+                    onDrop={handleDrop}
+                  >
+                    <Upload size={36} className={styles.uploadIcon} />
+                    <p className={styles.uploadText}>Drag & drop or click to upload</p>
+                    <p className={styles.uploadHint}>PDF, DOCX · 10 MB max</p>
+                    <input
+                      type="file"
+                      accept=".pdf,.doc,.docx"
+                      onChange={handleFileInput}
+                      className={styles.fileInput}
+                      id="cv-upload"
+                    />
+                    <label htmlFor="cv-upload" className={styles.uploadBtn}>
+                      Choose File
+                    </label>
+                  </div>
+                )}
+
+                {uploadMode === 'existing' && (
+                  <div className={styles.existingCandidates}>
+                    {loadingCandidates ? (
+                      <p className={styles.loading}>Loading candidates...</p>
+                    ) : existingCandidates.length === 0 ? (
+                      <p className={styles.comingSoon}>No existing candidates found</p>
+                    ) : (
+                      <div className={styles.candidatesList}>
+                        <label>Select a candidate</label>
+                        <select
+                          className={styles.select}
+                          value={selectedCandidateId}
+                          onChange={(e) => setSelectedCandidateId(e.target.value)}
+                        >
+                          <option value="">Choose candidate...</option>
+                          {existingCandidates.map((candidate) => (
+                            <option key={candidate.id} value={candidate.id}>
+                              {candidate.full_name} ({candidate.email})
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {uploadedFile && (
+                  <div className={styles.uploadedFile}>
+                    <FileText size={18} className={styles.fileIcon} />
+                    <div className={styles.fileInfo}>
+                      <p className={styles.fileName}>{uploadedFile.name}</p>
+                      <p className={styles.fileSize}>{(uploadedFile.size / 1024).toFixed(1)} KB</p>
+                    </div>
+                    <button className={styles.removeFileBtn} onClick={() => setUploadedFile(null)}>
+                      <Trash2 size={15} />
+                    </button>
+                  </div>
+                )}
               </div>
 
-              <div className={styles.formGroup}>
-                <label>Auto-Consider CVs</label>
-                <div className={styles.radioGroup}>
-                  <label className={styles.radioLabel}>
-                    <input
-                      type="radio"
-                      name="autoConsider"
-                      checked={autoConsiderMode === 'criteria'}
-                      onChange={() => setAutoConsiderMode('criteria')}
-                    />
-                    <span>Select CV Criteria</span>
-                  </label>
-                  <label className={styles.radioLabel}>
-                    <input
-                      type="radio"
-                      name="autoConsider"
-                      checked={autoConsiderMode === 'project'}
-                      onChange={() => setAutoConsiderMode('project')}
-                    />
-                    <span>Select a Hiring Project</span>
-                  </label>
+              {/* ── Divider ── */}
+              <div className={styles.cardDivider} />
+
+              {/* ── Section 2: Evaluation Settings ── */}
+              <div className={styles.cardSection}>
+                <div className={styles.cardSectionLabel}>
+                  <span className={styles.cardSectionNum}>2</span>
+                  Evaluation Settings
                 </div>
-              </div>
 
-              {autoConsiderMode === 'criteria' && (
                 <div className={styles.formGroup}>
-                  <label>Select CV Criteria</label>
+                  <label>Evaluate Against</label>
+                  <div className={styles.radioGroup}>
+                    <label className={`${styles.radioLabel} ${autoConsiderMode === 'criteria' ? styles.radioLabelActive : ''}`}>
+                      <input
+                        type="radio"
+                        name="autoConsider"
+                        checked={autoConsiderMode === 'criteria'}
+                        onChange={() => setAutoConsiderMode('criteria')}
+                      />
+                      <span>CV Criteria set</span>
+                    </label>
+                    <label className={`${styles.radioLabel} ${autoConsiderMode === 'project' ? styles.radioLabelActive : ''}`}>
+                      <input
+                        type="radio"
+                        name="autoConsider"
+                        checked={autoConsiderMode === 'project'}
+                        onChange={() => setAutoConsiderMode('project')}
+                      />
+                      <span>Hiring project only</span>
+                    </label>
+                  </div>
+                </div>
+
+                {autoConsiderMode === 'criteria' && (
+                  <div className={styles.formGroup}>
+                    <label>Criteria Set</label>
+                    <select
+                      className={styles.select}
+                      value={selectedCriteriaId}
+                      onChange={(e) => setSelectedCriteriaId(e.target.value)}
+                    >
+                      <option value="">Choose criteria set...</option>
+                      {criteriaList
+                        .filter((c) => c.status === 'Active')
+                        .map((c) => (
+                          <option key={c.id} value={c.id}>{c.name}</option>
+                        ))}
+                    </select>
+                  </div>
+                )}
+
+                <div className={styles.formGroup}>
+                  <label>Hiring Project <span className={styles.reqStar}>*</span></label>
                   <select
                     className={styles.select}
-                    value={selectedCriteriaId}
-                    onChange={(e) => setSelectedCriteriaId(e.target.value)}
+                    value={selectedProjectId}
+                    onChange={(e) => setSelectedProjectId(e.target.value)}
                   >
-                    <option value="">Choose criteria set...</option>
-                    {criteriaList
-                      .filter((c) => c.status === 'Active')
-                      .map((c) => (
-                        <option key={c.id} value={c.id}>
-                          {c.name}
-                        </option>
-                      ))}
+                    <option value="">Choose project...</option>
+                    {projects.map((p) => (
+                      <option key={p.id} value={p.id}>{p.title}</option>
+                    ))}
                   </select>
                 </div>
-              )}
-
-              <div className={styles.formGroup}>
-                <label>Select a Hiring Project</label>
-                <select
-                  className={styles.select}
-                  value={selectedProjectId}
-                  onChange={(e) => setSelectedProjectId(e.target.value)}
-                >
-                  <option value="">Choose project...</option>
-                  {projects.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.title}
-                    </option>
-                  ))}
-                </select>
               </div>
 
+              {/* ── Evaluate Button ── */}
               <button
                 className={styles.evaluateBtn}
                 onClick={handleEvaluate}
@@ -527,48 +517,12 @@ export default function CVEvaluator() {
                 }
               >
                 {evaluating ? (
-                  <>
-                    <Sparkles size={18} className={styles.spinner} />
-                    Waiting for AI analysis...
-                  </>
+                  <><Sparkles size={18} className={styles.spinner} /> Waiting for AI analysis...</>
                 ) : (
-                  <>
-                    <Sparkles size={18} />
-                    Evaluate CV
-                  </>
+                  <><Sparkles size={18} /> Evaluate CV</>
                 )}
               </button>
-            </div>
 
-            {/* Features */}
-            <div className={styles.featuresCard}>
-              <div className={styles.feature}>
-                <div className={styles.featureIcon}>
-                  <Target size={20} />
-                </div>
-                <div>
-                  <h4>Reusable criteria sets</h4>
-                  <p>Not once. Reuse across every role.</p>
-                </div>
-              </div>
-              <div className={styles.feature}>
-                <div className={styles.featureIcon}>
-                  <Zap size={20} />
-                </div>
-                <div>
-                  <h4>Consistent scoring</h4>
-                  <p>Same rubric. No human. No bias.</p>
-                </div>
-              </div>
-              <div className={styles.feature}>
-                <div className={styles.featureIcon}>
-                  <Users size={20} />
-                </div>
-                <div>
-                  <h4>Shared visibility</h4>
-                  <p>Everyone has same access. No domain.</p>
-                </div>
-              </div>
             </div>
           </div>
 
@@ -763,87 +717,105 @@ export default function CVEvaluator() {
       {/* Bulk Upload View */}
       {viewMode === 'bulk' && (
         <div className={styles.uploadView}>
-          {/* Left: settings + drop zone */}
+          {/* Left: merged single card */}
           <div className={styles.uploadSection}>
-            {/* Project / Criteria settings */}
             <div className={styles.card}>
-              <div className={styles.cardHeader}>
-                <h3>Bulk Settings</h3>
-                <p>Select a project before uploading. Criteria is optional.</p>
-              </div>
-              <div className={styles.formGroup}>
-                <label>Hiring Project <span style={{ color: '#DC2626' }}>*</span></label>
-                <select className={styles.select} value={bulkProjectId} onChange={(e) => setBulkProjectId(e.target.value)}>
-                  <option value="">Choose project…</option>
-                  {projects.map((p) => <option key={p.id} value={p.id}>{p.title}</option>)}
-                </select>
-              </div>
-              <div className={styles.formGroup}>
-                <label>Evaluation Criteria (optional)</label>
-                <select className={styles.select} value={bulkCriteriaId} onChange={(e) => setBulkCriteriaId(e.target.value)}>
-                  <option value="">None</option>
-                  {criteriaList.filter((c) => c.status === 'Active').map((c) => (
-                    <option key={c.id} value={c.id}>{c.name}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
 
-            {/* Drop zone — hidden while running */}
-            {!bulkRunning && !bulkDone && (
-              <div className={styles.card}>
-                <div className={styles.cardHeader}>
-                  <h3>Upload CVs</h3>
-                  <p>PDF, DOC, DOCX · Max {MAX_BULK_MB}MB per file · Up to {MAX_BULK_FILES} files</p>
+              {/* ── Section 1: Upload CVs ── */}
+              <div className={styles.cardSection}>
+                <div className={styles.cardSectionLabel}>
+                  <span className={styles.cardSectionNum}>1</span>
+                  Upload CVs
                 </div>
 
-                <div
-                  className={`${styles.uploadArea} ${bulkIsDragging ? styles.uploadAreaActive : ''}`}
-                  onDragEnter={(e) => { e.preventDefault(); setBulkIsDragging(true); }}
-                  onDragOver={(e) => { e.preventDefault(); setBulkIsDragging(true); }}
-                  onDragLeave={() => setBulkIsDragging(false)}
-                  onDrop={(e) => { e.preventDefault(); setBulkIsDragging(false); addBulkFiles(e.dataTransfer.files); }}
-                  onClick={() => bulkInputRef.current?.click()}
-                >
-                  <input ref={bulkInputRef} type="file" multiple accept=".pdf,.doc,.docx"
-                    onChange={(e) => { if (e.target.files) addBulkFiles(e.target.files); e.target.value = ''; }}
-                    className={styles.fileInput}
-                  />
-                  <Upload size={40} className={styles.uploadIcon} />
-                  <p className={styles.uploadText}>Drag & drop or click to browse</p>
-                  <p className={styles.uploadHint}>Select multiple files at once</p>
-                </div>
-
-                {bulkGlobalError && (
-                  <div className={styles.bulkInlineError}>
-                    <AlertCircle size={14} /> {bulkGlobalError}
-                  </div>
-                )}
-
-                {bulkFiles.length > 0 && (
-                  <div className={styles.bulkFileList}>
-                    <div className={styles.bulkFileListHeader}>
-                      <span>{bulkFiles.length} file{bulkFiles.length !== 1 ? 's' : ''} selected</span>
-                      <button className={styles.bulkClearBtn} onClick={() => { setBulkFiles([]); setBulkFileErrors({}); setBulkGlobalError(null); }}>Clear all</button>
+                {!bulkRunning && !bulkDone ? (
+                  <>
+                    <div
+                      className={`${styles.uploadArea} ${bulkIsDragging ? styles.uploadAreaActive : ''}`}
+                      onDragEnter={(e) => { e.preventDefault(); setBulkIsDragging(true); }}
+                      onDragOver={(e) => { e.preventDefault(); setBulkIsDragging(true); }}
+                      onDragLeave={() => setBulkIsDragging(false)}
+                      onDrop={(e) => { e.preventDefault(); setBulkIsDragging(false); addBulkFiles(e.dataTransfer.files); }}
+                      onClick={() => bulkInputRef.current?.click()}
+                    >
+                      <input ref={bulkInputRef} type="file" multiple accept=".pdf,.doc,.docx"
+                        onChange={(e) => { if (e.target.files) addBulkFiles(e.target.files); e.target.value = ''; }}
+                        className={styles.fileInput}
+                      />
+                      <Upload size={36} className={styles.uploadIcon} />
+                      <p className={styles.uploadText}>Drag & drop or click to browse</p>
+                      <p className={styles.uploadHint}>PDF, DOC, DOCX · Max {MAX_BULK_MB}MB · Up to {MAX_BULK_FILES} files</p>
                     </div>
-                    {bulkFiles.map((f, i) => (
-                      <div key={`${f.name}-${i}`} className={`${styles.bulkFileRow} ${bulkFileErrors[f.name] ? styles.bulkFileRowError : ''}`}>
-                        <FileText size={14} style={{ color: 'var(--color-brand-purple)', flexShrink: 0 }} />
-                        <div className={styles.bulkFileInfo}>
-                          <span className={styles.bulkFileName}>{f.name}</span>
-                          {bulkFileErrors[f.name]
-                            ? <span className={styles.bulkFileErrText}>{bulkFileErrors[f.name]}</span>
-                            : <span className={styles.bulkFileSize}>{(f.size / 1024).toFixed(0)} KB</span>}
-                        </div>
-                        <button className={styles.removeFileBtn} onClick={() => {
-                          setBulkFiles((prev) => { const u = [...prev]; u.splice(i, 1); return u; });
-                          setBulkFileErrors((e) => { const c = { ...e }; delete c[f.name]; return c; });
-                        }}><Trash2 size={13} /></button>
+
+                    {bulkGlobalError && (
+                      <div className={styles.bulkInlineError}>
+                        <AlertCircle size={14} /> {bulkGlobalError}
                       </div>
-                    ))}
+                    )}
+
+                    {bulkFiles.length > 0 && (
+                      <div className={styles.bulkFileList}>
+                        <div className={styles.bulkFileListHeader}>
+                          <span>{bulkFiles.length} file{bulkFiles.length !== 1 ? 's' : ''} selected</span>
+                          <button className={styles.bulkClearBtn} onClick={() => { setBulkFiles([]); setBulkFileErrors({}); setBulkGlobalError(null); }}>Clear all</button>
+                        </div>
+                        {bulkFiles.map((f, i) => (
+                          <div key={`${f.name}-${i}`} className={`${styles.bulkFileRow} ${bulkFileErrors[f.name] ? styles.bulkFileRowError : ''}`}>
+                            <FileText size={14} style={{ color: 'var(--color-primary)', flexShrink: 0 }} />
+                            <div className={styles.bulkFileInfo}>
+                              <span className={styles.bulkFileName}>{f.name}</span>
+                              {bulkFileErrors[f.name]
+                                ? <span className={styles.bulkFileErrText}>{bulkFileErrors[f.name]}</span>
+                                : <span className={styles.bulkFileSize}>{(f.size / 1024).toFixed(0)} KB</span>}
+                            </div>
+                            <button className={styles.removeFileBtn} onClick={() => {
+                              setBulkFiles((prev) => { const u = [...prev]; u.splice(i, 1); return u; });
+                              setBulkFileErrors((e) => { const c = { ...e }; delete c[f.name]; return c; });
+                            }}><Trash2 size={13} /></button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div className={styles.bulkRunningNote}>
+                    <Files size={16} />
+                    <span>{bulkRunning ? 'Processing files…' : `${bulkFiles.length} file${bulkFiles.length !== 1 ? 's' : ''} uploaded`}</span>
                   </div>
                 )}
+              </div>
 
+              {/* ── Divider ── */}
+              <div className={styles.cardDivider} />
+
+              {/* ── Section 2: Bulk Settings ── */}
+              <div className={styles.cardSection}>
+                <div className={styles.cardSectionLabel}>
+                  <span className={styles.cardSectionNum}>2</span>
+                  Bulk Settings
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label>Hiring Project <span className={styles.reqStar}>*</span></label>
+                  <select className={styles.select} value={bulkProjectId} onChange={(e) => setBulkProjectId(e.target.value)} disabled={bulkRunning}>
+                    <option value="">Choose project…</option>
+                    {projects.map((p) => <option key={p.id} value={p.id}>{p.title}</option>)}
+                  </select>
+                </div>
+
+                <div className={styles.formGroup}>
+                  <label>Evaluation Criteria <span className={styles.optionalTag}>optional</span></label>
+                  <select className={styles.select} value={bulkCriteriaId} onChange={(e) => setBulkCriteriaId(e.target.value)} disabled={bulkRunning}>
+                    <option value="">None</option>
+                    {criteriaList.filter((c) => c.status === 'Active').map((c) => (
+                      <option key={c.id} value={c.id}>{c.name}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* ── Upload Button ── */}
+              {!bulkRunning && !bulkDone && (
                 <button
                   className={styles.evaluateBtn}
                   onClick={handleBulkUpload}
@@ -852,23 +824,8 @@ export default function CVEvaluator() {
                   <Files size={18} />
                   Upload & Evaluate {bulkFiles.length > 0 ? `${bulkFiles.length} CV${bulkFiles.length !== 1 ? 's' : ''}` : 'CVs'}
                 </button>
-              </div>
-            )}
+              )}
 
-            {/* Features */}
-            <div className={styles.featuresCard}>
-              <div className={styles.feature}>
-                <div className={styles.featureIcon}><Files size={20} /></div>
-                <div><h4>Up to {MAX_BULK_FILES} CVs at once</h4><p>Batch process your entire applicant pool.</p></div>
-              </div>
-              <div className={styles.feature}>
-                <div className={styles.featureIcon}><Zap size={20} /></div>
-                <div><h4>Real-time progress</h4><p>Watch each CV get evaluated as it processes.</p></div>
-              </div>
-              <div className={styles.feature}>
-                <div className={styles.featureIcon}><Target size={20} /></div>
-                <div><h4>Auto-added to pipeline</h4><p>All candidates land in My Candidates automatically.</p></div>
-              </div>
             </div>
           </div>
 
