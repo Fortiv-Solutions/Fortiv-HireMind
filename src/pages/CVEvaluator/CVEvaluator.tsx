@@ -536,7 +536,7 @@ export default function CVEvaluator() {
               <div className={styles.emptyResults}>
                 <Sparkles size={64} className={`${styles.emptyIcon} ${styles.spinner}`} />
                 <h3>Analysing CV...</h3>
-                <p>CV sent to AI. Waiting for n8n to process and save the evaluation — checking every few seconds.</p>
+                <p>CV sent to AI. Processing and saving the evaluation — checking every few seconds.</p>
               </div>
             ) : !evaluationResult ? (
               <div className={styles.emptyResults}>

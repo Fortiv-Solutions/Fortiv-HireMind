@@ -419,7 +419,7 @@ async function sendToWebhook(
     // Add JSON data
     formData.append('data', JSON.stringify(payload));
     
-    // Send to webhook with timeout — n8n AI processing can take a while
+    // Send to webhook with timeout — AI processing can take a while
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 120000); // 2 minute timeout
     
@@ -476,7 +476,7 @@ async function sendToWebhook(
       success: false,
       error: error.message || 'Unknown error',
       message: error.message?.includes('fetch')
-        ? 'CORS error: The n8n webhook must allow requests from this origin. Check your n8n webhook CORS settings.'
+        ? 'CORS error: The webhook must allow requests from this origin. Check your webhook CORS settings.'
         : 'Failed to send CV file to webhook',
     };
   }
@@ -533,7 +533,7 @@ async function fetchEvaluationById(cvEvaluationId: string): Promise<CvEvaluation
 
 /**
  * Process and evaluate a CV.
- * 1. Sends the file + project/criteria context to the n8n webhook.
+ * 1. Sends the file + project/criteria context to the webhook.
  * 2. Webhook responds with all IDs (candidate_id, cv_evaluation_id, etc.).
  * 3. Uses cv_evaluation_id from the response to fetch the full record once.
  * 4. Returns the completed CvEvaluation.
@@ -603,12 +603,12 @@ export async function fetchExistingCandidates(): Promise<
 
 /**
  * Evaluate an existing candidate for a project.
- * 1. Sends candidate + project context to the n8n webhook.
- * 2. Waits for n8n's acknowledgement.
- * 3. Polls the database until n8n has written the evaluation record.
+ * 1. Sends candidate + project context to the webhook.
+ * 2. Waits for the webhook's acknowledgement.
+ * 3. Polls the database until the evaluation record has been written.
  * 4. Returns the completed CvEvaluation from the database.
  *
- * No local DB writes are performed here — n8n owns all database operations.
+ * No local DB writes are performed here — the backend owns all database operations.
  */
 export async function evaluateExistingCandidate(
   candidateId: string,
