@@ -616,3 +616,154 @@
   to   { transform: rotate(360deg); }
 }
 .spinner { animation: spin 0.8s linear infinite; }
+
+.aiInterviewPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.aiSectionTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-text-primary);
+  font-size: 17px;
+  font-weight: 850;
+  letter-spacing: -0.03em;
+}
+
+.aiHelpText {
+  color: var(--color-text-secondary);
+  font-size: 12.5px;
+  margin-top: 4px;
+}
+
+.aiToolbarActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.aiSelect {
+  height: 40px;
+  min-width: 210px;
+  border: 1.5px solid var(--color-border-light);
+  border-radius: 999px;
+  background: white;
+  color: var(--color-text-primary);
+  padding: 0 14px;
+  font-weight: 700;
+  outline: none;
+}
+
+.aiSelect:focus {
+  border-color: rgba(166, 25, 46, 0.35);
+  box-shadow: 0 0 0 4px rgba(166, 25, 46, 0.06);
+}
+
+.aiSetForm {
+  border: 1.5px solid rgba(166, 25, 46, 0.12);
+  background: rgba(166, 25, 46, 0.025);
+  border-radius: 18px;
+  padding: 18px;
+  margin-bottom: 18px;
+}
+
+.aiFormGrid {
+  display: grid;
+  grid-template-columns: minmax(240px, 0.6fr) 1fr;
+  gap: 14px;
+}
+
+.aiFormGrid label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  color: var(--color-text-primary);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.aiFormGrid input,
+.aiFormGrid textarea {
+  border: 1.5px solid var(--color-border-light);
+  border-radius: 14px;
+  padding: 12px 14px;
+  resize: vertical;
+  outline: none;
+}
+
+.aiFormGrid input:focus,
+.aiFormGrid textarea:focus {
+  border-color: rgba(166, 25, 46, 0.35);
+  box-shadow: 0 0 0 4px rgba(166, 25, 46, 0.06);
+}
+
+.aiFormActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.aiError {
+  padding: 12px 14px;
+  border: 1px solid #fecaca;
+  background: #fef2f2;
+  color: #b91c1c;
+  border-radius: 12px;
+  font-weight: 700;
+  margin-bottom: 14px;
+}
+
+.aiStatus,
+.aiStatusMuted {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 850;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: rgba(166, 25, 46, 0.08);
+  color: var(--color-primary);
+}
+
+.aiStatusMuted {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.aiLinkButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1.5px solid rgba(166, 25, 46, 0.22);
+  background: white;
+  color: var(--color-primary);
+  border-radius: 999px;
+  padding: 8px 13px;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.aiLinkButton:hover {
+  background: rgba(166, 25, 46, 0.04);
+}
+
+.addCandidateBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+@media (max-width: 860px) {
+  .aiFormGrid {
+    grid-template-columns: 1fr;
+  }
+}

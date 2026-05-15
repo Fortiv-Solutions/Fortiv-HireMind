@@ -62,6 +62,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <NavLink to="/candidates" className={({ isActive }) => isActive ? `${styles.navItem} ${styles.navItemActive}` : styles.navItem}>
             Candidates
           </NavLink>
+          <NavLink to="/ai-interviewer" className={({ isActive }) => isActive ? `${styles.navItem} ${styles.navItemActive}` : styles.navItem}>
+            AI Interviewer
+          </NavLink>
           <NavLink to="/cv-evaluator" className={({ isActive }) => isActive ? `${styles.navItem} ${styles.navItemActive}` : styles.navItem}>
             Evaluator
           </NavLink>

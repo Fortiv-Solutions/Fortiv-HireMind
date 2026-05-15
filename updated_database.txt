@@ -1,0 +1,193 @@
+-- WARNING: This schema is for context only and is not meant to be run.
+-- Table order and constraints may not be valid for execution.
+
+CREATE TABLE public.candidates (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  full_name text NOT NULL,
+  email text NOT NULL,
+  phone text,
+  linkedin_url text,
+  location text,
+  fingerprint text UNIQUE,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT candidates_pkey PRIMARY KEY (id)
+);
+CREATE TABLE public.cv_criteria_items (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  criteria_set_id uuid NOT NULL,
+  criterion_name text NOT NULL,
+  criterion_description text,
+  weight numeric DEFAULT 1.0 CHECK (weight >= 0::numeric AND weight <= 1::numeric),
+  criterion_type text CHECK (criterion_type = ANY (ARRAY['skill'::text, 'experience'::text, 'education'::text, 'custom'::text])),
+  expected_value text,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT cv_criteria_items_pkey PRIMARY KEY (id),
+  CONSTRAINT cv_criteria_items_criteria_set_id_fkey FOREIGN KEY (criteria_set_id) REFERENCES public.cv_evaluation_criteria(id)
+);
+CREATE TABLE public.cv_evaluation_criteria (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  name text NOT NULL,
+  description text,
+  status text DEFAULT 'Active'::text CHECK (status = ANY (ARRAY['Active'::text, 'Inactive'::text, 'Draft'::text, 'Archived'::text])),
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT cv_evaluation_criteria_pkey PRIMARY KEY (id)
+);
+CREATE TABLE public.cv_evaluations (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  candidate_id uuid,
+  hiring_project_id uuid,
+  job_post_id uuid,
+  source_platform text CHECK (source_platform = ANY (ARRAY['LinkedIn'::text, 'Naukri'::text, 'Indeed'::text, 'Website'::text, 'Email'::text, 'Manual'::text])),
+  cv_file_url text,
+  raw_cv_text text,
+  parsed_name text,
+  parsed_email text,
+  parsed_phone text,
+  parsed_location text,
+  parsed_skills ARRAY,
+  parsed_experience_years numeric,
+  parsed_education text,
+  parsed_companies ARRAY,
+  parsed_projects ARRAY,
+  parsed_summary text,
+  skills_match_score numeric DEFAULT 0,
+  experience_score numeric DEFAULT 0,
+  education_score numeric DEFAULT 0,
+  additional_score numeric DEFAULT 0,
+  total_score numeric DEFAULT 0,
+  status text DEFAULT 'New'::text CHECK (status = ANY (ARRAY['New'::text, 'Screened'::text, 'Shortlisted'::text, 'Under Review'::text, 'Rejected'::text])),
+  shortlisted boolean DEFAULT false,
+  shortlist_reason text,
+  reject_reason text,
+  applied_at timestamp with time zone DEFAULT now(),
+  screened_at timestamp with time zone,
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  criteria_set_id uuid,
+  CONSTRAINT cv_evaluations_pkey PRIMARY KEY (id),
+  CONSTRAINT cv_evaluations_candidate_id_fkey FOREIGN KEY (candidate_id) REFERENCES public.candidates(id),
+  CONSTRAINT cv_evaluations_hiring_project_id_fkey FOREIGN KEY (hiring_project_id) REFERENCES public.hiring_projects(id),
+  CONSTRAINT cv_evaluations_job_post_id_fkey FOREIGN KEY (job_post_id) REFERENCES public.job_posts(id),
+  CONSTRAINT cv_evaluations_criteria_set_id_fkey FOREIGN KEY (criteria_set_id) REFERENCES public.cv_evaluation_criteria(id)
+);
+CREATE TABLE public.error_logs (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  workflow_name text,
+  node_name text,
+  error_message text,
+  error_data text,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT error_logs_pkey PRIMARY KEY (id)
+);
+CREATE TABLE public.hiring_projects (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  title text NOT NULL,
+  department text,
+  location text,
+  job_type text CHECK (job_type = ANY (ARRAY['Full-time'::text, 'Part-time'::text, 'Contract'::text, 'Internship'::text])),
+  required_skills ARRAY,
+  required_experience_years integer DEFAULT 0,
+  required_education text,
+  description text,
+  status text DEFAULT 'Active'::text CHECK (status = ANY (ARRAY['Active'::text, 'Paused'::text, 'Closed'::text])),
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT hiring_projects_pkey PRIMARY KEY (id)
+);
+CREATE TABLE public.job_posts (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  hiring_project_id uuid,
+  platform text NOT NULL CHECK (platform = ANY (ARRAY['LinkedIn'::text, 'Naukri'::text, 'Indeed'::text, 'Website'::text, 'Email'::text, 'Manual'::text])),
+  external_job_id text,
+  post_url text,
+  posted_at timestamp with time zone,
+  status text DEFAULT 'Active'::text CHECK (status = ANY (ARRAY['Active'::text, 'Closed'::text])),
+  created_at timestamp with time zone DEFAULT now(),
+  updated_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT job_posts_pkey PRIMARY KEY (id),
+  CONSTRAINT job_posts_hiring_project_id_fkey FOREIGN KEY (hiring_project_id) REFERENCES public.hiring_projects(id)
+);
+CREATE TABLE public.project_criteria_mapping (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  hiring_project_id uuid NOT NULL,
+  criteria_set_id uuid NOT NULL,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT project_criteria_mapping_pkey PRIMARY KEY (id),
+  CONSTRAINT project_criteria_mapping_hiring_project_id_fkey FOREIGN KEY (hiring_project_id) REFERENCES public.hiring_projects(id),
+  CONSTRAINT project_criteria_mapping_criteria_set_id_fkey FOREIGN KEY (criteria_set_id) REFERENCES public.cv_evaluation_criteria(id)
+);
+
+create table public.ai_interview_sets (
+  id uuid primary key default gen_random_uuid(),
+  hiring_project_id uuid not null references public.hiring_projects(id) on delete cascade,
+  name text not null,
+  description text,
+  duration_minutes integer not null default 30,
+  status text not null default 'Active'
+    check (status in ('Active', 'Draft', 'Archived')),
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
+create table public.ai_interview_questions (
+  id uuid primary key default gen_random_uuid(),
+  interview_set_id uuid not null references public.ai_interview_sets(id) on delete cascade,
+  question_text text not null,
+  question_type text not null default 'general'
+    check (question_type in ('intro', 'technical', 'experience', 'behavioral', 'role_fit', 'closing', 'general')),
+  position integer not null default 0,
+  expected_signal text,
+  required boolean not null default true,
+  created_at timestamptz default now()
+);
+
+create table public.ai_interview_invites (
+  id uuid primary key default gen_random_uuid(),
+  token text not null unique,
+  candidate_id uuid not null references public.candidates(id) on delete cascade,
+  hiring_project_id uuid not null references public.hiring_projects(id) on delete cascade,
+  cv_evaluation_id uuid references public.cv_evaluations(id) on delete set null,
+  interview_set_id uuid references public.ai_interview_sets(id) on delete set null,
+  status text not null default 'Not Started'
+    check (status in ('Not Started', 'Started', 'Completed', 'Expired', 'Cancelled')),
+  expires_at timestamptz,
+  sent_at timestamptz,
+  started_at timestamptz,
+  completed_at timestamptz,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
+create table public.ai_interview_sessions (
+  id uuid primary key default gen_random_uuid(),
+  invite_id uuid not null references public.ai_interview_invites(id) on delete cascade,
+  candidate_id uuid not null references public.candidates(id) on delete cascade,
+  hiring_project_id uuid not null references public.hiring_projects(id) on delete cascade,
+  status text not null default 'Started'
+    check (status in ('Started', 'Completed', 'Failed')),
+  recording_url text,
+  transcript text,
+  analysis jsonb,
+  overall_score numeric default 0,
+  recommendation text check (recommendation in ('Strong Hire', 'Hire', 'Maybe', 'No Hire')),
+  started_at timestamptz default now(),
+  completed_at timestamptz,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
+create table public.ai_interview_messages (
+  id uuid primary key default gen_random_uuid(),
+  session_id uuid not null references public.ai_interview_sessions(id) on delete cascade,
+  role text not null check (role in ('ai', 'candidate', 'system')),
+  content text not null,
+  question_id uuid references public.ai_interview_questions(id) on delete set null,
+  sequence integer not null default 0,
+  created_at timestamptz default now()
+);
+
+insert into storage.buckets (id, name, public)
+values ('ai-interview-recordings', 'ai-interview-recordings', false)
+on conflict (id) do nothing;

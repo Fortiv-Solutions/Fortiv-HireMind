@@ -10,6 +10,8 @@ import HomeOverview from './pages/HomeOverview/HomeOverview';
 import Profile from './pages/Profile/Profile';
 import EvaluationCriteria from './pages/EvaluationCriteria/EvaluationCriteria';
 import Candidates from './pages/Candidates/Candidates';
+import AIInterviewer from './pages/AIInterviewer/AIInterviewer';
+import AIInterviewRoom from './pages/AIInterviewRoom/AIInterviewRoom';
 
 export default function App() {
   return (
@@ -18,6 +20,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Navigate to="/dashboard-home" replace />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/ai-interview/invite/:token" element={<AIInterviewRoom />} />
           <Route path="/dashboard" element={
             <ProtectedRoute>
               <Layout>
@@ -43,6 +46,13 @@ export default function App() {
             <ProtectedRoute>
               <Layout>
                 <CVEvaluator />
+              </Layout>
+            </ProtectedRoute>
+          } />
+          <Route path="/ai-interviewer" element={
+            <ProtectedRoute>
+              <Layout>
+                <AIInterviewer />
               </Layout>
             </ProtectedRoute>
           } />
